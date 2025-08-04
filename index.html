@@ -1,3 +1,211 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <title>EXTRACTION CANVAS</title>
+  <style>
+    body {
+      direction: rtl;
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 20px;
+      display: flex;
+      gap: 20px;
+      height: 100vh;
+      box-sizing: border-box;
+    }
+    .container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 5px;
+      box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+    }
+    h2 {
+      margin-top: 0;
+      text-align: center;
+    }
+    input[type="file"] {
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      margin-bottom: 15px;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 13px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+      resize: vertical;
+      font-family: monospace, monospace;
+    }
+    .row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    .field-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .field-container textarea {
+      height: 90px;
+      resize: vertical;
+    }
+    .copy-button {
+      margin-top: 5px;
+      background-color: #28a745;
+    }
+    .copy-button:hover {
+      background-color: #1e7e34;
+    }
+    .line-count {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #007bff;
+      text-align: center;
+      user-select: none;
+    }
+    label {
+      font-weight: bold;
+      margin-bottom: 5px;
+      display: block;
+    }
+    /* إخفاء خانة الكلمات (الموقع الثاني) */
+    #keyword, label[for="keyword"] {
+      display: none;
+    }
+  </style>
+
+  <!-- مكتبة SheetJS -->
+  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+
+  <!-- القسم الأول - رفع ودمج ملفات TXT -->
+  <div class="container" style="max-width: 45%;">
+<h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
+    <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt" />
+    <button onclick="mergeFolderTxt()">دمج الملفات</button>
+
+    <!-- النص بعد الدمج مخفي -->
+    <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
+
+    <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
+    <input
+      type="text"
+      id="singleKeywordInput"
+      value="ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Commentaire,Adresse Installation"
+      placeholder="اكتب كلمة أو أكثر مفصولة بفاصلة"
+    />
+    <label>
+      <input type="checkbox" id="startOnlySingleCheckbox" checked />
+      استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات
+    </label><br />
+    <button onclick="extractSingleKeyword()">🔎 استخراج</button>
+    <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
+    <button onclick="copySingleKeyword()" class="copy-button">📋 نسخ نتائج الاستخراج</button>
+  </div>
+
+  <!-- القسم الثاني - الفلترة والتوزيع -->
+  <div class="container" style="max-width: 50%;">
+    <label for="keyword">🔍 الكلمات (افصل بينها بـ +):</label>
+    <input type="text" id="keyword" placeholder="مثال: خطأ+فشل+تحذير" value="SANS CA" />
+    <button onclick="filterAndDistribute()" style="display:none;">🚀 تنفيذ</button>
+<!-- 🟦 الصف الأول: خانات 1، 2، 3 -->
+<div class="row">
+  <div class="field-container">
+    <div class="line-count" id="count1">0 سطر</div>
+    <textarea id="field1" readonly></textarea>
+    <button class="copy-button" onclick="copyField(1)">📋 نسخ الخانة 1</button>
+  </div>
+  <div class="field-container">
+    <div class="line-count" id="count2">0 سطر</div>
+    <textarea id="field2" readonly></textarea>
+    <button class="copy-button" onclick="copyField(2)">📋 نسخ الخانة 2</button>
+  </div>
+  <div class="field-container">
+    <div class="line-count" id="count3">0 سطر</div>
+    <textarea id="field3" readonly></textarea>
+    <button class="copy-button" onclick="copyField(3)">📋 نسخ الخانة 3</button>
+  </div>
+</div>
+
+<!-- ✅ التاريخ: في المنتصف بين الصفين -->
+<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin: 20px 0; justify-content: center;">
+  <strong>🗓️ التاريخ:</strong>
+
+  <label style="display: flex; align-items: center; gap: 5px;">
+    <input type="radio" name="dateOption" value="today" checked>
+    اليوم
+  </label>
+
+  <label style="display: flex; align-items: center; gap: 5px;">
+    <input type="radio" name="dateOption" value="yesterday">
+    البارحة
+  </label>
+
+  <label style="display: flex; align-items: center; gap: 5px;">
+    <input type="radio" name="dateOption" value="custom">
+    مخصص
+  </label>
+
+  <input type="date" id="customDateInput" style="padding: 5px;" />
+</div>
+
+<!-- 🟩 الصف الثاني: خانات 4، 5، 6 -->
+<div class="row">
+  <div class="field-container">
+    <div class="line-count" id="count4">0 سطر</div>
+    <textarea id="field4" readonly></textarea>
+    <button class="copy-button" onclick="copyField(4)">📋 نسخ الخانة 4</button>
+  </div>
+  <div class="field-container">
+    <div class="line-count" id="count5">0 سطر</div>
+    <textarea id="field5" readonly></textarea>
+    <button class="copy-button" onclick="copyField(5)">📋 نسخ الخانة 5</button>
+  </div>
+  <div class="field-container">
+    <div class="line-count" id="count6">0 سطر</div>
+    <textarea id="field6" readonly></textarea>
+    <button class="copy-button" onclick="copyField(6)">📋 نسخ الخانة 6</button>
+  </div>
+</div>
+
+<!-- ✅ أزرار التحكم (تحت الكل، تبقى كما كانت) -->
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+  <button onclick="removeDuplicatesBasedOnField1()" style="background-color:#dc3545; color:white;">
+    🗑️ مسح التكرار 
+  </button>
+  <button onclick="copyExcelData()" style="background-color:#28a745; color:white;">
+    📋 نسخ الكل
+  </button>
+  <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">
+    ⬇️ تصدير إلى Excel
+  </button>
+</div>
+
+
+
+
+
+<script>
+
   // تعطيل الزر الأيمن
 document.addEventListener("contextmenu", function(e) {
   e.preventDefault();
@@ -408,3 +616,8 @@ function getSelectedDate() {
 
   return formatDate(today); // fallback
 }
+
+</script>
+
+</body>
+</html>
