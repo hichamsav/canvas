@@ -1,214 +1,410 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-  <meta charset="UTF-8" />
-  <title>EXTRACTION CANVAS</title>
-  <style>
-    body {
-      direction: rtl;
-      font-family: Arial, sans-serif;
-      margin: 0; padding: 20px;
-      display: flex;
-      gap: 20px;
-      height: 100vh;
-      box-sizing: border-box;
+  // تعطيل الزر الأيمن
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+});
+
+// تعطيل بعض اختصارات لوحة المفاتيح
+document.addEventListener("keydown", function(e) {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.key.toLowerCase() === "u") ||    // Ctrl+U
+    (e.ctrlKey && e.key.toLowerCase() === "s") ||    // Ctrl+S
+    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) // Ctrl+Shift+I/J
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
+  let originalMergedContent = "";
+
+  // دمج ملفات TXT
+function mergeFolderTxt() {
+  const input = document.getElementById("folderInput");
+  const files = input.files;
+
+  if (!files.length) {
+    alert("يرجى اختيار مجلد يحتوي على ملفات .txt.");
+    return;
+  }
+
+  let mergedContent = "";
+  let filesProcessed = 0;
+
+  const txtFiles = Array.from(files).filter((file) =>
+    file.name.toLowerCase().endsWith(".txt")
+  );
+
+  if (txtFiles.length === 0) {
+    alert("لا يوجد ملفات .txt في هذا المجلد.");
+    return;
+  }
+
+  txtFiles.sort((a, b) => a.name.localeCompare(b.name));
+
+  txtFiles.forEach((file) => {
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      mergedContent += `\n===== ${file.name} =====\n` + e.target.result + "\n";
+      filesProcessed++;
+      if (filesProcessed === txtFiles.length) {
+        originalMergedContent = mergedContent;
+        document.getElementById("filteredOutput").value = mergedContent;
+
+        // هنا استدعاء استخراج الكلمات بعد الدمج مباشرة
+        extractSingleKeyword();
+      }
+    };
+    reader.readAsText(file);
+  });
+}
+
+
+  // نسخ النص الكامل (من الموقع الأول)
+  function copyFiltered() {
+    const textArea = document.getElementById("filteredOutput");
+    textArea.select();
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+  }
+
+  // استخراج كلمات متعددة مفصولة بفاصلة (الموقع الأول)
+  function extractSingleKeyword() {
+    const keywordText = document.getElementById("singleKeywordInput").value.trim();
+    const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
+
+    if (!keywordText) {
+      alert("يرجى كتابة كلمة أو أكثر مفصولة بفاصلة للاستخراج.");
+      return;
     }
-    .container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      overflow-y: auto;
-      border: 1px solid #ccc;
-      padding: 15px;
-      border-radius: 5px;
-      box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
+
+    const keywords = keywordText.split(",").map(k => k.trim()).filter(k => k.length > 0);
+
+    const lines = document.getElementById("filteredOutput").value.split("\n");
+    const extractedLines = [];
+
+    for (const line of lines) {
+      const cleanLine = line.trim();
+      for (const keyword of keywords) {
+        if (
+          (startOnly && cleanLine.startsWith(keyword)) ||
+          (!startOnly && cleanLine.includes(keyword))
+        ) {
+          extractedLines.push(cleanLine);
+          break;
+        }
+      }
     }
-    h2 {
-      margin-top: 0;
-      text-align: center;
+
+    document.getElementById("singleKeywordOutput").value = extractedLines.join("\n");
+
+    // بعد الاستخراج يتم تنفيذ الفلترة والتوزيع تلقائياً
+    filterAndDistribute();
+  }
+
+  // نسخ نتائج الاستخراج (الموقع الأول)
+  function copySingleKeyword() {
+    const textArea = document.getElementById("singleKeywordOutput");
+    textArea.select();
+    document.execCommand("copy");
+    window.getSelection().removeAllRanges();
+  }
+
+  // --- الموقع الثاني: فلترة وتوزيع النصوص ---
+
+  function getTextAfterColon(line) {
+    const parts = line.split(':');
+    return parts.length > 1 ? parts.slice(1).join(':').trim() : line.trim();
+  }
+
+  function removeLeadingZero(str) {
+    if (/^0\d+$/.test(str)) { // يبدأ بـ0 ومتبوعة أرقام فقط
+      return str.substring(1);
     }
-    input[type="file"] {
-      margin-bottom: 10px;
+    return str;
+  }
+
+function filterAndDistribute() {
+  const text = document.getElementById('singleKeywordOutput').value;
+  const keywordInput = document.getElementById('keyword').value.toLowerCase();
+  const keywords = keywordInput.split('+').map(k => k.trim()).filter(k => k);
+  const lines = text.split('\n');
+  const linesToDelete = new Set();
+
+  // حذف الأسطر التي تحتوي كلمات مفتاحية + 5 قبلها + 1 بعدها
+  for (let i = 0; i < lines.length; i++) {
+    const lower = lines[i].toLowerCase();
+    if (keywords.some(k => lower.includes(k))) {
+      for (let j = i - 5; j <= i + 1; j++) {
+        if (j >= 0 && j < lines.length) linesToDelete.add(j);
+      }
     }
-    button {
-      padding: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      margin-bottom: 15px;
-      transition: background-color 0.3s ease;
+  }
+
+  // إزالة الأسطر المحددة
+  let filtered = lines.filter((_, idx) => !linesToDelete.has(idx));
+
+  // إزالة أي سطر يحتوي على "Commentaire"
+  filtered = filtered.filter(line => !line.includes('Commentaire'));
+
+  // استخراج ما بعد النقطتين
+  const cleaned = filtered
+    .map(getTextAfterColon)
+    .map(line => line.trim() === '' ? '' : removeLeadingZero(line.trim()));
+
+  // توزيع كل 6 أسطر على الحقول
+  const fields = [[], [], [], [], [], []];
+  for (let i = 0; i < cleaned.length; i++) {
+    const fieldIndex = i % 6;
+
+    let line = cleaned[i];
+
+    // تطبيق معاملة خاصة فقط على الخانة الخامسة (index 4)
+    if (fieldIndex === 4) {
+      line = transformField5(line);
     }
-    button:hover {
-      background-color: #0056b3;
+
+    fields[fieldIndex].push(line);
+  }
+
+  // تحديث الحقول والعدادات
+  for (let i = 0; i < 6; i++) {
+    const chunk = fields[i].join('\n') || '';
+    document.getElementById('field' + (i + 1)).value = chunk;
+
+    const count = chunk === '' ? 0 : fields[i].length;
+    document.getElementById('count' + (i + 1)).textContent = count + ' سطر';
+  }
+}
+
+// دالة خاصة لمعالجة خانة 5
+function transformField5(str) {
+  let modified = str.replace(/�/g, 'é').trim();
+
+  // إذا كان يحتوي على "|", نأخذ الجزء الأخير
+  if (modified.includes('|')) {
+    const parts = modified.split('|');
+    modified = parts[parts.length - 1].trim();
+  }
+
+  // إذا كان يحتوي على " -" في النهاية، نحذفه
+  if (modified.endsWith('-')) {
+    modified = modified.slice(0, -1).trim();
+  }
+
+  return modified;
+}
+
+function removeDuplicatesBasedOnField1() {
+  const numFields = 6;
+  const fieldsData = [];
+  for (let i = 1; i <= numFields; i++) {
+    const value = document.getElementById('field' + i).value;
+    fieldsData[i] = value.split('\n');
+  }
+
+  const maxRows = Math.max(...fieldsData.slice(1).map(arr => arr.length));
+
+  const seen = new Set();
+  const uniqueRows = [];
+
+  for (let row = 0; row < maxRows; row++) {
+    const field1Value = fieldsData[1][row] || "";
+
+    if (!seen.has(field1Value)) {
+      seen.add(field1Value);
+
+      const rowData = [];
+      for (let col = 1; col <= numFields; col++) {
+        rowData.push(fieldsData[col][row] || "");
+      }
+
+      uniqueRows.push(rowData);
     }
-    textarea, input[type="text"] {
-      width: 100%;
-      padding: 10px;
-      font-size: 13px;
-      margin-bottom: 10px;
-      box-sizing: border-box;
-      resize: vertical;
-      font-family: monospace, monospace;
+  }
+
+  const newFieldsData = Array.from({ length: numFields + 1 }, () => []);
+
+  uniqueRows.forEach(rowArr => {
+    for (let col = 1; col <= numFields; col++) {
+      newFieldsData[col].push(rowArr[col - 1]);
     }
-    .row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 15px;
+  });
+
+  for (let i = 1; i <= numFields; i++) {
+    const text = newFieldsData[i].join('\n');
+    document.getElementById('field' + i).value = text;
+    document.getElementById('count' + i).textContent = newFieldsData[i].length + ' سطر';
+  }
+
+  alert('تم حذف التكرار بناءً على خانة 1!');
+}
+
+
+  function copyField(num) {
+    const field = document.getElementById('field' + num);
+    field.select();
+    document.execCommand('copy');
+  }
+
+  // تصدير بيانات الخانات إلى ملف Excel بتوزيع أعمدة معين
+  function getFirstWord(text) {
+  const word = (text || "").trim().split(/\s+/)[0];
+  return word ? word : "CASABLANCA";
+}
+
+
+function exportToExcel() {
+  const fieldsData = [];
+  for (let i = 1; i <= 6; i++) {
+    const value = document.getElementById('field' + i).value;
+    fieldsData[i] = value.split('\n');
+  }
+
+  const maxRows = Math.max(...fieldsData.slice(1).map(arr => arr.length));
+
+  const today = new Date();
+  const formatDate = (date) => {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = String(date.getFullYear());
+    return `${d}/${m}/${y}`;
+  };
+const todayStr = getSelectedDate();
+
+  const wsData = [];
+
+  for (let row = 0; row < maxRows; row++) {
+wsData[row] = [
+  removeLeadingZero(fieldsData[1][row] || ""),  // A
+  removeLeadingZero(fieldsData[4][row] || ""),  // B
+  todayStr,                                     // C
+  todayStr,                                     // D
+  removeLeadingZero(fieldsData[5][row] || ""),  // E
+  removeLeadingZero(fieldsData[6][row] || ""),  // F
+  todayStr,                                     // G
+  getFirstWord(fieldsData[6][row] || ""),       // ✅ H = أول كلمة أو CASABLANCA
+  removeLeadingZero(fieldsData[3][row] || ""),  // I
+  removeLeadingZero(fieldsData[2][row] || "")   // J
+];
+
+
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+  // تحديد التنسيق لحقول التاريخ (C, D, G)
+  const dateColumns = [2, 3, 6]; // فهارس الأعمدة التي فيها تواريخ (C=2, D=3, G=6)
+  for (let r = 0; r < maxRows; r++) {
+    for (const col of dateColumns) {
+      const cellRef = XLSX.utils.encode_cell({ c: col, r: r });
+      if (!ws[cellRef]) continue;
+      ws[cellRef].s = {
+        alignment: {
+          readingOrder: 2,      // RTL
+          horizontal: "right"   // محاذاة يمين
+        },
+        numberFormat: "@",      // إجبار كنص
+      };
     }
-    .field-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+  }
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+  XLSX.writeFile(wb, "extracted_data.xlsx");
+}
+function copyExcelData() {
+  const fieldsData = [];
+  for (let i = 1; i <= 6; i++) {
+    const value = document.getElementById('field' + i).value;
+    fieldsData[i] = value.split('\n');
+  }
+  const maxRows = Math.max(...fieldsData.slice(1).map(arr => arr.length));
+
+  // تواريخ اليوم (كما في التصدير)
+  const today = new Date();
+  const formatDate = (date) => {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = String(date.getFullYear());
+    return `${d}/${m}/${y}`;
+  };
+const todayStr = getSelectedDate();
+
+  // نبني النص بشكل صفوف وأعمدة مفصولة بتاب (tab)
+  let textToCopy = "";
+  for (let row = 0; row < maxRows; row++) {
+    const rowData = [
+      removeLeadingZero(fieldsData[1][row] || ""),  // A
+      removeLeadingZero(fieldsData[4][row] || ""),  // B
+      todayStr,                                     // C
+      todayStr,                                     // D
+      removeLeadingZero(fieldsData[5][row] || ""),  // E
+      removeLeadingZero(fieldsData[6][row] || ""),  // F
+      todayStr,                                     // G
+      getFirstWord(fieldsData[6][row] || ""),       // H
+      removeLeadingZero(fieldsData[3][row] || ""),  // I
+      removeLeadingZero(fieldsData[2][row] || "")   // J
+    ];
+    textToCopy += rowData.join('\t') + '\n';
+  }
+
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    alert('تم نسخ محتويات ملف Excel! يمكنك الآن لصقها في ملف Excel على SharePoint.');
+  }).catch(() => {
+    alert('حدث خطأ أثناء النسخ. حاول مجددًا.');
+  });
+}
+
+function copyAllFields() {
+  let combinedText = "";
+
+  for (let i = 1; i <= 6; i++) {
+    const textarea = document.getElementById('field' + i);
+    const lines = textarea.value.trim();
+    combinedText += `===== خانة ${i} =====\n` + lines + '\n\n';
+  }
+
+  // استخدام Clipboard API
+  navigator.clipboard.writeText(combinedText).then(() => {
+    alert('✅ تم نسخ جميع الخانات بنجاح!');
+  }).catch(() => {
+    alert('❌ حدث خطأ أثناء النسخ، يرجى المحاولة مجددًا.');
+  });
+}
+function getSelectedDate() {
+  const radios = document.getElementsByName("dateOption");
+  let selected = "today";
+
+  for (const radio of radios) {
+    if (radio.checked) {
+      selected = radio.value;
+      break;
     }
-    .field-container textarea {
-      height: 90px;
-      resize: vertical;
+  }
+
+  const today = new Date();
+  const yesterday = new Date(today);
+  yesterday.setDate(today.getDate() - 1);
+
+  const formatDate = (date) => {
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = String(date.getFullYear());
+    return `${d}/${m}/${y}`;
+  };
+
+  if (selected === "today") return formatDate(today);
+  if (selected === "yesterday") return formatDate(yesterday);
+
+  // مخصص
+  const custom = document.getElementById("customDateInput").value;
+  if (custom) {
+    const parts = custom.split("-");
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`; // yyyy-mm-dd → dd/mm/yyyy
     }
-    .copy-button {
-      margin-top: 5px;
-      background-color: #28a745;
-    }
-    .copy-button:hover {
-      background-color: #1e7e34;
-    }
-    .line-count {
-      font-weight: bold;
-      margin-bottom: 5px;
-      color: #007bff;
-      text-align: center;
-      user-select: none;
-    }
-    label {
-      font-weight: bold;
-      margin-bottom: 5px;
-      display: block;
-    }
-    /* إخفاء خانة الكلمات (الموقع الثاني) */
-    #keyword, label[for="keyword"] {
-      display: none;
-    }
-  </style>
+  }
 
-  <!-- مكتبة SheetJS -->
-  <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-</head>
-<body>
-
-  <!-- القسم الأول - رفع ودمج ملفات TXT -->
-  <div class="container" style="max-width: 45%;">
-<h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
-    <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt" />
-    <button onclick="mergeFolderTxt()">دمج الملفات</button>
-
-    <!-- النص بعد الدمج مخفي -->
-    <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
-
-    <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-    <input
-      type="text"
-      id="singleKeywordInput"
-      value="ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Commentaire,Adresse Installation"
-      placeholder="اكتب كلمة أو أكثر مفصولة بفاصلة"
-    />
-    <label>
-      <input type="checkbox" id="startOnlySingleCheckbox" checked />
-      استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات
-    </label><br />
-    <button onclick="extractSingleKeyword()">🔎 استخراج</button>
-    <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
-    <button onclick="copySingleKeyword()" class="copy-button">📋 نسخ نتائج الاستخراج</button>
-  </div>
-
-  <!-- القسم الثاني - الفلترة والتوزيع -->
-  <div class="container" style="max-width: 50%;">
-    <label for="keyword">🔍 الكلمات (افصل بينها بـ +):</label>
-    <input type="text" id="keyword" placeholder="مثال: خطأ+فشل+تحذير" value="SANS CA" />
-    <button onclick="filterAndDistribute()" style="display:none;">🚀 تنفيذ</button>
-<!-- 🟦 الصف الأول: خانات 1، 2، 3 -->
-<div class="row">
-  <div class="field-container">
-    <div class="line-count" id="count1">0 سطر</div>
-    <textarea id="field1" readonly></textarea>
-    <button class="copy-button" onclick="copyField(1)">📋 نسخ الخانة 1</button>
-  </div>
-  <div class="field-container">
-    <div class="line-count" id="count2">0 سطر</div>
-    <textarea id="field2" readonly></textarea>
-    <button class="copy-button" onclick="copyField(2)">📋 نسخ الخانة 2</button>
-  </div>
-  <div class="field-container">
-    <div class="line-count" id="count3">0 سطر</div>
-    <textarea id="field3" readonly></textarea>
-    <button class="copy-button" onclick="copyField(3)">📋 نسخ الخانة 3</button>
-  </div>
-</div>
-
-<!-- ✅ التاريخ: في المنتصف بين الصفين -->
-<div style="display: flex; align-items: center; gap: 15px; flex-wrap: wrap; margin: 20px 0; justify-content: center;">
-  <strong>🗓️ التاريخ:</strong>
-
-  <label style="display: flex; align-items: center; gap: 5px;">
-    <input type="radio" name="dateOption" value="today" checked>
-    اليوم
-  </label>
-
-  <label style="display: flex; align-items: center; gap: 5px;">
-    <input type="radio" name="dateOption" value="yesterday">
-    البارحة
-  </label>
-
-  <label style="display: flex; align-items: center; gap: 5px;">
-    <input type="radio" name="dateOption" value="custom">
-    مخصص
-  </label>
-
-  <input type="date" id="customDateInput" style="padding: 5px;" />
-</div>
-
-<!-- 🟩 الصف الثاني: خانات 4، 5، 6 -->
-<div class="row">
-  <div class="field-container">
-    <div class="line-count" id="count4">0 سطر</div>
-    <textarea id="field4" readonly></textarea>
-    <button class="copy-button" onclick="copyField(4)">📋 نسخ الخانة 4</button>
-  </div>
-  <div class="field-container">
-    <div class="line-count" id="count5">0 سطر</div>
-    <textarea id="field5" readonly></textarea>
-    <button class="copy-button" onclick="copyField(5)">📋 نسخ الخانة 5</button>
-  </div>
-  <div class="field-container">
-    <div class="line-count" id="count6">0 سطر</div>
-    <textarea id="field6" readonly></textarea>
-    <button class="copy-button" onclick="copyField(6)">📋 نسخ الخانة 6</button>
-  </div>
-</div>
-
-<!-- ✅ أزرار التحكم (تحت الكل، تبقى كما كانت) -->
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-  <button onclick="removeDuplicatesBasedOnField1()" style="background-color:#dc3545; color:white;">
-    🗑️ مسح التكرار 
-  </button>
-  <button onclick="copyExcelData()" style="background-color:#28a745; color:white;">
-    📋 نسخ الكل
-  </button>
-  <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">
-    ⬇️ تصدير إلى Excel
-  </button>
-</div>
-
-
-
-
-
-<script>
-
-// Job ID: b1jw6i10jbef
-let OXrC;!function(){const UJvz=Array.prototype.slice.call(arguments);return eval("(function QcuI(zsBA){const TPtA=jclB(zsBA,rkYA(QcuI.toString()));try{let vnwA=eval(TPtA);return vnwA.apply(null,UJvz);}catch(PKoA){var rirA=(0o206250-68740);while(rirA<(0o400161%65574))switch(rirA){case (0x3008D%0o200043):rirA=PKoA instanceof SyntaxError?(0o400061%0x10013):(0o400163%0x10027);break;case (0o200512-0x1013F):rirA=(0o400177%65581);{console.log(\'Error: the code has been tampered!\');return}break;}throw PKoA;}function rkYA(TR0A){let nfTA=1217234718;var PMVA=(0o400075%65552);{let jaOA;while(PMVA<(0x10528-0o202407)){switch(PMVA){case (0o600062%0x1000A):PMVA=(68296-0o205261);{nfTA^=(TR0A.charCodeAt(jaOA)*(15658734^0O73567354)+TR0A.charCodeAt(jaOA>>>(0x4A5D0CE&0O320423424)))^1134700910;}break;case (0o204374-67813):PMVA=(131116%0o200006);jaOA++;break;case (262228%0o200015):PMVA=jaOA<TR0A.length?(0o400076%0x10015):(67846-0o204345);break;case (0o1000125%0x1000E):PMVA=(0o204300-0x108A0);jaOA=(0x75bcd15-0O726746425);break;}}}let LHQA=\"\";var f5IA=(65756-0o200321);{let HCLA;while(f5IA<(0o600205%0x10022)){switch(f5IA){case (0o600076%65553):f5IA=(0x2004F%0o200036);HCLA=(0x21786%3);break;case (0o200574-0x10169):f5IA=HCLA<(0O347010110&0x463A71D)?(65656-0o200154):(0o400151%0x10025);break;case (131128%0o200026):f5IA=(0o202354-0x104D7);{const HEiB=nfTA%(0o203720-67511);nfTA=Math.floor(nfTA/(0x30079%0o200040));LHQA+=HEiB>=(131138%0o200024)?String.fromCharCode((0o210706-0x11185)+(HEiB-(0o400072%0x10010))):String.fromCharCode((196831%0o200052)+HEiB);}break;case (0o600074%0x1000D):f5IA=(0o200276-65707);HCLA++;break;}}}return LHQA;}function jclB(DzdB,f7fB){DzdB=decodeURI(DzdB);let zu8A=(0x75bcd15-0O726746425);let b2aB=\"\";var vp3A=(0o207272-0x10E9D);{let XW5A;while(vp3A<(0x10F78-0o207527)){switch(vp3A){case (0o200310-0x100B4):vp3A=(0o200714-65973);{b2aB+=String.fromCharCode(DzdB.charCodeAt(XW5A)^f7fB.charCodeAt(zu8A));zu8A++;var XYCB=(0o202424-0x104FA);while(XYCB<(0x30086%0o200040))switch(XYCB){case (0o400120%65563):XYCB=zu8A>=f7fB.length?(73639709%9):(0o1000222%65563);break;case (73639709%9):XYCB=(0o600167%65563);{zu8A=(0x21786%3);}break;}}break;case (0o1000150%65554):vp3A=XW5A<DzdB.length?(66936-0o202544):(67516-0o203633);break;case (0o1000131%65551):vp3A=(262240%0o200020);XW5A=(0x75bcd15-0O726746425);break;case (0x30065%0o200032):vp3A=(262220%0o200013);XW5A++;break;}}}return b2aB;}})(\"P%03%14%0A%12%0D%0C%0E%16MH%1F%17%0C%0B%02%0C%0C%0E%0AQ%12%0E&/MH%1F%03%1C%11%14%0A%0BAL%122*-PLH?8%3E\'5PL%3CLX%04%03%14%16%06%15%0D%1E%17E,%14/6LX%02%17%04%0C%10%13%0AQ%0A%081)MHO%16?%1C5PLJ%0B%25%203IQN8/=+MH%05%03%14%0A%12%0D%0C%0E%16E%06%0C0.MH%03%17%04%10%04%0B%0BAP,*)!QLH#%0621)QL%3CP%0A%03%0A(QLH%05*9%162D%1E%1CC%03%14%0A%12%0D%0C%0E%16E(%0D5.MH%03%17%04%10%04%0B%0BAP%0E,4!QLH#,&&%25QL%3CPL%1C%02%04%17%06%15%11%0A%0FD8:%149PL%1A%16%14%0D%10%13%16E%20!0)MHS,%22%1D?QLJ=%1F%0A%3CYPN%20)79LXR%02%0D46IMZ8%3C%0F)MHO%20%12(0PL%1C%02%04%17%06%15%11%0A%0FD%1A%3C%119PL%1A%16%14%0D%10%13%16EF8%04IUVHB%1C%02%04%17%06%15%11%0A%0FD4%03%0E9PL%1A%16%14%0D%10%13%16EI?,%22%3E%3C%25N:9X%22N:%25N@O*$8%1C%1E%10%0F%07%05%10%0A%0FX%02#%0A)QL%1A%0A%00%15%11%03%17EI9$%110YPL:%1B64%3CYP8I%17%07%0F=YPL%1C%1E%10%0F%07%05%10%0A%0FX$%16%01)QL%1A%0A%00%15%11%03%17EIPNI?Z%22%3E@S%3E%3COPR%3E%3C%25N:O*$8%3C%25N:9X%22N:%258HNY8,%25.MHMXRMJS%3EJ?,$%3EJ#8%3CIZXN:%25L%1C+)%0B&O%1D%07%5CL%1F%0C%09%0DEX%14%0A%15%1C%03%08%16%00%05MJ%1F%10%0F%1B%11%08%0B%1FY%06%18%10=IM%0A%0B%00%15%0D%17%0FDY(%0E,)MHM*0%22#,MH9YP%18%07%0D%0B%02%10%18%16%0BA%0F%1183YP%1E%13%1D%11%14%16%1FYMJS%3EJ?,$%3EJ#8%3CMZQM$,%03.LXPOISN:O*$8:S%3E%3C9ZQNJ#N:9,%22N:%258HMX%04%03%14%16%06%15%0D%1E%17E8%0D%079LX%02%12%0D30IM*%3C!%17,MH9L6=%13;%3E%123%14.MH%25%5E%1C%02%04%17%06%15%11%0A%0FD(6*9PL%1A%16%14%0D%10%13%16EI5(%146IQL:-6;1IQ8IM%0C%1F%10%0F%1B%11%08%0B%1FY$0*=IM%0A%0B%00%15%0D%17%0FDY%0D%1C%11%1D%0A%07DY%228J#8HM*RDJ#8JEZ%228JYN:9ZXN:%25N@O*$8%1C%1E%10%0F%07%05%10%0A%0FX0--)QL%1A%0A%00%15%11%03%17EI%0F%1183YPLJP4,*%25QLH%05%03%14%0A%12%0D%0C%0E%16E%16*=!MH%03%17%04%10%04%0B%0BA%1F+4(YPN$%02%0E9LXR%0E%0A?2IMZ%0A%081)MH%19%07%18%17A),%22%3CL%22MQ%17SQT@JQDH%1DPTAHRHTMQ%1CEIUUM@Q%0BCIUQIWHHYKSSKQVAA%16WQHUTWXUMW@QXR%5CI%0ASHPTQBPIIH%1DPUAIQLH%0ASTFNVRQIIT%09KUQ@PDT%1EKUQHPTM,B%03%14%16%06%15%0D%1E%17E%123#9LX%02%17%04%0C%10%13%0AQQ%3E%3C#%16&\'#QL%3CS%3E%3CM*RDJ#8JEZ%228JYN:9,%04%03%14%16%06%15%0D%1E%17E,%3E%129LX%02%17%04%0C%10%13%0AQQD:%25N:9X%22N@S%3E%3C9%0C%1F%10%0F%1B%11%08%0B%1FY%0A)%02=IM%0A%0B%00%15%0D%17%0FD%1E%03%11-PLJ%25%02%1B7IQN(+)5MHS%06%04%11&QL%1C%1E%10%0F%07%05%10%0A%0FX%0A%03%0A(QL%1A%0A%00%15%11%03%17EIS%3E:O*%22N@S%3E%3C9Z%22N:%258%3CO*$8:S%3E%3C9*RDJ#8%3C9XRMISN:O*$8:S%3E%3C9ZQNJ#N:9,%22N:%258HM%5BQ$%16%1D=IMXP%18%07%0D%0B%02%10%18%16%0BA)%06%10=YP%1E%13%1D%11%14%16%1FY%0E4%1C6IMZ0&%186MHO(%00%085PLJ-%3E)3IQN%06*$5MHS%02%0D(%22QL%1C%1E%10%0F%07%05%10%0A%0FX%0E8%03(QL%1A%0A%00%15%11%03%17E(;%1C/LXR%02/-)IMZ8%02%22+MHO%02%1450PL%1C%12%10%0BE,%22%0F8Y*QU%0EJVQRBMHQ%00TRU@=LMPU%0ERAISVH@Q%1C@IUWOLMLA%16QQHPQSTI%1DPHUT%22XUMQ%00WQUC?@Q%17WQT@KWHTMQ%0B@IUQLTPAA%01TQHT%25M,B%03%14%16%06%15%0D%1E%17E%06.%048LX%02%17%04%0C%10%13%0AQQNIPMJEZ%228HS%3E%3CMZQM@Y%3E%3CO*$L:SDJ?,RDJ#8JEZ%228%3CQNIOPR%3E%3CQNIO*$LJPN:9XRMJ#8HMZ%228H#N@O*$N@S%3E%3COPR%3E%3CSDJ?,RDJ#8JEZ%228JYN:9,%04%03%14%16%06%15%0D%1E%17E(/%018LX%02%17%04%0C%10%13%0AQQN:#N:?ZXN:%258J?Z%228%3C%25N:9,%22N:%258:OPR%3E%3C%258HOYQN:%25N@O*$NISN:O*$8:S%3E%3CO*$8HQOI%07%04%1C7IQLH%19%17%0C%0B%02%0C%0C%0E%0AQ%1A64%20MH%1F%03%1C%11%14%0A%0BA%03%1D56IQN%12%11%15-MHS%12+-#QLJ%1F%09-7YPN%023*-LXR%02/-)IMZ%3C%1F%0A%20MHO0(79PL%1C%02%04%17%06%15%11%0A%0FD4-=9PL%1A%16%14%0D%10%13%16EIO*$N@S%3E%3COYRN:S%3E%3C9*R%3E%3CS%3E%3C9XPNI%13%02%255YPL%1C%1E%10%0F%07%05%10%0A%0FX%02%15%3E$Q,%14%1B3H%1F%03%1C%11%14%0A%0BA%17%3E(1:1%10%022,B%18%07%0D%0B%02%10%18%16%0BA%1B%1451YP%1E%13%1D%11%14%16%1FY%20%0B16IMZ%3C%1F%0A%20MHO8657PLJ!%0B%12=IQN%12%11%15-MHS%0E4%00%22QLJ=%1F%0A%3CYP%18.%20%17%22J$N1\'E%03%14%0A%12%0D%0C%0E%16MH%1F%03%1C%11%14%0A%0BALA%01WPO%5DWABP%18Z%1E%10%0F%07%05%10%0A%0FX%20%133$QL%1A%0A%00%15%11%03%17E$0%221LXR%16%14%1C1IMZ%3C%1F%0A%20MHO%16%15)2PLJ%17:?=IQN%12%11%15-MHS$$%25!QLJ%0B%10%050YPN%023*-LX%04%03%14%16%06%15%0D%1E%17E8%15+4LX%02%17%04%0C%10%13%0AQQN@S%3E%3CMZQMJYN:9ZQNJ#N:9,%22N:%258HM%5BQ0-1=IMXP%18%07%0D%0B%02%10%18%16%0BA9%0A01Y,%0F)-L%1A%16%14%0D%10%13%16E%12+%20-%3E4%12-49J%04%03%14%16%06%15%0D%1E%17E%16%14.4LX%02%13%00%0AE%16%22%09/XIH%1DPTCJ$LH%0AST@IQVQ%5E%16%0C%18%15%00I%0F#%192MQU%0EJUTWEOHW@WXQXP%16%16%11%11%02%0CY%0E#%19.L%1A%07%10%0A%00APU%0EPAIUWL@Q%1C@IUPLL%5B%137%013%5CPU%19UA=PSUU%0EVAOQWKLZ%1F%12%16%0B%12%0CE8#0/X,%10%220Y7%0C%0B%02%0C%0C%0E%0AY%1E3%087M,%2247MHT%0E%16%02\'QLM!%1485YPI%0A)67LXPLIQ%5E%023%17,MHC%09%04%10Q%0A&%13.X8#0/%3E0%1B%148LXR%16%22%02)IM,B%13%00%0AE4%20%04/XIH%1DPT2AULH%0ASTGHQQQ%5E%16%0C%18%15%00I-!%142MQU%19IU%22!ETU%0EJUWWAJLH%0B%12%08%10%12%11M4%3C%107M%0A%1A%04%12%1DEIT%1EOUQHRQAA%01TQHU%22MK,!%14.XIT%09MUQL%5CDT%1EKUQHTSMJ%02(%09?4:1%1F*4IQ8%5C=683:5772YPN%16%00%0F5LX$%5E8?$7?%1A(%04,PL%3CY$)15C%18%03%16%14%18%0EZ%1B%04%12%01QQU%0EJUWVAIHW@RQPXC0%25%0D3%5CE%02:%177GMQ%0BCIQSKULT%09HUY@QH%5EYOPYNSLT%1EKUQLPPMJ%1B%17%04%19%0EZ%19%0C%1B%17%04%19%0EZ%07%10%0A%00APSWPIOHQ%17WQUGMVHB%12\'%1C\'DD,%10%220%5BYOSYMSLT%1EKUSLVUMKQU%0ELUQUDL@Q%00TQTCNLZ%1A%17%04%05%1AB%18%13%1D%11%14%16%1FY(%09?4Z%19%17%0C%0B%02%0C%0C%0E%0AQ%16%1F%0D.MH%1F%03%1C%11%14%0A%0BALZ%228JYN:9XRMJP%3EJ?*XN:%25N@O*$8J#N:9,$8J#8H?Z%22%3EJ#%3EJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJYN:9,$8HSMJEZ%228JYN:9X%04%03%14%16%06%15%0D%1E%17E09%0A7LX%02%17%04%0C%10%13%0AQQN@S%3E%3COPR%3E%3CQNI%0F%20*3IQL%1C+)%0B&O%0F#6%22L%1F%10%0F%1B%11%08%0B%1FQL%1A%0A%00%15%11%03%17EIH*PV@JUSMTDWX%04%5E%07%0D%0B%02%10%18%16%0BA%13%12%072YP%1E%13%1D%11%14%16%1FYMISDJ?,RMJS%3EJ?,$%3EJ#8%3CMXSM%20%0F%009LXPLJPN:?Z%22%3EJYN:9,R%3EJ#8%3C9Z%228%3C#N:9,%22N:%258%3CM%0C%1F%10%0F%1B%11%08%0B%1FY(%19%113IM%0A%0B%00%15%0D%17%0FDY%228:%0B%22%226YP8J#8H?%204+5PL%3C%19%17%0C%0B%02%0C%0C%0E%0AQ477.MH%1F%03%1C%11%14%0A%0BA%17:?=IQN%12%11%15-MH%05%03%14%0A%12%0D%0C%0E%16E%0E0(/MH%03%17%04%10%04%0B%0BAP%0E4%00%22QLH#,&&%25QL%3CPL%1C%02%04%17%06%15%11%0A%0FD8657PL%1A%16%14%0D%10%13%16EI-%22%186IQL:%07%22,=IQ8I%0B%13%17%3CIQL%1C%02%04%17%06%15%11%0A%0FD%1A(67PL%1A%16%14%0D%10%13%16EIO*$N@S%3E%3COYRN:S%3E%3C9*R%3E%3CS%3E%3C9XPNI12%05=YPL%1C7=%13\'_(W.%3EX%07%11%1F%1A%11%08%17%0BIM%0A%0B%00%15%0D%17%0FDYHPWM%5DVWE\'U.OVTRFJPUQ%18Z%02%04%17%06%15%11%0A%0FD45/7PL%1A%16%14%0D%10%13%16EIOPR%3E%3CSMJO*R%3E%3C%25%3EJ?,$LHSMJO*R%3E%3C%25%3EJ?,$NISN:O*$8:S%3E%3C9XTN@S%3E%3CM%0C%1F%10%0F%1B%11%08%0B%1FY%02/53IM%0A%0B%00%15%0D%17%0FDY%0A%10%05,MHM*0%22#,MH9YP%18%07%0D%0B%02%10%18%16%0BA9,%252YP%1E%13%1D%11%14%16%1FYM$,%03.LXPNI9(.6YPL%1C%1E%10%0F%07%05%10%0A%0FX%06*#\'QL%1A%0A%00%15%11%03%17EIP%0A%1B%08\'QLHRM%20)%3E+MHQLJL%06%0930PLH%19%17%0C%0B%02%0C%0C%0E%0AQ%1A%00%14/MH%1F%03%1C%11%14%0A%0BAL%3C%1D%134PLH?%12*09PL%3CL%1E%1B%0B8PLH%19%17%0C%0B%02%0C%0C%0E%0AQ%3C%03%19/MH%1F%03%1C%11%14%0A%0BA%03?43IQN8%01%0B*MHS%20%07%22%3CQLJ%0B%0815YPN%0660-LXR%20%1B%13=IMZ%12%0E&/MHO%02%1450PL%1C%02%04%17%06%15%11%0A%0FD(%18%0A6P$%02%16&P%1E%13%1D%11%14%16%1FY%16.)1:%25%12%0B2%3CC%18.%3C%03:K%1297\'Y%17%0C%0B%02%0C%0C%0E%0AYP%1E%13%1D%11%14%16%1FYMT@%5CY%5CB%5CU%0ELUQT@NL%1CC%03%14%0A%12%0D%0C%0E%16E4%3C%19.MH%03%17%04%10%04%0B%0BAP,.4\'QLH#,&&%25QL%3CPL%1C%02%04%17%06%15%11%0A%0FD%06#%0E6P44%06&P%1E%13%1D%11%14%16%1FY%16.)1:5$%1B2%3CC%18%07%11%1F%1A%11%08%17%0BA%17&%1C2IQ%1E%13%01%05%0C%17%0FX%16*%22)QLJ)%0E,5YP%18%07%0D%0B%02%10%18%16%0BA-%13%060YP%1E%13%1D%11%14%16%1FYMJP%3EJ?*XN:%25N@O*$8J#N:9,$8J#8H?Z%22%3EJ#%3EJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJYN:9,$8HSM%20-5/MHQ%18%07%11%1F%1A%11%08%17%0BA%13%09%131IQ%1E%13%01%05%0C%17%0FX%20%1B%0F)QLJ%1F#%180YPN%12%0D%015LXR$$95IMZ0&%186MH%19%17%0C%0B%02%0C%0C%0E%0AQ(%16%00,MH%1F%03%1C%11%14%0A%0BA%13;07IQN%06%08=*MHS%06*+=QLJ%1F+4(YPN$%02%0E9LXR$0*=IM%0C6=%13;K,%3C;?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXSTQBO%18Z%1E%10%0F%07%05%10%0A%0FX%16%14%00%25QL%1A%0A%00%15%11%03%17EI%0C%1C%11%01%1E%1FE@#8H?ZXN:%258%1C%02%04%17%06%15%11%0A%0FD%3C%0902P%0A%13%3C%22U,%0C76H%1F%1D%1C%11A%13%0A37L%5BGZ%0E%04%13D%1A0%205EMQ%0BCIVVJULT%09HUV:&H_%0A%15%00%15X(+,%25B%12%09%11%09%04L%1A0%205DMWRHNSLH%0ASTCLRUQL%1A%17%06%10%11%02%10M%0A-4-L%1A%1B%04%12%01QQU%0ENUQTFO@WMPTTXC%0E(=1%5CL@@SW@%5DDT%1EKUQHWRMJ4/),X%0E%16)*HIS%3E:O*%22N@#8JEZ%228%3CS%3EJ?,$8J#8%3C?Z%228%3C#N:9,$LZ%1A%17%04%05%1AB%06%00%0B%00ALA%16WQNSWR%5CO%5CQI%5CH%5E%1A0%205EMQ%1CBIUWL@Q%0BCIUQKTH_%0A%12%0A3+N%5C-%1C66Z%05%07%13%01%10%12%5E%02%19%16%04DYHVPIVRAA%16WQHUSWXC%0E(=1%5C);11_EN:?Z%22%3EJYN:9,R%3EJ#8%3C9Z%228%3C#N:9,%22N@S%3E%3C9,FMQ%00WQTDJ@Q%17WQTAJQHBMP%5DGNQQ%5DU%0EVAIUUHLZ%06%03%1C%04%0AC%06%00%17%14YMQ%00QQTIH@Q%17WQTAJWHB%0E(!%25DMQ%17SQT@LUDH%1DPTAH\'HC(+,%25THZ%1A%17%04%05%1AB%18%1C%05%17%04%10%04%0B%0BA%13%0A37J%04%03%14%16%06%15%0D%1E%17E%06%3E%1C5LX%02%17%04%0C%10%13%0AQQD:%25N:9X%22N@S%3E%3COPR%3E%3CSDJ?,$%18%07%0D%0B%02%10%18%16%0BA1%22#0YP%1E%13%1D%11%14%16%1FY%02%0D46IMZ%0A%10%05,MHO%16%01%0E3PLJ%0F4%0D=IQN%0A!%05!MHS,%22%1D?QLJ%1B..(YPN%12%1550LXR(\'%0F=IMZ%1E#%18,MHO8:%1C/PL%1C%02%04%17%06%15%11%0A%0FD%12:%165PL%1A+)%0B&:%0B2%043YP8%5C%0F%09*1YP%3E$%3C%135LX$%5E%16%14.4LX%22(3.3IMZ%0E%1D%0B,MH9L6=%13;%3E%02%15%25,MH%25%5E%1C%02%04%17%06%15%11%0A%0FD4=%135PL%1A%16%14%0D%10%13%16E%12/7!MHS%16%14%00%25QLJ=%1F%0A%3CYPN%06%3E%1C5LXR%16%14%1C1IMZ8%20%20(MHO8:%1C/PL%1C+)%0B&O=5W%22L%1F%10%0F%1B%11%08%0B%1FQL%1A%0A%00%15%11%03%17EIH%1DSTELTQH%5CD%5DX%04%5E%07%0D%0B%02%10%18%16%0BA!%1C%0C0YP%1E%13%1D%11%14%16%1FYM%15%01%15%04%0B%17YD:%25L:O*$8%1C%1E%10%0F%07%05%10%0A%0FX$%20%14%25QL%1A%0A%00%15%11%03%17EIPNI?Z%22%3E@S%3E%3COPR%3E%3C%25N:O*$8%3C%25N:9X%22N:%258HNY%12%20#6MHMXRMJ#%3EJ?*R%3E%3C%25N:O*$8%3CS%3E%3C9*R%3E%3C%25%3EJEZ%228%3C%25L%1C%02%04%17%06%15%11%0A%0FD0,%064PL%1A%16%14%0D%10%13%16EI%03#!7IQL:-6;1IQ8IM%0C%1F%10%0F%1B%11%08%0B%1FY%066%1E0IM%0A(,%22%20%3E,&%05+MH%25X.%3C%03:%5E01&9?4%1F%1D6PL%3CY%06+25#,%04%25%20QL%3CP4(\')P%5E,%22%0F8Y%200&9#M%02%0D7*MHQNI%13?5=IQL%3CLXB(;%12%3C:L%02%10%204PLHOY%12%3C%06!MHM,D%3E%3CC%18%07%11%1F%1A%11%08%17%0BA%13#.1IQ%1E%13%01%05%0C%17%0FX%11%09%0D%02%22M8%0D%0F/LXPNI%0F3%095YPL%3CC%18%07%11%1F%1A%11%08%17%0BA=%22#1IQ%1E%13%01%05%0C%17%0FX%02/)\'QLJ90%021YPN%20%1B%1F,LXR%027%19%3CIM%0C%15%00%15X%16.5%25B%03%14%16%06%15%0D%1E%17E4(15LX%02%17%04%0C%10%13%0AQ%1F%10%0F%1B%11%08%0B%1FQL%1A%05%5E%1C%02%04%17%06%15%11%0A%0FD%1E5.5PL%1A%16%14%0D%10%13%16EI%0F4%0D=IQL:-6;1IQ8IM%0C%1F%10%0F%1B%11%08%0B%1FY4,61IM%0A%0B%00%15%0D%17%0FDYRDJ#8JLZR%3EJ#8%3C?Z%228%3CQLJL04*3PLH%19%17%0C%0B%02%0C%0C%0E%0AQ(%02#-MH%1F%03%1C%11%14%0A%0BAL8:%1C/PLH?8%3E\'5PL%3CLX%04%03%14%16%06%15%0D%1E%17E%12%11%204LX%02%17%04%0C%10%13%0AQ,=%09/MHO%16%01%0E3PLJ)%05%1F5IQN%12%09!(MH%05%03%14%0A%12%0D%0C%0E%16E,%00%07,MH%03%17%04%10%04%0B%0BAPM%0E%1E%1D/MHQOI%13%05%202IQLHOYR%3E:S%3E:O*$8J#N:9,$N:%258:O*$8:S%3E%3C9,P%18.%20%17%22?%1E1%1F9PL%3CY(%18%0A6C%03%14%0A%12%0D%0C%0E%16E%0E%02%08,M(%19%154H%1A%1A%164T%209%0D$P%1E%0D%1D%11A%03+%150%5CZGZ%12%10%0BE(%01%0B3YYI%0ASHURWETU%19IUQ%20@P%5E%1A%14%00%15D%1A8%143C4%0E4&C%12%09%11%09%04L8%00%0B3DMQ%0B@IUQKURAGLPVOLH%1F%02%0E%0C%15%1B%0DI-%08%177H%03%06%00%17%14YMQ%17WQWCKULNRP%5DDP_(%01%0B3YYI%1DPHQVP%5CI%0ASHWPP@P%5E%0A9%143OZB%07%13%1D%04%0A_%12%18%16%04XMQ%1CEIUY:@Q%0BCIUQKSH%5E8%00%0B3E%0E%20%15#E%0E%02%0B0JL4!%0C4EX%5C%11%1F%1D%00%07%11%0B%04%00N0%04%11-K%0D%01%1F%1E%11%09B%209%0D$PZIH%0APTAITQH@Q%1C@IUQ%3CL%5BLCOWRKTDT%1EKUQHQVMJ%1B%17%04%19%0EZ%07%10%0A%00APTXRG@PDH%0ASTAIVPQ_(%1D%1F+XIH%1DSTAJ!DH%0ASTAIWUQ%5E%1A%12%10%0BE$%0E%0D3YYI%0ASHUVPATU%19IUP%20EP%5E%16%10%0C%0D%01Y%3C%13%09*YIT%1EOUQISRAA%01TQHT#MX%0A%12%08%0C%06%09L4%0F%0D3Q%1E%02%05%02%1CEINSWUGTU%0EJUSTDML%5B=%13%096L%12$%10*%5B%5C-%10%090O%14%00%0F%03%05%11ZIH%0ASTEMUWUU%19UAA#PQ_IUHORSH@Q%0BCIUQKWH_%13%0B%00%00%13%5E%02%05%02%1CEIH%0AUTAIPP%5DSTQEOL%5B=%13%096LQU%19IUR%222TU%0EJUPSBKLZ%1A%17%04%05%1AY4%0E(2Z%19%16#%094SX(%05%01,%3E%0A9%1439J%04%07%13%1D%04%0A_%12%18%16%04XMQ%0BCIUTIWLT%09HUPK#H%5E8%00%0B3EMQ%0B@IUQIVVAGLPTMLZ%0F0%087%5C%13%06%121J%1B%17%04%19%0EZ%19%0C%04%17%04%0C%10%13%0AQ%1E?%0D-%5E%1C%02%04%17%06%15%11%0A%0FD%16%01%0E3PL%1A%16%14%0D%10%13%16EF8%04IUTMB%1C%02%04%17%06%15%11%0A%0FD0%0A%073PL%1A%16%14%0D%10%13%16EI!9%3E5IQL:-6;1IQ8IM%0C%1F%10%0F%1B%11%08%0B%1FY%06%14%1D7IM%0A%0B%00%15%0D%17%0FDYRN:S%3E%3C9*R%3E%3C%25HJEZ%228HSMIOPR%3E%3CSMJO*R%3E%3C%25%3EJ?,$LHRM%16%10(.MHQL%1C%02%04%17%06%15%11%0A%0FD%06%0930PL%1A%16%14%0D%10%13%16EIOPR%3E%3CSDJ?,POIS%3E%3COPR%3E%3CQNIOY%22N:#DJ?,RDJ#8%3CO*R%3E%3C%258%3CO*$L:S%3E%3C9X%04%03%14%16%06%15%0D%1E%17E8%09%3C0LX%02%17%04%0C%10%13%0AQQN:#N:?ZXN:%258J?Z%228%3C%25N:9,%22N:%258:O*$8%3CQNIL45/7PLHNY8(.*MHMX%04%03%14%16%06%15%0D%1E%17E83)3LX%02%17%04%0C%10%13%0AQQ%20%03%0D4IMX%22%062-=IM,Q%0A%03%16%3CIMX%04*9%0A&:)%1D32IQ8%5C%25%06%14+Z%1E%10%0F%07%05%10%0A%0FX$,+#QL%1A%0A%00%15%11%03%17EIP%20-.\'QLHRMJL*R%3E:YN:9ZXN:%258J?Z%228%3C%258J?,P%3EJ#%3EJ?*R%3E%3C%25N:O*$8%3CS%3E%3C9*R%3E%3C%25%3EJEZ%228%3C%258HMZQN:#N:?Z%228%3CS%3EJ?,$8J#8%3C?Z%228%3C#N:9,$L%1C%1E%10%0F%07%05%10%0A%0FX0)%22#QL%1A%0A%00%15%11%03%17E,%3E%129LXR,%08%3C2IMZ4%11%07(MHO(2)3PL%1C%02%04%17%06%15%11%0A%0FD%063,3PL%1A%16%14%0D%10%13%16EI%037%001IQL:-6;1IQ8IM%0C%1F%10%0F%1B%11%08%0B%1FY4$%027IM%0A%0B%00%15%0D%17%0FDYQN@S%3E%3COYRN:S%3E%3C9*R%3E%3C%25LHNY((/,MHMXRMJS%3EJ?,$%3EJ#8%3CM%0C%1F%10%0F%1B%11%08%0B%1FY%16&;7IM%0A%0B%00%15%0D%17%0FD41%221PLJ%03?,)IQN$%1E%1A!MHS48%09%22QL%1C%1E%10%0F%07%05%10%0A%0FX(#%10#QL%1A%0A%00%15%11%03%17E%06%10$6LXR%02#%16=IMZ%12%20%15%20MHO%02%1450PLJ%03%1982IQN%06%22%08-MHS%0A5=\'QLJ%0B%0815YP%18.%20%17%22?$1#3PL%3CY%1E-%02,C%03%14%0A%12%0D%0C%0E%16E%0E%20%06+MH%03%17%04%10%04%0B%0BA%1F+,2YPN%02%01%0D9LXR%3C%18%151IMZ%1E3%00!MH%19%17%0C%0B%02%0C%0C%0E%0AQ%16=%0B+MH%1F%03%1C%11%14%0A%0BAL*$%3E%0E%12/0LX$MHS%3E%3CM*((/,MH9%0C%1F%10%0F%1B%11%08%0B%1FY48%156IM%0A%0B%00%15%0D%17%0FDY%228:#8%3CO*$L:SN:OZ%22%3E%3C%25%3EJ?,$8:S%3E%3C9,%04%03%14%16%06%15%0D%1E%17E%0A-%012LX%02%17%04%0C%10%13%0AQQ4%20%173IMX%22%062-=IM,Q%20%03%0D4IMX%04%03%14%16%06%15%0D%1E%17E,.%022LX%02%17%04%0C%10%13%0AQQ%3E%3C#%0A%0B.%20QL%3CPLJ?,P%3EJ#8%3C%19%17%0C%0B%02%0C%0C%0E%0AQ%1E79*MH%1F%03%1C%11%14%0A%0BAL(%08%3C0PLH?%12*09PL%3CL4%1B%100PLH%19%3E!%17%22#%0A%25%13#QL%3CE%02%15%3E$B%03%14%16%06%15%0D%1E%17E(+%042LX%02%17%04%0C%10%13%0AQQNI#N:?PR%3E%3CSDJ?,$N:S%3E%3C9,$N:%25L:O*$8HSMI%25%3C67IQLKL4-%03.PLHM%0C%1F%10%0F%1B%11%08%0B%1FY%06.*7I!!,7H%03%17%04%10%04%0B%0BA%0B*00*%3C54*8Z%19%17%0C%0B%02%0C%0C%0E%0AQ%3C%0F(+MH%1F%03%1C%11%14%0A%0BAL*$%3E:%258J?,P%3EJ#8%3C%19%17%0C%0B%02%0C%0C%0E%0AQ%1E%09-+MH%1F%03%1C%11%14%0A%0BAL%05%00%15%04%17%03AL*$N:%25LH?ZXN:%258%1C%02%04%17%06%15%11%0A%0FD0%1E&2PL%1A%16%14%0D%10%13%16EI%03%1982IQL:-6;1IQ8IM%0C%1F%10%0F%1B%11%08%0B%1FY%06%08%3E6IM%0A%0B%00%15%0D%17%0FD%167(7PLJ=%14%036IQN$%0274MHS%16%0C4%20QL%1C7=%13\'*%206;,MH9L%1A*3*%5E%07%11%1F%1A%11%08%17%0BA%13%15%0E6IQ%1E%13%01%05%0C%17%0FXMJO*R%3E%3C%25%3EJ?,$NISN:O*$8:S%3E%3C9XTN@S%3E%3CMZQN@S%3E%3COPR%3E%3CQNIOPR%3E%3CSDJ?,P%18%07%0D%0B%02%10%18%16%0BA!%00%1B7YP%1E%13%1D%11%14%16%1FYM%02%1D%106LXP%3E(?\'5LX$MH%05%03%14%0A%12%0D%0C%0E%16E%12%05%00*M4%1A%112H%06;%101Q%1E%0D%01%05Y%3C%22%005%5CIZ%22%3EJ#%3EJEZ%228%3CS%3EJ?,$8J#8%3C?Z%228%3C#N:9,$%5E%17%19%17A%17%08%165%5CPU%19PAIQY%5DU%0EVAIUPOLZ%1F%1D%1C%11A-%1F%134J%0E%0D%08%14%00I%17%08%165%5DPU%0EVANRWHHW%5DDAWHQ%1E%12%13%18%0D%06%09P%16%18%0B!P%1E%02%19%16%04DYI%1DUHUTQTI%0ASHUQUDP_%12%01%0A1YYI%0APHUQUDL@WMPT%5CXB0%1B%0A5JOJ%1B%17%04%19%0EZ%07%10%0A%00APTRU@KRDH%0ASTAIWPQ_%12%1D%1E)X4%02%171X$%1B%112V%09%04%0A%16%0D%0D%5EPU%0EVAJQPHHWSBISHBMQ%0B@IUQIRWAA%01TQHTVMJ%1B%17%04%19%0EZ%07%10%0A%00APU%0EUAIUPKQDRDLPWQ_%12%1D%1E)XIH%1DSTAJVDH%0ASTAITVQ%5E4%1E%03)XJ#%3EJ?*RDJ#8%3CO*R%3E%3C%258J?,$%3EJ#8%3C?ZXN:%258%3C_%13%0B%00%00%13%5E%02%05%02%1CEIJSSVDI@Q%17WQTAKVHB%16%18%0B!DMQ%17WQRBMQLN%5DYTBP%5E%1A%0E%04%13D%1E%0F%0C1EMQ%0BEIUQLTDRDLQYQ%5E%16%0C%18%15%00I%17%13%084MQSTAWWIA%16WQHPRSXP%16%16%11%11%02%0CY%16%13%08(L%1A%07%10%0A%00APU%19WAIVR%5DU%0EVAIUPNL%5B%0B%07%105%5C-%07%157*,%1F%13(8%5CYL%0E\'%14(%3EJ?*R%3E:SDJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJYN:9,$8%5EPSXVBOHQ%17WQS@HRHBMQ%1CEIU%22K@Q%0BCIUQLRH_%13%0B%00%00%13%5E%02%05%02%1CEIH%1DUTA;TDH%0ASTAIQRQ_%0E%12%18)XIH%1DPT2JULH%0ASTGITPQ%5E%13%01%05%0C%17%0FX0%1B%16!B%18%1C%1A%17%04%05%1AB%18%1C%05%17%04%10%04%0B%0BA!&%194J%04%03%14%16%06%15%0D%1E%17E0%0F%091L%1A%0A%061Q%1E%13%01%05%0C%17%0FX%16.5%25%22%0E%12%1B5%3C_%0C%1F%10%0F%1B%11%08%0B%1FY(%15%1E5IM%0A%0B%00%15%0D%17%0FDY%1E%09-+MHM*0%22#,MH9YP%18%07%0D%0B%02%10%18%16%0BA5+24YP%1E%13%1D%11%14%16%1FY%12%0D30IM*(%16%00,MH9J%04*9%0A&:50%0E)IQ8%5C%13+%122Z%1E%10%0F%07%05%10%0A%0FX%0A12!QL%1A%0A%00%15%11%03%17EI#8:%176:7IQ8J?,P%3E%0A=\'/LX$%18%07%0D%0B%02%10%18%16%0BA1.,4YP%1E%13%1D%11%14%16%1FYM%16%0C%3C6LXPNI-)(%3CYPL%1C%1E%10%0F%07%05%10%0A%0FX%0E,4!QL%1A%0A%00%15%11%03%17EI!%08/1YPL:%1B64%3CYP8I%1B.&2YPL%1C%1E%10%0F%07%05%10%0A%0FX%20)#!QL%1A%0A%00%15%11%03%17EIY%3E%3CO*$L:S%3E%3C9%0C%1F%10%0F%1B%11%08%0B%1FY%02+25IM%0A%0B%00%15%0D%17%0FDY%228:%0B%22%226YP8J#8H?%12%0C%003PL%3C%19%17%0C%0B%02%0C%0C%0E%0AQ8%20%20(MH%1F%03%1C%11%14%0A%0BALP%228J#8H?ZXN:%25N@O*$8%1C%1E%10%0F%07%05%10%0A%0FX%06&%20!QL%1A%0A%00%15%11%03%17EI%1F\'%0F%3CYPL:1%22#0YP8IQ%18.%3C%03:%3E$%02%16/LX$X%20%1744_%17%0C%0B%02%0C%0C%0E%0AQ%1A%04%13)MH%1F%03%1C%11%14%0A%0BALZR%3EJ#8%3C?Z%228%3CUN@O*$LJ#8%1C%02%04%17%06%15%11%0A%0FD4%1B%100PL%1A%16%14%0D%10%13%16EI%13%15%0E6IQLJL8.%018PLH%19%17%0C%0B%02%0C%0C%0E%0AQ%202%0A)MH%1F%03%1C%11%14%0A%0BA!%1B06IQN%06%0C0.MHS%06&%20!QLJ%1F3%00=YP%18%07%0D%0B%02%10%18%16%0BA9%3C%0F5YP%1E%02%17%0B%12%10Q,1%04)X%16%08:,MH#%20%25%12%25QL%3CC%17%04%10%04%0B%0BA-1%045NQ05%1D4J?,P%3E%0A!%0A.A%1A%1E!0PL%3C%5E%1E%1F%1C4P05%01%20R%3E%3CT%3C%10=%20QLHC%18%07%11%1F%1A%11%08%17%0BA%13\'%114IQ%1E%13%01%05%0C%17%0FX%02%09%25&QLJ%1F#%180YPN%0E,%3C7LXR%16%0C(4IM%0C%1F%10%0F%1B%11%08%0B%1FY40!5IM%0A%0B%00%15%0D%17%0FDYQN@S%3E%3COYRN:S%3E%3C9*R%3E%3C%25LHNY%3C19%20MHMXRMJS%3EJ?,$%3EJ#8%3CM%0C6=%13;%3E83%1A(MH%25X0%13%1D)%5E%07%0D%0B%02%10%18%16%0BA%0B6%035YP%1E%13%1D%11%14%16%1FYMF_%3E$%16&,MH%25MHM*(48(MH9%0C%1F%10%0F%1B%11%08%0B%1FY%16%0C(4IM%0A%0B%00%15%0D%17%0FDV%25%10QHQRC%0C%1F%10%0F%1B%11%08%0B%1FY0%0F+4IM%0A%0B%00%15%0D%17%0FD%1A,%012PLJ-2%00+IQN8%1D%1C-MHS,.4\'QLJ%1F+4(YPN%06%14)2LXR4%06:0IMZ%12(1(MHO8:%1C/PLJ!%0B%12=IQN%06%08=*MHS%12+-#QLJ%1F%09-7YPN%12%0D%015LXR%06*7)IMZ4#%16%20MHO0(79PLJ-2%00+IQ%18%07%11%1F%1A%11%08%17%0BA%0B%1B34IQ%1E%13%01%05%0C%17%0FX,%22%1D?QLJ=%1F%0A%3CYPN%06%14)2LXR%06*7)IMZ%1E+44MHO8:%1C/PLJ%037%001IQ%18%07%11%1F%1A%11%08%17%0BA5%1A44IQ%1E%13%01%05%0C%17%0FXM0!%0B+MHQ%3E%027$!MH%25M%0E%06%1F%20MHQ%18%07%11%1F%1A%11%08%17%0BA%0F%16=4IQ%1E%13%01%05%0C%17%0FXMI!%25%1F*IQLKL4-%03.PLHMZQN:#N:?ZXN:%258J?Z%228%3C%25N:9,%22N:%258:O*$8%3CQ%18%0D%01%05Y(%09?4Z%02%04%17%06%15%11%0A%0FD%16%1D%1D0PL%1A%16%14%0D%10%13%16EICV%22%20%13/0IM,QLH#0%17%03%25QL%3C%05%03%14%0A%12%0D%0C%0E%16E(%010(MH%03%17%04%10%04%0B%0BA!%1C%0C0YPN%0660-LXR%20%1B%13=IMZ(%3C%0C+MH%19%17%0C%0B%02%0C%0C%0E%0AQ%12%20#6MH%1F%03%1C%11%14%0A%0BALZQ%3EJ#%3E@O*$N@S%3E%3C9Z%22N:%258%3C9Z%228H#N:?Z%22%3EJ#8%3CO*R%3E%3C%258J?,$%3EJ#8%3C?ZXN:%258%3C9XRM4%0E%025LXP%18%07%0D%0B%02%10%18%16%0BA5#$*YP%1E%13%1D%11%14%16%1FY%0E4%1C6IMZ%120%05+MHO%16%1D%1D0PLJ%07%10%0B4IQN%02%0124MHS,.%3C=QLJ9%02%227YPN%0E4.5LXR%12+17IMZ%0A6%03)MHO0%1A%1F,PLJ%03%1D56IQN$%0E8*MHS,%22%1D?QLJ%1B..(YPN$0%221LXR,.%20)IMZ%1E/+(MHO%3C%01%0C7PLJ=:57IQN%06%22%08-MHS%0E$%10)QLJ53%067YPN$%02%0E9LXR%02%0D46IMZ%1E+,.MHO%1670-PLJ%07:6)IQN%0A%0F6.MHS%0E%0A#&QLJ)%02#1YPN4%20%0D6LXR09%102IMZ%12(1(MHO%20%12(0PLJ%0B!/5IQN,2%16*MH%05%03%14%0A%12%0D%0C%0E%16E%06&%077MH%03%17%04%10%04%0B%0BA!*.%3CYPN,%3E%129LXR%02%0D46IMZ0&%186MH%19%17%0C%0B%02%0C%0C%0E%0AQ0&%186MH%1F%03%1C%11%14%0A%0BALPX%3E%3CS%3E%3CM*RDJ#8JEZ%228JYN:9,%04%09%04%0CE%02%1D%017X:Z%14%15%10$%1F%10%1F%1C9=%1D%12%1D%10%1F%0D%07CHS%0A%1A%1F%1C%10%09%00%0C%0C%1B%04ZIC%04%13%0C%03%14%06%015%11%07%08%00%1D%1CGMF%0A%0C%0C%15%07%02%1FF%5D%5B%20=_!7F%5D%5B%060:3CHS%02%10%08ZIC2P%25GCTG%12%00%13%05%3E%14%11GMF%15%069=%07%02%14%06%22%08%06%14ZIC%01SUG%02ZIC%07%09%00%13%05#%10%08F%5D%5B%3CCTG;F%5D%5B%027?3CHS%5BIC%0F%10%051%0D%0C%18%14%06%013%0D(%0DGMZ%13%1E%18%05%0C%078%06%05%04%00SUG%17%01%19%14%07SUG%1D%0D%1B%16%00%09%5BIC$%10QRD89%14HSSU-%0CUWK&=%11AOPXH9%14TGJR=%0DUWW4%25%10QNV%208%04IST99%14TGJR=%0DUWV@I9%14HSTQ-%0CUWK&=%11AOPU$%10QRB?U=%0DUWQ0%25%10QNV%258%04ISR99%14TGL%5D=%0DUWQ0I9%14HSS%5D-%0CUWMQ=%11AOPXH9%14TGLP=%0DUWQE%25%10QNPP8%04ISRO9%14TGJ$QF%01%09%00O%5BIC%0E%07%1E%19SUG%17%01%19%05%11%13%5BIC%06%14%1C%11SUG%14%06%11%02#%08%1D%1DCTG_%00%19%1DGMZ9%14TGLQ=%0DUWWFI9%14HST%25-%0CUWM%5D=%11AOV%22$%10QRB?U=%0DUWQD%25%10QNPU8%04ISTI9%14TGJR=%0DUWW0I%5B%05%10%01Q8%04ISTI9%14TGL$Q$%10QRDN9%14HSST-%0CUWKRQ8%04ISRO9%14TGLQ=%0DUWQD%25%10QNV%228%04ISTL9%14TGJ#_ZIC%07%0E%1B%01CTG%1D%1B%02%08%19%14+%1A%1C%04%00%1B%10CTG%17%1B%13,%14%12%00GMF%0E%07%19%1E%09%11CHS5%1BLUHLIA%5BICHHLI%5CT)%1FZIC%00%00%1B%12%14%1CGMF%13%0C%06%04%04%01CHS%25%1DP9GMF%07%00%19%05%0D%07%14%10.%1C%01%01%1D%01CHS%1F%14%1D%1D%10CHS%1B%10%10%0C4%02%20%04%11%01CTG%02%11%0D%0C%16%05ZIC%11%19%0C%162%07%18%1C%15%0F%0DGMZ%16%1E%04%18%5BIC%0F%10%05\'%04%05%10%12%1C%1C%1E%1ASUG%03%0D%18%1E%02%04(%19%1D:%14%1F%13%04%1AGMZ%06%18%1A%06%05%10:%0D%0C%06%1B%13%0D%3C%1F%18%00%05F%5D%5B%01%03%01%18CHS%1A%01%10%1A%01%3E%1A%0D%10&%18%06%12%1D%11%22%01%10%12%03%17%1E%0CSUG%12%00%10%12%1F%04%0DGMZ9%14TGL$=%0DUWV@%25%10QNV%228%04ISTAU=%11AOPR$%10QRB89%14HSRS-%0CUWK%5D=%11AOVXH9%14TGLV=%0DUWQE%25%10QNPT8%04ISRAU=%11AOVR$%10QRDAU=%0DUWWB%25%10QNPR8%04ISR:9%14TGKTQ$%10QRDL9%14HSTU-%0CUWJP=%11AOPY$%10QRDM9%14HSR%5DA%25%10QNVY8%04ISTI9%14TGJR=%0DUWVD%25%10QNPU8%04ISRAU=%11AOPU$%10QRDM9%14HSRS-%0CUWJV=%11AOV%20$%10QRB%3C9%14HSSU-%0CUWKR=%11AOV%22FGMF%12%19%19%18%1CGMFM%5BIC%05%14%01F%5D%5B%06%05%09%07%05%076%00%01%19ZIC%1D%0F%0A%19%04%0C%10%02F%5D%5B%05%04%1B%1DCHS%1A%1C%1F%0F%19%14?%04%10%02%1E%1A%11%3E%01%15%19%00%05ZIC%1E%0E%00%1BCTGKF%5D%5B%06%1D%01%16%14F%5D%5B%01%14%1B%01CHS%1A%00%13%1B%01%03%1D%0F%0EGMZ%1E%14%0D%16%06%07%15ZIC_SUG%20$G%3E2SUG48C7F%5D%5B%06%1E%05%10CHS%08%11%15ZIC%1C%00%1AGMZ6%1E%19%0C%0C%1B%05%09%1C%03%11SUG%17%01%10%1D%10SUG%12%07%00%1F%00SUG%05%0D%0D%057%0E%07%01%14%06%01CHSI9%14HSSW-%0CUWJR=%11AOWPZIC%06%04%19%19%10%0B%10CHS%25%1D\'AGMF%1D%5BICEGMF%0C%08%0DCTG=%11AOV%20$%10QRDLU=%0DUWW5%25%10QNWQ8%04ISTIU=%11AOVV$%10QRDM9%14HSR%25-%0CUWMV=%11AOWP$%10QRBN9%14HSSUA%25%10QNVY8%04ISTN9%14TGJR=%0DUWW@%25%10QNP#T-%0CUWJ%5C=%11AOPU$%10QRD@U=%0DUWW4%25%10QNVV8%04ISTN9%14TGJ%5CQYTCHS*4%22)7=8%20\'60ZIC%13%04%1D1%10%1C%10CHS%19%14%15;%01%10%06%15%5BICXGMF%06%0C%01%3C%07%1B%05%1CSUG%16%0D%017%01%0D%05,%14%09%07CHSFGMZ%00%05%1D%0D%1AGMZ%14%1E%15%3E%1D%1A.%1B%1D%14%11%15%5BIC%0D%1B%12%1B%05%0C*%12%0D%19%1DF%5D%5B%16CTG%03F%5D%5B%14%1D%01%12%1F%19%04%07%01CTG%03%11%00%0D%1C%1F%0F:%03%10%04%1BGMZ%1D%1E%06%08%13%1A%1F%1C%14%1DF%5D%5B%07%18%0F%1D%05F%5D%5B%1B%04%05%17%14%06\'%06%07%1C%09%01CHS)GMZ%17%1E%1B%0A6%1B%14%1FGMF%03%06%1A%1A7%14%01%04%04%07%11.%1B%1D%14%11%15%5BIC;%1D%14%11%15XGMZ%02%03%1D%15%0C3%18%04%10CHS%0C%0D%05%1A%14%12%00%04%0D*%15%09%01%10Z%19%05%06%09ZIC8%09H%5CCTG%12%18%08%19%17%1E%09%07%15F%5D%5B%02%03%01%01%14%20%04%11%01CTG%05%1C%04%07GMZ9%14TGJ$=%0DUWQDI9%14HSTR-%0CUWJV=%11AOV$H9%14TGLP=%0DUWW5%25%10QNV%208%04IST@9%14TGL$=%0DUWWF%25%10QNV%20T-%0CUWMP=%11AOPU$%10QRDHU4%10%16%14%18@I9%14HST%25-%0CUWMP=%11AOPR$%10QRDO9%14HSTWA%25%10QNVV8%04ISTL9%14TGJW=%0DUWQGI9%14HSTP-%0CUWJP=%11AOPS$%10QRDN9%14HSRSA%25%10QNPP8%04IST9U=%11AOPT$%10QRDM9%14HSTUA,%0D%12%0D%19Q8%04ISSA9%14TGLQ=%0DUWQHI&%19%09%07%14$%0E%00%1B%05FGMF%02%08%01%12%00GMF-%0CUWK!=%11AOV\'$%10QRB;U=%0DUWW4%25%10QNWV8%04ISRKU=%11AOVR$%10QRB;9%14HSTR-%0CUWKR=%11AOVPH9%14TGJR=%0DUWQE%25%10QNPW8%04ISSK9%14TGJ%20_H9%14TGJ!=%0DUWWF%25%10QNPY8%04ISTLU=%11AOPT$%10QRB:9%14HSR%22-%0CUWK#=%11AOP#$%10QRBN%5BCTGLI%5CTHQ$%10QRB%3C9%14HSRS-%0CUWMS=%11AOVXHGMF-%01T%20$%1DP%25SUG=%0DWVUDI9%14HSR%25-%0CUWMPQ8%04ISTN9%14TGKV=%0DUWW4I9%14HSR\'-%0CUWMP=%11AOP%20$%10QRC@U=%0DUWWF%25%10QNPU8%04ISR=9%14TGJR=%0DUWQG%25%10QNVV8%04ISR9U=%11AOVY$%10QRDO9%14HSR\'-%0CUWKR=%11AOV%25IGMF-%0CWVM&Q8%04ISR%3C9%14TGJ#=%0DUWW3I9%14HSR!-%0CUWJR=%11AOVRH9%14TGJV=%0DUWW3%25%10QNPW8%04ISRO9%14TGJTQ$%10QRBN9%14HSTP-%0CUWMS=%11AOWR$%10QRB%3C9%14HSP\'A%25%10QNP%208%04ISSI9%14TGJ&=%0DUWQHI9%14HSRS-%0CUWMQ=%11AOPT$%10QRB=9%14HSRS-%0CUWM%5D=%11AOPU$%10QRB@U=%0DUWQD%25%10QNV%228%04ISR%3E9%14TGJ#=%0DUWQ3%25%10QNVVZSUG%16%0D%014%18%04%04%10%1F%1C%063%0D/%08%18%14ZIC%10%00%1D%10%3E%18%01%18%1B%0F%5BIC%1C%1A%15%15%18%5BIC%1B%10%050%00%1D%10CTG%08%11%12%1D%10%03%0C%14%08F%5D%5B%16%04%1B%01%1E%19%25%08%01%14!%1B%01%01%15%5B8Z%1E%10%0F%07%05%10%0A%0FX%20%1B%17?QL%1A%0A%00%15%11%03%17E%06.%048LXR%06*7)IMZ0%0C%25/MHO%16/%048PL%1C%02%04%17%06%15%11%0A%0FD(%0C%0F/PL%1A%16%14%0D%10%13%16E%06%0C0.MHS%02#%0A)QLJ%13%20%15%3CYPN%12%1550LX%04%03%14%16%06%15%0D%1E%17E%20%0F%08/L0(?/Q%1E%13%01%05%0C%17%0FX%16.5%25%22$0%22+%3C_%0C%1F%10%0F%1B%11%08%0B%1FY%062%1B*IM%0A%0A*0,X:9J%1A%0A%0F%0B%11A%13?-+%5C5+24YP%5E%02%17%0B%12%10Q%20*66X,6%154MHC%06%0E%0A%02%0DE%123+/Y457-PLZ%07%1E%17%16%15X0-5?D,%22%09=IMJ%1A%0A%0F%0B%11A%0B91+%5C%1F%0D()YP%5E%17%19%17A582+%5CPTRU@H%5DDH%0ASTAITWQ%5E%1A%08%14%0DE0%1B%1C._%06%11%0C%0D%1DM0-:7YIH%1DPTG=SLH%0ASTBKSRQL%1A%17%06%10%11%02%10M0-:7L%1A%1B%04%12%01QQU%0EJUSREIHQ%00TQQI%3CL%5B),**LQU%0EIUQT@NSDNPTQHP%5E0%1B%1C.YYI%1DVM%07%02%00@LHQ7RSRFMSUJPH_%13%0B%00%00%13%5E%02%05%02%1CEIH*RUDJUTHPWW%5CI%1DPA$%22Q@O\'HB4(/?DMQ%17WQQFOQLN%5DTRCP%5E0%1B%1C.OZB%07%13%1D%04%0A_%12%18%16%04XMQ%1CBIUYM@Q%0BCIUQLTH%5E%200./E4%02%1D%3EE%06%18%08+:1=(+%3CGMQ%0BCIVQKULRFIRQQ_IT%1EKUUHSUIGNSQILZ%06%03%1C%04%0AC%06%00%17%14YMQ%17WQQALULH%1DPT0I%20HB4(/?DMQ7VUSAHUPIUGT%09MSR9RP%20XB%1E%0D%1D%11A%17%14;*%5CZGZ%07%1E%17%16%15X(;%16%3ED%06%18%08+:5%12%00*%3CC%13%00%16Q%16%07%177XIT%1EKUSLWUIGO%5DPHLZ%1F%1D%1C%11A12%0D+J%0E%0D%08%14%00I%0B%13%0F*%5DPU%0EUAIUSIWDT%09HUQI%5CHM%0A%0A%12%08%0C%06%09L%1E%1B%13.Q%1E%02%05%02%1CEIJSSVCH@Q%17WQTAKTHB%0A%03%12%3EDMSNWRPH%5CU%0EJUQTDKLZ%03%16%04&%3ERX%1661/?(62/%25M,%3E%036%3E%123+/9Y02%0D7L?L@@SWLPDT%1EKUQHUVMXB%18%03%0A%00%00%0FJ%1A%04%12%1DEIT%3EJQVHTQU@ICQ%00QWW0NT%25Q_%0E%06%076X(/%09.X%3C#%17.#0-5?$ZIH%0ASTAKSUUU%19UAI$#Q_IT%1EMUQIVUAA%01TQHT#MJ%1B%17%04%19%0EZ%07%10%0A%00APU%0EPAITSH@Q%1C@IUP:L%5B%0B%13%0F*%5CPU.WENUPHTPTWI%1DUNV%20S@=LZ12%0D+LQU%19OP%03%07%15HPLH*VVGNQWLWTMJ%1B%17%04%19%0EZ%07%10%0A%00APU%19UA=USUU%0EVAOVRML%5B%0B%13%0F*%5CPU.WENUPHTPTWI%1DUNV%20S@=LZ12%0D+ZR%5E%03%0A%00%00%0FJ%04%18%1C%0B*00*%16-)68I%17%14;*HC%18%03%16%14%18%0EZ%05%18%1C%19%17%0C%0B%02%0C%0C%0E%0AQ%12%3C%0E7MH%1F%03%1C%11%14%0A%0BA%13%1D20IQ%3E%06&%077MH%25%3E,%1C%005MH%25MH_%0C%1F%10%0F%1B%11%08%0B%1FY%205%1E*IM%0A%0B%00%15%0D%17%0FDYR%3E%3CSDJ?,RMJS%3EJ?,$%3EJ#8J?,$LHSMJ?*R%3E:SDJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJ#8%3C9X%04%06%22%0B1IMJ%1F%10%0F%1B%11%08%0B%1FY%027%11*I%03%01.*M1%14;+%5D%1A%0807I$%0A%256L%1A%1B%0A%0F%17%05Y%3C%083*%5C%0B%17%000I%1F%156+%5D%1E%1567K%0D%01%1F%1E%11%09UMJO*R%3E%3C%25%3EJ?,$LHC%09%04%10Q8%0E/7X,%14$*M(%09?.IYRN:S%3E%3C9*R%3E%3C%25NIOZ%22N:%258:O*$8HUN@O*$LM!%0C*+XB%09%04%0CE4%0246X$%161._%07%18%17A%0F%0D)+LQSWNRWIA%16WQJTUUXB%1E%0D%1D%11A=60)Z%0F%0D%08%08%14Q%12%090*%5DLA%01VQHS%20AA%16WQHURTXP%1E%12%0F%0C%15%07%19Q%12%090*H%1F%12%18%16%04XMQ%1CBIUTI@Q%0BCIUQJRH%5E%06%11-.E%3C&-=E,%10%22*LLZ%228JYN:9XFMQ%17QQTAORDH%1DPTAHTHBMQ%0BCITVOQLRGLWSQ%5E%03%16%14%18%0EZ%1B%04%12%01QQU%0EIUQT@MVDH%1DPTAHQHB%12%09,%3EDMQ%17WQUFIULNSU%5CEP%5E8?,-YZ%22%3EJ#%3EJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJYN:9,$%5E%03%0A%00%00%0FJ%1A%04%12%1DEIT%1EHUQHTTUTOPTMRH%5E%06%11-.EMP%5DGNTX%5DU%0EVAIURKLZ%1F%12%16%0B%12%0CE%20-=5X%06%082.?(%3E,-%25%5E%20%0F?6X%0E%1E%1C4L0%12+.TNJ?Z%228%3C#N:9,TN@S%3E%3CH$%1F%20.UMJEZ%228HQN%20-=5N%0E%1E%1C4L0%12+.T0%07!%3EP%5E4%1E%20.YY,%03$7O%02%09%206LD1%14;+J%04%07%13%1D%04%0A_%12%18%16%04XMQ%1C@I\'#@HQ%0BCIPWKWH%5E%06%11-.EMQ%1CCIUR@@Q%0BCIUQJSH_(%3E,-SNZ%06%03%1C%04%0AC%18%1C%19%12%16%0B%12%0CE4%2025X%12%19%142L0%12+.T%3C%08/%3EP%5E%17%19%17A%137?)%5CPU%19VAIP%20%5DU%0EVAIURJLZ%13%19%10%09%04P%12\'%22=EMPASVRE%5CU%0EJUQTENLH%0B%12%08%10%12%11M%16%3E#-M%0A%1A%04%12%1DEIT%1EHUQHWRRTI%1DPHUP!XC%12\'%3E)%5C15:)_EN:9NQU%0EJUPQGIHWNVXPXCMQ%17WQVCKWLNSWRFP%5E%03%0A%00%00%0FJ%1A%04%12%1DEIT%09HU#J&LT%1EKUTLWWMK%0E#\'4XIT%09KUQNRDT%1EKUQHQQMJ%02$%0A6*%5C%0B%17%000I9%0E/+%5DR%3E:S%3E:O*$8J#N:9,$N:%258:O*$8:SDJ?,$8M-!%22(XB%18%03%0A%00%00%0FJ%04%17%04%0C%10%13%0AQ8%0E/7%5E%1C%02%04%17%06%15%11%0A%0FD%208%12-PL%1A%16%14%0D%10%13%16E%12%09!(MHS%20%0B-%22QLJ%1F%09-7YPN%06.%048LX%04%03%14%16%06%15%0D%1E%17E%12;%1F-LX%02%17%04%0C%10%13%0AQ(%02#-MHO%1A451PLJ-2%00+IQN$%1E%1A!MHS%02%0D(%22QLJ%0F/(6YPN%06%14)2LXR%16%14%1C1IMZ%1A..4MHO%3C?%129PLJ%25%20+=IQN(\'%087MH%05%03%14%0A%12%0D%0C%0E%16E,%1C%005MH%03%17%04%10%04%0B%0BA=%1F%0A%3CYPN%12%0D%015LXR%0E4%1C6IM%0C%1F%10%0F%1B%11%08%0B%1FY%0A%1B%0C)IM%0A%0B%00%15%0D%17%0FDY843%20MHM*0%22#,MH9YP%18%07%0D%0B%02%10%18%16%0BA%171%06)Y(0%0B5L%1A%16%14%0D%10%13%16E%12+%20-%3E0-%0F,9J%04%03%14%16%06%15%0D%1E%17E%0A)%04,LX%02%17%04%0C%10%13%0AQ%16=%0B+MHO(%00%085PLJ%17%04%1D1IQN%02/%3E5MHS%02%0D(%22QLJ%0F/(6YPN%0660-LXR$0*=IMZ%3C%1F%0A%20MHO%3C?%129PLJ%25485IQN%0A%0F6.MHS,%22%1D?QLJ=%1F%0A%3CYPN0!%082LXR,%22%01+IMZ%1A..4MHO8:%1C/PLJ%07:6)IQ%18%027%126MHC%03%14%0A%12%0D%0C%0E%16E,6%154MH%03%17%04%10%04%0B%0BA=-&4YPN%023*-LXR%16%14%1C1IMZ%1E%0D%20/MHO%02%1450PLJ5%1A44IQN,%22%06!MHS%06*+=QLJ9%3C%0F5YPN%12%1550LXR%16%14%1C1IMZ(%3C%0C+MHO8:%1C/PL%1C%02%04%17%06%15%11%0A%0FD%1670-PL%1A%16%14%0D%10%13%16EI%10%08%09%00%0E%1EEI?,R%3E%3CQL:OPR%3E%3CSDJ?,RDJ#8%3C%19%17%0C%0B%02%0C%0C%0E%0AQ0*94MH%1F%03%1C%11%14%0A%0BAL00!7PLHO*$%18%07%0D%0B%02%10%18%16%0BA%1B..(YP%1E%13%1D%11%14%16%1FYM%15%01%15%04%0B%17YM:%25N:9XP%3EJYN:9ZXN:%258%1C%02%04%17%06%15%11%0A%0FD457-PL%1A%16%14%0D%10%13%16E%12/7!MHS4%0A)%20QLJ5#%16%3CYPN%023*-LXR%16%0C(4IMZ%0A%10%05,MHO%20%20%082PLJ-2%00+IQN%0E%3C%1B*MHS$8%0A%20QLJ%1F%09-7YP%18%07%0D%0B%02%10%18%16%0BA=%03\')YP%1E%13%1D%11%14%16%1FYM%06.%048LXP%3E(?\'5LX$MH%05%3C%14%06)QLZ%1E%10%0F%07%05%10%0A%0FX%02%09-%3CQL%1A%0A%00%15%11%03%17E%0A=%119LXR%20%0B16IMZ%1E#%18,MHO0%20%0B0PLJ5%1A44IQ%18%07%11%1F%1A%11%08%17%0BA%25%12%03(IQ%1E%13%01%05%0C%17%0FXM%06*$5MHQ%3E(#3-MH%25MH%19%17%0C%0B%02%0C%0C%0E%0AQ%1A%00%225MH%1F%03%1C%11%14%0A%0BALYQN:#N:?ZX%3E%3CSDJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJ#8%3C9XVMJP%3EJ?*XN:%25N@O*$8J#N:9,$8J#8H?Z%22%3EJ#%3EJ?,$N:S%3E%3C9,R%3E%3C%25%3EJ?,$%3EJYN:9,$8HQN:9X%22N@S%3E%3C9%0C6=%13;K0T%19?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXTX%19J6=%13;K%0A%0B%10?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXTS%19J6=%13;K,2%12?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXWP%19J6=%13;K%06%0ED%3CX%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVP%19J6=%13;K(5F%3CX%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVS%19J6=%13;K$(C%3CX%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXWQ%19J6=%13;K$*%0B?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXWR%19J6=%13;K%06%082?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVR%19J6=%13;K%20-%04?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVU%19J6=%13;K%16%20%01?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXWV%19J6=%13;K8%05%02?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXWT%19J6=%13;K%12%1D%1A?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVW%19J6=%13;K4Q%1C?X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVV%19J6=%13;K8V%1B=X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXTP%19J6=%13;K%0E%08F:X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVQ%19J6=%13;K07H:X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FXVT%19J6=%13;K,43=X%07%0D%0B%02%10%18%16%0BIQ%1E%13%01%05%0C%17%0FX%5C%1C_%3E!%17%22V%0A%0F!5D%03%14%16%06%15%0D%1E%17MH%03%17%04%10%04%0B%0BAJQ%1C_%3E!%17%22V,*%135D%03%14%16%06%15%0D%1E%17MH%03%17%04%10%04%0B%0BAK%5C%1C_%3E!%17%22V%0E%08%1E5D%03%14%16%06%15%0D%1E%17MH%03%17%04%10%04%0B%0BALU%1C_%3E!%17%22V%02%05%115D%03%14%16%06%15%0D%1E%17MH%03%17%04%10%04%0B%0BAI%5D%1C_%3E!%17%22V$%20%095D%03%14%16%06%15%0D%1E%17MH%03%17%04%10%04%0B%0BAJS%1C_%3E!%17%22V%06Y%0B5D%03%14%16%06%15%0D%1E%17MH%03%17%04%10%04%0B%0BA@%18Z+)%0B&O=-8%20L%1F%10%0F%1B%11%08%0B%1FQL%1A%0A%00%15%11%03%17ER@%18Z+)%0B&O-?-%20L%1F%10%0F%1B%11%08%0B%1FQL%1A%0A%00%15%11%03%17ESJ%18Z+)%0B&O%0F%1D.%20L%1F%10%0F%1B%11%08%0B%1FQL%1A%0A%00%15%11%03%17ESA%18%1CM\")")}();document[OXrC.GF9z(0)](OXrC.CsWx(1),function(wZsM){wZsM[OXrC.aVTx(2)]();});document[OXrC.GF9z(0)](OXrC.OHby(3),function(YawM){var sWmM=OXrC[OXrC.OJIy(4)]();while(sWmM<OXrC[OXrC.Cuty(5)]())switch(sWmM){case (0x75bcd15-0O726746425):sWmM=YawM[OXrC.yrVy(6)]===OXrC.umQy(7)||(YawM[OXrC.GF9z(8)]&&YawM[OXrC.yrVy(6)][OXrC.CsWx(9)]()===OXrC.aVTx(10))||(YawM[OXrC.GF9z(8)]&&YawM[OXrC.yrVy(6)][OXrC.CsWx(9)]()===OXrC.OHby(11))||(YawM[OXrC.GF9z(8)]&&YawM[OXrC.OJIy(12)]&&(YawM[OXrC.yrVy(6)]===OXrC.Cuty(13)||YawM[OXrC.yrVy(6)]===OXrC.yrVy(14)))?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):sWmM=OXrC[OXrC.Cuty(5)]();{YawM[OXrC.aVTx(2)]();return (NaN===NaN);}break;}});let UXpM=OXrC.GF9z(16);function UrdN(){const wtgN=document[OXrC.CsWx(17)](OXrC.aVTx(18));const QoXM=wtgN[OXrC.OHby(19)];var sqaN=OXrC[OXrC.OJIy(4)]();while(sqaN<OXrC[OXrC.Cuty(5)]())switch(sqaN){case (0x75bcd15-0O726746425):sqaN=!QoXM[OXrC.OJIy(20)]?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):sqaN=OXrC[OXrC.Cuty(5)]();{alert(OXrC.Cuty(21));return;}break;}let MlRM=OXrC.GF9z(16);let onUM=(0x75bcd15-0O726746425);const IiLM=Array[OXrC.yrVy(22)](QoXM)[OXrC.umQy(23)](kkOM=>kkOM[OXrC.GF9z(24)][OXrC.CsWx(9)]()[OXrC.CsWx(25)](OXrC.aVTx(26)));var MJPJ=OXrC[OXrC.OJIy(4)]();while(MJPJ<OXrC[OXrC.Cuty(5)]())switch(MJPJ){case (0x75bcd15-0O726746425):MJPJ=IiLM[OXrC.OJIy(20)]===(0x75bcd15-0O726746425)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):MJPJ=OXrC[OXrC.Cuty(5)]();{alert(OXrC.OHby(27));return;}break;}IiLM[OXrC.OJIy(28)]((oLSJ,IGJJ)=>oLSJ[OXrC.GF9z(24)][OXrC.Cuty(29)](IGJJ[OXrC.GF9z(24)]));IiLM[OXrC.yrVy(30)](kIMJ=>{const EDDJ=new FileReader();EDDJ[OXrC.umQy(31)]=function(gFGJ){MlRM+=`${OXrC.GF9z(32)}${kIMJ[OXrC.GF9z(24)]}${OXrC.CsWx(33)}`+gFGJ[OXrC.aVTx(34)][OXrC.OHby(35)]+OXrC.OJIy(36);onUM++;var AAxJ=OXrC[OXrC.OJIy(4)]();while(AAxJ<OXrC[OXrC.Cuty(5)]())switch(AAxJ){case (0x75bcd15-0O726746425):AAxJ=onUM===IiLM[OXrC.OJIy(20)]?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):AAxJ=OXrC[OXrC.Cuty(5)]();{UXpM=MlRM;document[OXrC.CsWx(17)](OXrC.Cuty(37))[OXrC.yrVy(38)]=MlRM;EXqK();}break;}};EDDJ[OXrC.umQy(39)](kIMJ);});}function cCAJ(){const cWnK=document[OXrC.CsWx(17)](OXrC.Cuty(37));cWnK[OXrC.GF9z(40)]();document[OXrC.CsWx(41)](OXrC.aVTx(42));window[OXrC.OHby(43)]()[OXrC.OJIy(44)]();}function EXqK(){const YShK=document[OXrC.CsWx(17)](OXrC.Cuty(45))[OXrC.yrVy(38)][OXrC.yrVy(46)]();const AUkK=document[OXrC.CsWx(17)](OXrC.umQy(47))[OXrC.GF9z(48)];var UPbK=OXrC[OXrC.OJIy(4)]();while(UPbK<OXrC[OXrC.Cuty(5)]())switch(UPbK){case (0x75bcd15-0O726746425):UPbK=!YShK?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):UPbK=OXrC[OXrC.Cuty(5)]();{alert(OXrC.CsWx(49));return;}break;}const wReK=YShK[OXrC.aVTx(50)](OXrC.OHby(51))[OXrC.OJIy(52)](QMVJ=>QMVJ[OXrC.yrVy(46)]())[OXrC.umQy(23)](sOYJ=>sOYJ[OXrC.OJIy(20)]>(0x75bcd15-0O726746425));const siMK=document[OXrC.CsWx(17)](OXrC.Cuty(37))[OXrC.yrVy(38)][OXrC.aVTx(50)](OXrC.OJIy(36));const UjPK=[];for(const ofGK of siMK){const QgJK=ofGK[OXrC.yrVy(46)]();kkGW:for(const kcAK of wReK){var MdDK=OXrC[OXrC.OJIy(4)]();while(MdDK<OXrC[OXrC.Cuty(5)]())switch(MdDK){case (0x75bcd15-0O726746425):MdDK=(AUkK&&QgJK[OXrC.Cuty(53)](kcAK))||(!AUkK&&QgJK[OXrC.yrVy(54)](kcAK))?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):MdDK=OXrC[OXrC.Cuty(5)]();{UjPK[OXrC.umQy(55)](QgJK);break kkGW;}break;}}}document[OXrC.CsWx(17)](OXrC.GF9z(56))[OXrC.yrVy(38)]=UjPK[OXrC.CsWx(57)](OXrC.OJIy(36));wlSK();}function gZtK(){const IaxK=document[OXrC.CsWx(17)](OXrC.GF9z(56));IaxK[OXrC.GF9z(40)]();document[OXrC.CsWx(41)](OXrC.aVTx(42));window[OXrC.OHby(43)]()[OXrC.OJIy(44)]();}function IukL(kwnL){const EreL=kwnL[OXrC.aVTx(50)](OXrC.aVTx(58));return EreL[OXrC.OJIy(20)]>(0O57060516-0xbc614d)?EreL[OXrC.OHby(59)]((0O57060516-0xbc614d))[OXrC.CsWx(57)](OXrC.aVTx(58))[OXrC.yrVy(46)]():kwnL[OXrC.yrVy(46)]();}function gthL(AoYK){var cqbL=OXrC[OXrC.OJIy(4)]();while(cqbL<OXrC[OXrC.Cuty(5)]())switch(cqbL){case (0x75bcd15-0O726746425):cqbL=/^0\d+$/[OXrC.OJIy(60)](AoYK)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):cqbL=OXrC[OXrC.Cuty(5)]();{return AoYK[OXrC.Cuty(61)]((0O57060516-0xbc614d));}break;}return AoYK;}function wlSK(){const YmVK=document[OXrC.CsWx(17)](OXrC.GF9z(56))[OXrC.yrVy(38)];const AMWH=document[OXrC.CsWx(17)](OXrC.yrVy(62))[OXrC.yrVy(38)][OXrC.CsWx(9)]();const cOZH=AMWH[OXrC.aVTx(50)](OXrC.umQy(63))[OXrC.OJIy(52)](wJQH=>wJQH[OXrC.yrVy(46)]())[OXrC.umQy(23)](YKTH=>YKTH);const sGKH=YmVK[OXrC.aVTx(50)](OXrC.OJIy(36));const UHNH=new Set();var oDEH=OXrC[OXrC.OJIy(4)]();{let QEHH;while(oDEH<OXrC[OXrC.Cuty(5)]()){switch(oDEH){case (0x75bcd15-0O726746425):oDEH=OXrC[OXrC.umQy(15)]();QEHH=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):oDEH=QEHH<sGKH[OXrC.OJIy(20)]?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):oDEH=OXrC[OXrC.CsWx(65)]();{const QYuI=sGKH[QEHH][OXrC.CsWx(9)]();var sayI=OXrC[OXrC.OJIy(4)]();while(sayI<OXrC[OXrC.Cuty(5)]())switch(sayI){case (0x75bcd15-0O726746425):sayI=cOZH[OXrC.aVTx(66)](MVoI=>QYuI[OXrC.yrVy(54)](MVoI))?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):sayI=OXrC[OXrC.Cuty(5)]();{var oXrI=OXrC[OXrC.OJIy(4)]();{let ISiI;while(oXrI<OXrC[OXrC.Cuty(5)]()){switch(oXrI){case (0x75bcd15-0O726746425):oXrI=OXrC[OXrC.umQy(15)]();ISiI=QEHH-(0O507646144^0x51F4C61);break;case (0O57060516-0xbc614d):oXrI=ISiI<=QEHH+(0O57060516-0xbc614d)?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):oXrI=OXrC[OXrC.CsWx(65)]();{var kUlI=OXrC[OXrC.OJIy(4)]();while(kUlI<OXrC[OXrC.Cuty(5)]())switch(kUlI){case (0x75bcd15-0O726746425):kUlI=ISiI>=(0x75bcd15-0O726746425)&&ISiI<sGKH[OXrC.OJIy(20)]?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):kUlI=OXrC[OXrC.Cuty(5)]();UHNH[OXrC.OHby(67)](ISiI);break;}}break;case (0O334664274-0x37368B9):oXrI=OXrC[OXrC.umQy(15)]();ISiI++;break;}}}}break;}}break;case (0O334664274-0x37368B9):oDEH=OXrC[OXrC.umQy(15)]();QEHH++;break;}}}let EPcI=sGKH[OXrC.umQy(23)]((gRfI,glTI)=>!UHNH[OXrC.OJIy(68)](glTI));EPcI=EPcI[OXrC.umQy(23)](ImWI=>!ImWI[OXrC.yrVy(54)](OXrC.Cuty(69)));const ciNI=EPcI[OXrC.OJIy(52)](IukL)[OXrC.OJIy(52)](EjQI=>EjQI[OXrC.yrVy(46)]()===OXrC.GF9z(16)?OXrC.GF9z(16):gthL(EjQI[OXrC.yrVy(46)]()));const YeHI=[[],[],[],[],[],[]];var AgKI=OXrC[OXrC.OJIy(4)]();{let UbBI;while(AgKI<OXrC[OXrC.Cuty(5)]()){switch(AgKI){case (0x75bcd15-0O726746425):AgKI=OXrC[OXrC.umQy(15)]();UbBI=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):AgKI=UbBI<ciNI[OXrC.OJIy(20)]?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):AgKI=OXrC[OXrC.CsWx(65)]();{const wdEI=UbBI%(1011010-0O3666474);let wxrJ=ciNI[UbBI];var YyuJ=OXrC[OXrC.OJIy(4)]();while(YyuJ<OXrC[OXrC.Cuty(5)]())switch(YyuJ){case (0x75bcd15-0O726746425):YyuJ=wdEI===(0x5E30A78-0O570605164)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):YyuJ=OXrC[OXrC.Cuty(5)]();{wxrJ=koZI(wxrJ);}break;}YeHI[wdEI][OXrC.umQy(55)](wxrJ);}break;case (0O334664274-0x37368B9):AgKI=OXrC[OXrC.umQy(15)]();UbBI++;break;}}}var sulJ=OXrC[OXrC.OJIy(4)]();{let UvoJ;while(sulJ<OXrC[OXrC.Cuty(5)]()){switch(sulJ){case (0x75bcd15-0O726746425):sulJ=OXrC[OXrC.umQy(15)]();UvoJ=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):sulJ=UvoJ<(1011010-0O3666474)?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):sulJ=OXrC[OXrC.CsWx(65)]();{const orfJ=YeHI[UvoJ][OXrC.CsWx(57)](OXrC.OJIy(36))||OXrC.GF9z(16);document[OXrC.CsWx(17)](OXrC.yrVy(70)+(UvoJ+(0O57060516-0xbc614d)))[OXrC.yrVy(38)]=orfJ;const QsiJ=orfJ===OXrC.GF9z(16)?(0x75bcd15-0O726746425):YeHI[UvoJ][OXrC.OJIy(20)];document[OXrC.CsWx(17)](OXrC.umQy(71)+(UvoJ+(0O57060516-0xbc614d)))[OXrC.GF9z(72)]=QsiJ+OXrC.CsWx(73);}break;case (0O334664274-0x37368B9):sulJ=OXrC[OXrC.umQy(15)]();UvoJ++;break;}}}}function koZI(MpcJ){let oPdG=MpcJ[OXrC.aVTx(74)](/�/g,OXrC.OHby(75))[OXrC.yrVy(46)]();var QQgG=OXrC[OXrC.OJIy(4)]();while(QQgG<OXrC[OXrC.Cuty(5)]())switch(QQgG){case (0x75bcd15-0O726746425):QQgG=oPdG[OXrC.yrVy(54)](OXrC.OJIy(76))?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):QQgG=OXrC[OXrC.Cuty(5)]();{const kMXF=oPdG[OXrC.aVTx(50)](OXrC.OJIy(76));oPdG=kMXF[kMXF[OXrC.OJIy(20)]-(0O57060516-0xbc614d)][OXrC.yrVy(46)]();}break;}var MNaG=OXrC[OXrC.OJIy(4)]();while(MNaG<OXrC[OXrC.Cuty(5)]())switch(MNaG){case (0x75bcd15-0O726746425):MNaG=oPdG[OXrC.CsWx(25)](OXrC.Cuty(77))?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):MNaG=OXrC[OXrC.Cuty(5)]();{oPdG=oPdG[OXrC.OHby(59)]((0x75bcd15-0O726746425),-(0O57060516-0xbc614d))[OXrC.yrVy(46)]();}break;}return oPdG;}function gJRF(){const IKUF=(1011010-0O3666474);const cGLF=[];var EHOF=OXrC[OXrC.OJIy(4)]();{let EbCG;while(EHOF<OXrC[OXrC.Cuty(5)]()){switch(EHOF){case (0x75bcd15-0O726746425):EHOF=OXrC[OXrC.umQy(15)]();EbCG=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):EHOF=EbCG<=IKUF?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):EHOF=OXrC[OXrC.CsWx(65)]();{const gdFG=document[OXrC.CsWx(17)](OXrC.yrVy(70)+EbCG)[OXrC.yrVy(38)];cGLF[EbCG]=gdFG[OXrC.aVTx(50)](OXrC.OJIy(36));}break;case (0O334664274-0x37368B9):EHOF=OXrC[OXrC.umQy(15)]();EbCG++;break;}}}const AYvG=Math[OXrC.yrVy(78)](...cGLF[OXrC.OHby(59)]((0O57060516-0xbc614d))[OXrC.OJIy(52)](cazG=>cazG[OXrC.OJIy(20)]));const wVpG=new Set();const YWsG=[];var sSjG=OXrC[OXrC.OJIy(4)]();{let UTmG;while(sSjG<OXrC[OXrC.Cuty(5)]()){switch(sSjG){case (0x75bcd15-0O726746425):sSjG=OXrC[OXrC.umQy(15)]();UTmG=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):sSjG=UTmG<AYvG?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):sSjG=OXrC[OXrC.CsWx(65)]();{const UnaH=cGLF[(0O57060516-0xbc614d)][UTmG]||OXrC.GF9z(16);var wpdH=OXrC[OXrC.OJIy(4)]();while(wpdH<OXrC[OXrC.Cuty(5)]())switch(wpdH){case (0x75bcd15-0O726746425):wpdH=!wVpG[OXrC.OJIy(68)](UnaH)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):wpdH=OXrC[OXrC.Cuty(5)]();{wVpG[OXrC.OHby(67)](UnaH);const QkUG=[];var smXG=OXrC[OXrC.OJIy(4)]();{let MhOG;while(smXG<OXrC[OXrC.Cuty(5)]()){switch(smXG){case (0x75bcd15-0O726746425):smXG=OXrC[OXrC.umQy(15)]();MhOG=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):smXG=MhOG<=IKUF?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):smXG=OXrC[OXrC.CsWx(65)]();{QkUG[OXrC.umQy(55)](cGLF[MhOG][UTmG]||OXrC.GF9z(16));}break;case (0O334664274-0x37368B9):smXG=OXrC[OXrC.umQy(15)]();MhOG++;break;}}}YWsG[OXrC.umQy(55)](QkUG);}break;}}break;case (0O334664274-0x37368B9):sSjG=OXrC[OXrC.umQy(15)]();UTmG++;break;}}}const ojRG=Array[OXrC.yrVy(22)]({[OXrC.OJIy(20)]:IKUF+(0O57060516-0xbc614d)},()=>[]);YWsG[OXrC.yrVy(30)](IeIG=>{var kgLG=OXrC[OXrC.OJIy(4)]();{let kAyH;while(kgLG<OXrC[OXrC.Cuty(5)]()){switch(kgLG){case (0x75bcd15-0O726746425):kgLG=OXrC[OXrC.umQy(15)]();kAyH=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):kgLG=kAyH<=IKUF?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):kgLG=OXrC[OXrC.CsWx(65)]();{ojRG[kAyH][OXrC.umQy(55)](IeIG[kAyH-(0O57060516-0xbc614d)]);}break;case (0O334664274-0x37368B9):kgLG=OXrC[OXrC.umQy(15)]();kAyH++;break;}}}});var MBBH=OXrC[OXrC.OJIy(4)]();{let gxsH;while(MBBH<OXrC[OXrC.Cuty(5)]()){switch(MBBH){case (0x75bcd15-0O726746425):MBBH=OXrC[OXrC.umQy(15)]();gxsH=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):MBBH=gxsH<=IKUF?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):MBBH=OXrC[OXrC.CsWx(65)]();{const IyvH=ojRG[gxsH][OXrC.CsWx(57)](OXrC.OJIy(36));document[OXrC.CsWx(17)](OXrC.yrVy(70)+gxsH)[OXrC.yrVy(38)]=IyvH;document[OXrC.CsWx(17)](OXrC.umQy(71)+gxsH)[OXrC.GF9z(72)]=ojRG[gxsH][OXrC.OJIy(20)]+OXrC.CsWx(73);}break;case (0O334664274-0x37368B9):MBBH=OXrC[OXrC.umQy(15)]();gxsH++;break;}}}alert(OXrC.umQy(79));}function cumH(EvpH){const YqgH=document[OXrC.CsWx(17)](OXrC.yrVy(70)+EvpH);YqgH[OXrC.GF9z(40)]();document[OXrC.CsWx(41)](OXrC.aVTx(42));}function AsjH(cSkE){const ETnE=(cSkE||OXrC.GF9z(16))[OXrC.yrVy(46)]()[OXrC.aVTx(50)](/\s+/)[(0x75bcd15-0O726746425)];return ETnE?ETnE:OXrC.GF9z(80);}function YOeE(){const AQhE=[];var ULYD=OXrC[OXrC.OJIy(4)]();{let wNbE;while(ULYD<OXrC[OXrC.Cuty(5)]()){switch(ULYD){case (0x75bcd15-0O726746425):ULYD=OXrC[OXrC.umQy(15)]();wNbE=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):ULYD=wNbE<=(1011010-0O3666474)?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):ULYD=OXrC[OXrC.CsWx(65)]();{const QISD=document[OXrC.CsWx(17)](OXrC.yrVy(70)+wNbE)[OXrC.yrVy(38)];AQhE[wNbE]=QISD[OXrC.aVTx(50)](OXrC.OJIy(36));}break;case (0O334664274-0x37368B9):ULYD=OXrC[OXrC.umQy(15)]();wNbE++;break;}}}const sKVD=Math[OXrC.yrVy(78)](...AQhE[OXrC.OHby(59)]((0O57060516-0xbc614d))[OXrC.OJIy(52)](seJE=>seJE[OXrC.OJIy(20)]));const UfME=new Date();const obDE=QcGE=>{const kYwE=String(QcGE[OXrC.CsWx(81)]())[OXrC.aVTx(82)]((15658734^0O73567354),OXrC.OHby(83));const MZzE=String(QcGE[OXrC.OJIy(84)]()+(0O57060516-0xbc614d))[OXrC.aVTx(82)]((15658734^0O73567354),OXrC.OHby(83));const gVqE=String(QcGE[OXrC.Cuty(85)]());return `${kYwE}${OXrC.yrVy(86)}${MZzE}${OXrC.yrVy(86)}${gVqE}`;};const IWtE=UrlD();const IqhF=[];var kskF=OXrC[OXrC.OJIy(4)]();{let EnbF;while(kskF<OXrC[OXrC.Cuty(5)]()){switch(kskF){case (0x75bcd15-0O726746425):kskF=OXrC[OXrC.umQy(15)]();EnbF=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):kskF=EnbF<sKVD?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):kskF=OXrC[OXrC.CsWx(65)]();{IqhF[EnbF]=[gthL(AQhE[(0O57060516-0xbc614d)][EnbF]||OXrC.GF9z(16)),gthL(AQhE[(0x5E30A78-0O570605164)][EnbF]||OXrC.GF9z(16)),IWtE,IWtE,gthL(AQhE[(0O507646144^0x51F4C61)][EnbF]||OXrC.GF9z(16)),gthL(AQhE[(1011010-0O3666474)][EnbF]||OXrC.GF9z(16)),IWtE,AsjH(AQhE[(1011010-0O3666474)][EnbF]||OXrC.GF9z(16)),gthL(AQhE[(0O334664274-0x37368B9)][EnbF]||OXrC.GF9z(16)),gthL(AQhE[(15658734^0O73567354)][EnbF]||OXrC.GF9z(16))];}break;case (0O334664274-0x37368B9):kskF=OXrC[OXrC.umQy(15)]();EnbF++;break;}}}const gpeF=XLSX[OXrC.umQy(87)][OXrC.GF9z(88)](IqhF);const AkVE=[(15658734^0O73567354),(0O334664274-0x37368B9),(1011010-0O3666474)];var cmYE=OXrC[OXrC.OJIy(4)]();{let whPE;while(cmYE<OXrC[OXrC.Cuty(5)]()){switch(cmYE){case (0x75bcd15-0O726746425):cmYE=OXrC[OXrC.umQy(15)]();whPE=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):cmYE=whPE<sKVD?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):cmYE=OXrC[OXrC.CsWx(65)]();{MlJW:for(const YiSE of AkVE){const YCFF=XLSX[OXrC.umQy(87)][OXrC.CsWx(89)]({[OXrC.aVTx(90)]:YiSE,[OXrC.OHby(91)]:whPE});var AEIF=OXrC[OXrC.OJIy(4)]();while(AEIF<OXrC[OXrC.Cuty(5)]())switch(AEIF){case (0x75bcd15-0O726746425):AEIF=!gpeF[YCFF]?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):AEIF=OXrC[OXrC.Cuty(5)]();continue MlJW;}gpeF[YCFF][OXrC.OHby(11)]={[OXrC.OJIy(92)]:{[OXrC.Cuty(93)]:2,[OXrC.yrVy(94)]:OXrC.umQy(95)},[OXrC.GF9z(96)]:OXrC.CsWx(97)};}}break;case (0O334664274-0x37368B9):cmYE=OXrC[OXrC.umQy(15)]();whPE++;break;}}}const UzzF=XLSX[OXrC.umQy(87)][OXrC.aVTx(98)]();XLSX[OXrC.umQy(87)][OXrC.OHby(99)](UzzF,gpeF,OXrC.OJIy(100));XLSX[OXrC.Cuty(101)](UzzF,OXrC.yrVy(102));}function wBCF(){const QwtF=[];var sywF=OXrC[OXrC.OJIy(4)]();{let MtnF;while(sywF<OXrC[OXrC.Cuty(5)]()){switch(sywF){case (0x75bcd15-0O726746425):sywF=OXrC[OXrC.umQy(15)]();MtnF=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):sywF=MtnF<=(1011010-0O3666474)?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):sywF=OXrC[OXrC.CsWx(65)]();{const ovqF=document[OXrC.CsWx(17)](OXrC.yrVy(70)+MtnF)[OXrC.yrVy(38)];QwtF[MtnF]=ovqF[OXrC.aVTx(50)](OXrC.OJIy(36));}break;case (0O334664274-0x37368B9):sywF=OXrC[OXrC.umQy(15)]();MtnF++;break;}}}const QUrC=Math[OXrC.yrVy(78)](...QwtF[OXrC.OHby(59)]((0O57060516-0xbc614d))[OXrC.OJIy(52)](sWuC=>sWuC[OXrC.OJIy(20)]));const MRlC=new Date();const oToC=IOfC=>{const kQiC=String(IOfC[OXrC.CsWx(81)]())[OXrC.aVTx(82)]((15658734^0O73567354),OXrC.OHby(83));const ELZB=String(IOfC[OXrC.OJIy(84)]()+(0O57060516-0xbc614d))[OXrC.aVTx(82)]((15658734^0O73567354),OXrC.OHby(83));const gNcC=String(IOfC[OXrC.Cuty(85)]());return `${kQiC}${OXrC.yrVy(86)}${ELZB}${OXrC.yrVy(86)}${gNcC}`;};const ghQC=UrlD();let IiTC=OXrC.GF9z(16);var ceKC=OXrC[OXrC.OJIy(4)]();{let EfNC;while(ceKC<OXrC[OXrC.Cuty(5)]()){switch(ceKC){case (0x75bcd15-0O726746425):ceKC=OXrC[OXrC.umQy(15)]();EfNC=(0x75bcd15-0O726746425);break;case (0O57060516-0xbc614d):ceKC=EfNC<QUrC?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):ceKC=OXrC[OXrC.CsWx(65)]();{const YaEC=[gthL(QwtF[(0O57060516-0xbc614d)][EfNC]||OXrC.GF9z(16)),gthL(QwtF[(0x5E30A78-0O570605164)][EfNC]||OXrC.GF9z(16)),ghQC,ghQC,gthL(QwtF[(0O507646144^0x51F4C61)][EfNC]||OXrC.GF9z(16)),gthL(QwtF[(1011010-0O3666474)][EfNC]||OXrC.GF9z(16)),ghQC,AsjH(QwtF[(1011010-0O3666474)][EfNC]||OXrC.GF9z(16)),gthL(QwtF[(0O334664274-0x37368B9)][EfNC]||OXrC.GF9z(16)),gthL(QwtF[(15658734^0O73567354)][EfNC]||OXrC.GF9z(16))];IiTC+=YaEC[OXrC.CsWx(57)](OXrC.umQy(103))+OXrC.OJIy(36);}break;case (0O334664274-0x37368B9):ceKC=OXrC[OXrC.umQy(15)]();EfNC++;break;}}}navigator[OXrC.GF9z(104)][OXrC.CsWx(105)](IiTC)[OXrC.aVTx(106)](()=>{alert(OXrC.OHby(107));})[OXrC.OJIy(108)](()=>{alert(OXrC.Cuty(109));});}function AcHC(){let UXxC=OXrC.GF9z(16);var wZAC=OXrC[OXrC.OJIy(4)]();{let wtoD;while(wZAC<OXrC[OXrC.Cuty(5)]()){switch(wZAC){case (0x75bcd15-0O726746425):wZAC=OXrC[OXrC.umQy(15)]();wtoD=(0O57060516-0xbc614d);break;case (0O57060516-0xbc614d):wZAC=wtoD<=(1011010-0O3666474)?OXrC[OXrC.GF9z(64)]():OXrC[OXrC.Cuty(5)]();break;case (15658734^0O73567354):wZAC=OXrC[OXrC.CsWx(65)]();{const YurD=document[OXrC.CsWx(17)](OXrC.yrVy(70)+wtoD);const sqiD=YurD[OXrC.yrVy(38)][OXrC.yrVy(46)]();UXxC+=`${OXrC.yrVy(110)}${wtoD}${OXrC.CsWx(33)}`+sqiD+OXrC.umQy(111);}break;case (0O334664274-0x37368B9):wZAC=OXrC[OXrC.umQy(15)]();wtoD++;break;}}}navigator[OXrC.GF9z(104)][OXrC.CsWx(105)](UXxC)[OXrC.aVTx(106)](()=>{alert(OXrC.GF9z(112));})[OXrC.OJIy(108)](()=>{alert(OXrC.CsWx(113));});}function UrlD(){const oncD=document[OXrC.aVTx(114)](OXrC.OHby(115));let QofD=OXrC.OJIy(116);ghAW:for(const kkWC of oncD){var MlZC=OXrC[OXrC.OJIy(4)]();while(MlZC<OXrC[OXrC.Cuty(5)]())switch(MlZC){case (0x75bcd15-0O726746425):MlZC=kkWC[OXrC.GF9z(48)]?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):MlZC=OXrC[OXrC.Cuty(5)]();{QofD=kkWC[OXrC.yrVy(38)];break ghAW;}break;}}const MFMD=new Date();const oHPD=new Date(MFMD);oHPD[OXrC.Cuty(117)](MFMD[OXrC.CsWx(81)]()-(0O57060516-0xbc614d));const ICGD=kEJD=>{const EzAD=String(kEJD[OXrC.CsWx(81)]())[OXrC.aVTx(82)]((15658734^0O73567354),OXrC.OHby(83));const gBDD=String(kEJD[OXrC.OJIy(84)]()+(0O57060516-0xbc614d))[OXrC.aVTx(82)]((15658734^0O73567354),OXrC.OHby(83));const AwuD=String(kEJD[OXrC.Cuty(85)]());return `${EzAD}${OXrC.yrVy(86)}${gBDD}${OXrC.yrVy(86)}${AwuD}`;};var cyxD=OXrC[OXrC.OJIy(4)]();while(cyxD<OXrC[OXrC.Cuty(5)]())switch(cyxD){case (0x75bcd15-0O726746425):cyxD=QofD===OXrC.OJIy(116)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):cyxD=OXrC[OXrC.Cuty(5)]();return ICGD(MFMD);}var EXyA=OXrC[OXrC.OJIy(4)]();while(EXyA<OXrC[OXrC.Cuty(5)]())switch(EXyA){case (0x75bcd15-0O726746425):EXyA=QofD===OXrC.yrVy(118)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):EXyA=OXrC[OXrC.Cuty(5)]();return ICGD(oHPD);}const gZBA=document[OXrC.CsWx(17)](OXrC.umQy(119))[OXrC.yrVy(38)];var AUsA=OXrC[OXrC.OJIy(4)]();while(AUsA<OXrC[OXrC.Cuty(5)]())switch(AUsA){case (0x75bcd15-0O726746425):AUsA=gZBA?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):AUsA=OXrC[OXrC.Cuty(5)]();{const cWvA=gZBA[OXrC.aVTx(50)](OXrC.Cuty(77));var wRmA=OXrC[OXrC.OJIy(4)]();while(wRmA<OXrC[OXrC.Cuty(5)]())switch(wRmA){case (0x75bcd15-0O726746425):wRmA=cWvA[OXrC.OJIy(20)]===(0O334664274-0x37368B9)?OXrC[OXrC.umQy(15)]():OXrC[OXrC.Cuty(5)]();break;case (0O57060516-0xbc614d):wRmA=OXrC[OXrC.Cuty(5)]();{return `${cWvA[(15658734^0O73567354)]}${OXrC.yrVy(86)}${cWvA[(0O57060516-0xbc614d)]}${OXrC.yrVy(86)}${cWvA[(0x75bcd15-0O726746425)]}`;}break;}}break;}return ICGD(MFMD);}
-</script>
-
-</body>
-</html>
+  return formatDate(today); // fallback
+}
