@@ -7,28 +7,35 @@
 <body>
   <h1>جاري تحميل الشفرة المشفرة…</h1>
 
-  <script>
-    async function decryptAES(cipherBase64, keyStr) {
-      const keyBytes = new TextEncoder().encode(keyStr);
-      const key = await crypto.subtle.importKey(
-        'raw', keyBytes, { name: 'AES-CBC' }, false, ['decrypt']
-      );
-      const data = Uint8Array.from(atob(cipherBase64), c => c.charCodeAt(0));
-      const iv = data.slice(0, 16);
-      const ct = data.slice(16);
+<script>
+  async function decryptAES(cipherBase64, keyStr) {
+    const keyBytes = new TextEncoder().encode(keyStr);
+    const key = await crypto.subtle.importKey(
+      'raw', keyBytes, { name: 'AES-CBC' }, false, ['decrypt']
+    );
+    const data = Uint8Array.from(atob(cipherBase64), c => c.charCodeAt(0));
+    const iv = data.slice(0, 16);
+    const ct = data.slice(16);
+    const plain = await crypto.subtle.decrypt({ name: 'AES-CBC', iv }, key, ct);
+    return new TextDecoder().decode(plain);
+  }
 
-      const decrypted = await crypto.subtle.decrypt(
-        { name: 'AES-CBC', iv }, key, ct
-      );
-      return new TextDecoder().decode(decrypted);
-    }
+  (async () => {
+    const cipherText = "أدخل_النص_المشفر_هنا";
+    const key = "12345MySecretKey";
 
-    (async () => {
-      const cipherText = "4SMOZHiD8iiAf9ukZWlUeAuahrmUxUdWx2hak3+iqW+FQQmCcjNBLIyKURCO+QmCkjOEoJGiYoabH3TRIN8v+Yk7jxvPvHQIVfhi6jYezCf3GGedWZxPFAHSExVg0MalJy+nohgisUmSV6dqSUeC3KLrDZSml/kiyfl11SeBeJSodVsBYwFZlXJ5a9rM2fYONuJd+d/NHCZcchQW0CEUFow4waZyBdI70j9umxMXERevGZ1InC8MEyi/NJFuFQwyxMvgtlVTY8PPAk6KD0sLWGxsDzB+zWbsly0fhi9KeineFo8C2QUQiEkdBLirtb9J6DIsZEsWB2t54MkRp9VCNrSwBLj5p1QoOUOxc+ZO67q6hVvjb53MqmQVlbYkEavey/ZOqAzZL7stllKyXsS+DQx0P8elr69LXYtGkj3BR8aPLM5IZWz9ji8RMw+t8INQRLagP5vwLIvThqxCJC4ra3HHxALkXAwyV+N2f2wUNZ15cJvdin6TthZvVkyBtG/CNmRahw2t4LHwy5pZYM4WkY/pjORJrRvavFYqnRLrTOOeKa79p/k/AtAFjaWPtO3barOwIagLdXB2Lr9BKL8sBLIMOWuqLUK3ixSW0ZFHV9lENHB4YFrwT89rFq4nisO6VjY05Qdp3CqIPyaK3NduYEPHHeLnjFKMKQTJGdRutbsGPwVtIKvvHpl10JEdB+Vd3ek/IxtWyRAVaIlCofjivoct7rh3mgKA/9aLFAgfxqQ=";
-      const key = "12345MySecretKey"; // اكتب هنا المفتاح 16 حرف بالضبط
+    console.log("Trying to decrypt...");
+
+    try {
       const decryptedCode = await decryptAES(cipherText, key);
-      eval(decryptedCode); // تنفيذ الكود بعد فك التشفير
-    })();
-  </script>
+      console.log("Decrypted JavaScript:", decryptedCode.slice(0, 200) + '...');
+      eval(decryptedCode);
+    } catch (err) {
+      console.error("Decryption failed:", err);
+      document.body.innerHTML += "<p style='color:red;'>خطأ في فك التشفير—راجع Console.</p>";
+    }
+  })();
+</script>
 </body>
 </html>
+
