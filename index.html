@@ -205,6 +205,24 @@
 
 
 <script>
+
+  // تعطيل الزر الأيمن
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+});
+
+// تعطيل بعض اختصارات لوحة المفاتيح
+document.addEventListener("keydown", function(e) {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.key.toLowerCase() === "u") ||    // Ctrl+U
+    (e.ctrlKey && e.key.toLowerCase() === "s") ||    // Ctrl+S
+    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) // Ctrl+Shift+I/J
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
   let originalMergedContent = "";
 
   // دمج ملفات TXT
@@ -598,25 +616,10 @@ function getSelectedDate() {
 
   return formatDate(today); // fallback
 }
-// تعطيل الزر الأيمن
-document.addEventListener("contextmenu", function(e) {
-  e.preventDefault();
-});
 
-// تعطيل بعض اختصارات لوحة المفاتيح
-document.addEventListener("keydown", function(e) {
-  if (
-    e.key === "F12" ||
-    (e.ctrlKey && e.key.toLowerCase() === "u") ||    // Ctrl+U
-    (e.ctrlKey && e.key.toLowerCase() === "s") ||    // Ctrl+S
-    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) // Ctrl+Shift+I/J
-  ) {
-    e.preventDefault();
-    return false;
-  }
-});
 </script>
 
 </body>
 </html>
+
 
