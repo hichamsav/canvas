@@ -557,7 +557,7 @@ const todayStr = getSelectedDate();
     textToCopy += rowData.join('\t') + '\n';
   }
 
-  navigator.clipboard.writeText(textToCopy).then(() => {
+  navigator.clipboard.writeText(textToCopy).catch(() => {
     alert('تم نسخ محتويات ملف Excel! يمكنك الآن لصقها في ملف Excel على SharePoint.');
   }).catch(() => {
     alert('حدث خطأ أثناء النسخ. حاول مجددًا.');
@@ -574,10 +574,8 @@ function copyAllFields() {
   }
 
   // استخدام Clipboard API
-  navigator.clipboard.writeText(combinedText).then(() => {
-    alert('✅ تم نسخ جميع الخانات بنجاح!');
+  navigator.clipboard.writeText(combinedText).catch(() => {
   }).catch(() => {
-    alert('❌ حدث خطأ أثناء النسخ، يرجى المحاولة مجددًا.');
   });
 }
 function getSelectedDate() {
