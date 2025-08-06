@@ -100,7 +100,7 @@
   <!-- القسم الأول - رفع ودمج ملفات TXT -->
   <div class="container" style="max-width: 45%;">
 <h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
-    <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt" />
+<input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt,.html" />
     <button onclick="mergeFolderTxt()">دمج الملفات</button>
 
     <!-- النص بعد الدمج مخفي -->
@@ -484,13 +484,12 @@ wsData[row] = [
   removeLeadingZero(fieldsData[1][row] || ""),  // A
   removeLeadingZero(fieldsData[4][row] || ""),  // B
   todayStr,                                     // C
-  todayStr,                                     // D
-  removeLeadingZero(fieldsData[5][row] || ""),  // E
-  removeLeadingZero(fieldsData[6][row] || ""),  // F
-  todayStr,                                     // G
-  getFirstWord(fieldsData[6][row] || ""),       // ✅ H = أول كلمة أو CASABLANCA
-  removeLeadingZero(fieldsData[3][row] || ""),  // I
-  removeLeadingZero(fieldsData[2][row] || "")   // J
+  removeLeadingZero(fieldsData[5][row] || ""),  // D
+  removeLeadingZero(fieldsData[6][row] || ""),  // E
+  todayStr,                                     // F
+  getFirstWord(fieldsData[6][row] || ""),       // G 
+  removeLeadingZero(fieldsData[3][row] || ""),  // H
+  removeLeadingZero(fieldsData[2][row] || "")   // I
 ];
 
 
