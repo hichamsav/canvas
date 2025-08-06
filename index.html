@@ -544,13 +544,12 @@ const todayStr = getSelectedDate();
       removeLeadingZero(fieldsData[1][row] || ""),  // A
       removeLeadingZero(fieldsData[4][row] || ""),  // B
       todayStr,                                     // C
-      todayStr,                                     // D
-      removeLeadingZero(fieldsData[5][row] || ""),  // E
-      removeLeadingZero(fieldsData[6][row] || ""),  // F
-      todayStr,                                     // G
-      getFirstWord(fieldsData[6][row] || ""),       // H
-      removeLeadingZero(fieldsData[3][row] || ""),  // I
-      removeLeadingZero(fieldsData[2][row] || "")   // J
+      removeLeadingZero(fieldsData[5][row] || ""),  // D
+      removeLeadingZero(fieldsData[6][row] || ""),  // E
+      todayStr,                                     // F
+      getFirstWord(fieldsData[6][row] || ""),       // G
+      removeLeadingZero(fieldsData[3][row] || ""),  // H
+      removeLeadingZero(fieldsData[2][row] || "")   // I
     ];
     textToCopy += rowData.join('\t') + '\n';
   }
