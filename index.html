@@ -540,15 +540,16 @@ const todayStr = getSelectedDate();
   let textToCopy = "";
   for (let row = 0; row < maxRows; row++) {
     const rowData = [
-      removeLeadingZero(fieldsData[1][row] || ""),  // A
-      removeLeadingZero(fieldsData[4][row] || ""),  // B
-      todayStr,                                     // C
-      removeLeadingZero(fieldsData[5][row] || ""),  // D
-      removeLeadingZero(fieldsData[6][row] || ""),  // E
-      todayStr,                                     // F
-      getFirstWord(fieldsData[6][row] || ""),       // G
-      removeLeadingZero(fieldsData[3][row] || ""),  // H
-      removeLeadingZero(fieldsData[2][row] || "")   // I
+  removeLeadingZero(fieldsData[1][row] || ""),  // A
+  removeLeadingZero(fieldsData[4][row] || ""),  // B
+  todayStr,                                     // C
+  todayStr,                                     // D
+  removeLeadingZero(fieldsData[5][row] || ""),  // E
+  removeLeadingZero(fieldsData[6][row] || ""),  // F
+  todayStr,                                     // G
+  getFirstWord(fieldsData[6][row] || ""),       // ✅ H = أول كلمة أو CASABLANCA
+  removeLeadingZero(fieldsData[3][row] || ""),  // I
+  removeLeadingZero(fieldsData[2][row] || "")   // J
     ];
     textToCopy += rowData.join('\t') + '\n';
   }
@@ -615,3 +616,4 @@ function getSelectedDate() {
 
 </body>
 </html>
+
