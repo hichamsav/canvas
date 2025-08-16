@@ -212,8 +212,12 @@
                 let buffer = [];
                 let skip = false;
                 for (const line of lines) {
-                    if (line.includes("sans case+SANS CASE+sans ca+SANS CA")) { buffer = []; skip = true; continue; }
-                    if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
+const keywords = ["sans case", "SANS CASE", "SANS CA", "sans ca"];
+if (keywords.some(word => line.includes(word))) {
+    buffer = [];
+    skip = true;
+    continue;
+}                    if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
                     buffer.push(line);
                     if (keywords.some(k => line.startsWith(k))) {
                         extracted.push(...buffer);
@@ -435,4 +439,5 @@
         </script>
 </body>
 </html>
+
 
