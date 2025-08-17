@@ -174,6 +174,12 @@
 <div id="progressContainer" style="width: 100%; height: 8px; background-color: #e0e0e0; position: fixed; bottom: 0; right: 0; left: 0; display: none; z-index: 9999;">
     <div id="progressBar" style="height: 100%; width: 0%; background-color: #007bff; transition: width 0.1s ease;"></div>
 </div>
+     
+<textarea id="inputText" rows="10" cols="50" placeholder="الصق النص هنا"></textarea>
+<br>
+<button id="processBtn">مسح التكرار</button>
+<br>
+<textarea id="outputText" rows="10" cols="50" placeholder="النتيجة تظهر هنا"></textarea>
 
         <script>
             document.addEventListener("contextmenu", e => e.preventDefault());
@@ -558,11 +564,26 @@ function generateExcelText() {
                     .catch(() => { }); // تجاهل أي أخطاء بدون إظهار رسائل
             }
 
+  const inputText = document.getElementById('inputText');
+  const outputText = document.getElementById('outputText');
+  const processBtn = document.getElementById('processBtn');
 
+  // إنشاء الـ Worker
+  const worker = new Worker('worker.js');
 
+  worker.onmessage = function(e) {
+    outputText.value = e.data;
+  };
+
+  processBtn.onclick = function() {
+    const text = inputText.value;
+    // إرسال النص للـ Worker للمعالجة في الخلفية
+    worker.postMessage(text);
+  };
         </script>
 </body>
 </html>
+
 
 
 
