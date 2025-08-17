@@ -254,7 +254,6 @@ function startsWithAny(line, keywords) {
         }
 
         value = decodeCorruptedCharacters(value);
-
         return value;
     }
 
@@ -277,43 +276,47 @@ function startsWithAny(line, keywords) {
         return phone.startsWith("0") ? phone.substring(1) : phone;
     }
 
-    function startsWithAny(line, keywords) {
-        return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
+    // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
+    function startsWithAnyStrict(line, keywords) {
+        return keywords.find(keyword => {
+            const pattern = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
+            return pattern.test(line);
+        });
     }
 
     for (let i = 0; i < text.length; i++) {
         const line = text[i].trim();
 
-        // Envoyé / Sent (الحقل 0)
-        const envoyKey = startsWithAny(line, ["Envoyé", "Envoy�", "Sent"]);
+        // الحقل 0 - Envoyé أو Sent
+        const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
         if (envoyKey) {
             current[0] = cleanValue(line, envoyKey);
         }
 
-        // ID CASE (الحقل 1)
-        else if (line.toLowerCase().startsWith("id case")) {
+        // الحقل 1 - ID CASE
+        else if (startsWithAnyStrict(line, ["ID CASE"])) {
             current[1] = cleanValue(line, "ID CASE");
         }
 
-        // Client (الحقل 2)
-        else if (startsWithAny(line, ["Client :", "Client"])) {
+        // الحقل 2 - Client
+        else if (startsWithAnyStrict(line, ["Client"])) {
             current[2] = cleanValue(line, "Client");
         }
 
-        // Téléphone (الحقل 3)
-        const telKey = startsWithAny(line, ["T�l�phone", "Téléphone"]);
+        // الحقل 3 - Téléphone
+        const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
         if (telKey) {
             current[3] = normalizePhone(cleanValue(line, telKey));
         }
 
-        // Accès réseau (الحقل 4)
-        const reseauKey = startsWithAny(line, ["Acc�s r�seau", "Accès réseau"]);
+        // الحقل 4 - Accès réseau
+        const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
         if (reseauKey) {
             current[4] = normalizePhone(cleanValue(line, reseauKey));
         }
 
-        // Activités de service (الحقل 5)
-        const activitesKey = startsWithAny(line, ["Activit�s de service", "Activités de service"]);
+        // الحقل 5 - Activités de service
+        const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
         if (activitesKey) {
             let rawValue = cleanValue(line, activitesKey);
             let parts = rawValue.split("|");
@@ -322,24 +325,25 @@ function startsWithAny(line, keywords) {
             current[5] = lastPart;
         }
 
-        // Adresse Installation (الحقل 6) ← يعتبر نهاية السجل
-        else if (startsWithAny(line, ["Adresse Installation"])) {
+        // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
+        else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
             current[6] = cleanValue(line, "Adresse Installation");
 
-            // بعد اكتمال كل البيانات، نضيفها للحقول
+            // نسجّل السطر الحالي في الأعمدة السبعة
             for (let j = 0; j <= 6; j++) {
                 fields[j].push(current[j] || "");
             }
-            current = {};
+            current = {}; // إعادة تعيين السجل
         }
     }
 
-    // عرض النتائج
+    // عرض النتائج في الواجهة
     for (let i = 0; i <= 6; i++) {
         document.getElementById("field" + i).value = fields[i].join("\n");
         document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
+
 
 
 
@@ -468,6 +472,7 @@ function startsWithAny(line, keywords) {
         </script>
 </body>
 </html>
+
 
 
 
