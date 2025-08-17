@@ -373,6 +373,39 @@ function removeDuplicatesAndAutoCopy() {
     }, 2000);
 }
 
+function generateExcelText() {
+    const fieldsData = [], numFields = 7;
+    for (let i = 0; i < numFields; i++) {
+        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+    }
+    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+    let text = "";
+
+    for (let r = 0; r < maxRows; r++) {
+        const rawDate = fieldsData[0][r] || "";
+        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+
+        const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
+
+        const rowData = [
+            fieldsData[1][r] || "",  // A: ID CASE
+            fieldsData[4][r] || "",  // B: Accès réseau
+            parsedDate || "",        // C
+            parsedDate || "",        // D
+            fieldsData[5][r] || "",  // E
+            fieldsData[6][r] || "",  // F
+            parsedDate || "",        // G
+            firstWord,               // H
+            fieldsData[3][r] || "",  // I
+            fieldsData[2][r] || "",  // J
+            "", "", parsedDate || "" // K, L, N
+        ];
+
+        text += rowData.join("\t") + "\n";
+    }
+
+    return text;
+}
 
 
 
@@ -502,6 +535,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
