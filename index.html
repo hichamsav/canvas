@@ -284,7 +284,7 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
 
                     else if (line.startsWith("ID CASE")) current[1] = cleanValue(line, "ID CASE");
                     else if (line.startsWith("Client :")) current[2] = cleanValue(line, "Client :");
-                    else if (line.startsWith("T�l�phone")) current[3] = normalizePhone(cleanValue(line, "T�l�phone"));
+                    else if (line.startsWith("T�l�phone","Téléphone")) current[3] = normalizePhone(cleanValue(line, "T�l�phone","Téléphone"));
                     else if (line.startsWith("Acc�s r�seau")) current[4] = normalizePhone(cleanValue(line, "Acc�s r�seau"));
                     else if (line.startsWith("Activit�s de service")) {
                         let rawValue = cleanValue(line, "Activit�s de service");
@@ -440,6 +440,7 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
         </script>
 </body>
 </html>
+
 
 
 
