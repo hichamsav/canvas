@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8" />
@@ -103,7 +103,7 @@
                 display: none;
             }
     </style>
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -168,7 +168,7 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-<button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 مسح التكرار + 📋 نسخ بعد 2 ثوان</button>
+            <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
             <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
         </div>
 
@@ -212,12 +212,12 @@
                 let buffer = [];
                 let skip = false;
                 for (const line of lines) {
-const skipKeywords = ["sans", "SANS"];
-if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
-    buffer = [];
-    skip = true;
-    continue;
-}
+                    const skipKeywords = ["sans", "SANS"];
+                    if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
+                        buffer = [];
+                        skip = true;
+                        continue;
+                    }
                     if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
                     buffer.push(line);
                     if (keywords.some(k => line.startsWith(k))) {
@@ -235,177 +235,177 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
                 const parts = line.split(":");
                 return parts.length > 1 ? parts.slice(1).join(":").trim() : line.trim();
             }
-            
-function startsWithAny(line, keywords) {
-    return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
-}
-            function filterAndDistribute() {
-    const text = document.getElementById('singleKeywordOutput').value.split("\n");
-    const fields = [[], [], [], [], [], [], []];
-    let current = {};
 
-function cleanValue(line, keyword) {
-    let value = "";
-
-    if (line.includes(":")) {
-        value = line.split(":").slice(1).join(":").trim();
-    } else {
-        value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
-    }
-
-    value = decodeCorruptedCharacters(value);
-    return value;
-}
-
-
-    function decodeCorruptedCharacters(text) {
-        return text
-            .replace(/�/g, "é")
-            .replace(/Ã©/g, "é")
-            .replace(/Ã¨/g, "è")
-            .replace(/Ã/g, "à")
-            .replace(/Ã´/g, "ô")
-            .replace(/Ãª/g, "ê")
-            .replace(/Ã¢/g, "â")
-            .replace(/Ã¼/g, "ü")
-            .replace(/Ã§/g, "ç")
-            .replace(/Â/g, "")
-            .replace(/[^\x00-\x7F]/g, c => c);
-    }
-
-    function normalizePhone(phone) {
-        return phone.startsWith("0") ? phone.substring(1) : phone;
-    }
-
-    // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
-function startsWithAnyStrict(line, keywords) {
-    line = line.trimStart(); // إزالة الفراغات من بداية السطر
-    for (let keyword of keywords) {
-        const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
-        if (regex.test(line)) return keyword;
-    }
-    return null;
-}
-
-
-    for (let i = 0; i < text.length; i++) {
-        const line = text[i].trim();
-
-        // الحقل 0 - Envoyé أو Sent
-        const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
-        if (envoyKey) {
-            current[0] = cleanValue(line, envoyKey);
-        }
-
-        // الحقل 1 - ID CASE
-        else if (startsWithAnyStrict(line, ["ID CASE"])) {
-            current[1] = cleanValue(line, "ID CASE");
-        }
-
-        // الحقل 2 - Client
-        else if (startsWithAnyStrict(line, ["Client"])) {
-            current[2] = cleanValue(line, "Client");
-        }
-
-        // الحقل 3 - Téléphone
-        const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
-        if (telKey) {
-            current[3] = normalizePhone(cleanValue(line, telKey));
-        }
-
-        // الحقل 4 - Accès réseau
-        const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
-        if (reseauKey) {
-            current[4] = normalizePhone(cleanValue(line, reseauKey));
-        }
-
-        // الحقل 5 - Activités de service
-        const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
-        if (activitesKey) {
-            let rawValue = cleanValue(line, activitesKey);
-            let parts = rawValue.split("|");
-            let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-            lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-            current[5] = lastPart;
-        }
-
-        // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
-        else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
-            current[6] = cleanValue(line, "Adresse Installation");
-
-            // نسجّل السطر الحالي في الأعمدة السبعة
-            for (let j = 0; j <= 6; j++) {
-                fields[j].push(current[j] || "");
+            function startsWithAny(line, keywords) {
+                return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
             }
-            current = {}; // إعادة تعيين السجل
-        }
-    }
+            function filterAndDistribute() {
+                const text = document.getElementById('singleKeywordOutput').value.split("\n");
+                const fields = [[], [], [], [], [], [], []];
+                let current = {};
 
-    // عرض النتائج في الواجهة
-    for (let i = 0; i <= 6; i++) {
-        document.getElementById("field" + i).value = fields[i].join("\n");
-        document.getElementById("count" + i).textContent = fields[i].length + " سطر";
-    }
-}
+                function cleanValue(line, keyword) {
+                    let value = "";
 
-function removeDuplicatesAndAutoCopy() {
-    removeDuplicatesBasedOnField1();
+                    if (line.includes(":")) {
+                        value = line.split(":").slice(1).join(":").trim();
+                    } else {
+                        value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
+                    }
 
-    // إنشاء زر مخفي مؤقتاً لتنفيذ النسخ بعد 2 ثانية
-    setTimeout(() => {
-        // إنشاء عنصر textarea مؤقت
-        const tempTextarea = document.createElement("textarea");
-        tempTextarea.style.position = "fixed";
-        tempTextarea.style.opacity = "0";
-        tempTextarea.value = generateExcelText(); // ننسخ نفس النص الذي يستخدم في copyExcelData()
-        document.body.appendChild(tempTextarea);
-        tempTextarea.select();
+                    value = decodeCorruptedCharacters(value);
+                    return value;
+                }
 
-        try {
-            const successful = document.execCommand('copy');
-            // النسخ تم بنجاح أو فشل
-            console.log(successful ? "تم النسخ بنجاح" : "فشل النسخ");
-        } catch (err) {
-            console.error("خطأ في النسخ:", err);
-        }
 
-        document.body.removeChild(tempTextarea);
-    }, 2000);
-}
+                function decodeCorruptedCharacters(text) {
+                    return text
+                        .replace(/�/g, "é")
+                        .replace(/Ã©/g, "é")
+                        .replace(/Ã¨/g, "è")
+                        .replace(/Ã/g, "à")
+                        .replace(/Ã´/g, "ô")
+                        .replace(/Ãª/g, "ê")
+                        .replace(/Ã¢/g, "â")
+                        .replace(/Ã¼/g, "ü")
+                        .replace(/Ã§/g, "ç")
+                        .replace(/Â/g, "")
+                        .replace(/[^\x00-\x7F]/g, c => c);
+                }
 
-function generateExcelText() {
-    const fieldsData = [], numFields = 7;
-    for (let i = 0; i < numFields; i++) {
-        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-    }
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    let text = "";
+                function normalizePhone(phone) {
+                    return phone.startsWith("0") ? phone.substring(1) : phone;
+                }
 
-    for (let r = 0; r < maxRows; r++) {
-        const rawDate = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+                // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
+                function startsWithAnyStrict(line, keywords) {
+                    line = line.trimStart(); // إزالة الفراغات من بداية السطر
+                    for (let keyword of keywords) {
+                        const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
+                        if (regex.test(line)) return keyword;
+                    }
+                    return null;
+                }
 
-        const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
 
-        const rowData = [
-            fieldsData[1][r] || "",  // A: ID CASE
-            fieldsData[4][r] || "",  // B: Accès réseau
-            parsedDate || "",        // C
-            parsedDate || "",        // D
-            fieldsData[5][r] || "",  // E
-            fieldsData[6][r] || "",  // F
-            parsedDate || "",        // G
-            firstWord,               // H
-            fieldsData[3][r] || "",  // I
-            fieldsData[2][r] || "",  // J
-            "", "", parsedDate || "" // K, L, N
-        ];
+                for (let i = 0; i < text.length; i++) {
+                    const line = text[i].trim();
 
-        text += rowData.join("\t") + "\n";
-    }
+                    // الحقل 0 - Envoyé أو Sent
+                    const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
+                    if (envoyKey) {
+                        current[0] = cleanValue(line, envoyKey);
+                    }
 
-    return text;
-}
+                    // الحقل 1 - ID CASE
+                    else if (startsWithAnyStrict(line, ["ID CASE"])) {
+                        current[1] = cleanValue(line, "ID CASE");
+                    }
+
+                    // الحقل 2 - Client
+                    else if (startsWithAnyStrict(line, ["Client"])) {
+                        current[2] = cleanValue(line, "Client");
+                    }
+
+                    // الحقل 3 - Téléphone
+                    const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
+                    if (telKey) {
+                        current[3] = normalizePhone(cleanValue(line, telKey));
+                    }
+
+                    // الحقل 4 - Accès réseau
+                    const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
+                    if (reseauKey) {
+                        current[4] = normalizePhone(cleanValue(line, reseauKey));
+                    }
+
+                    // الحقل 5 - Activités de service
+                    const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
+                    if (activitesKey) {
+                        let rawValue = cleanValue(line, activitesKey);
+                        let parts = rawValue.split("|");
+                        let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+                        lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+                        current[5] = lastPart;
+                    }
+
+                    // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
+                    else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
+                        current[6] = cleanValue(line, "Adresse Installation");
+
+                        // نسجّل السطر الحالي في الأعمدة السبعة
+                        for (let j = 0; j <= 6; j++) {
+                            fields[j].push(current[j] || "");
+                        }
+                        current = {}; // إعادة تعيين السجل
+                    }
+                }
+
+                // عرض النتائج في الواجهة
+                for (let i = 0; i <= 6; i++) {
+                    document.getElementById("field" + i).value = fields[i].join("\n");
+                    document.getElementById("count" + i).textContent = fields[i].length + " سطر";
+                }
+            }
+
+            function removeDuplicatesAndAutoCopy() {
+                removeDuplicatesBasedOnField1();
+
+                // إنشاء زر مخفي مؤقتاً لتنفيذ النسخ بعد 2 ثانية
+                setTimeout(() => {
+                    // إنشاء عنصر textarea مؤقت
+                    const tempTextarea = document.createElement("textarea");
+                    tempTextarea.style.position = "fixed";
+                    tempTextarea.style.opacity = "0";
+                    tempTextarea.value = generateExcelText(); // ننسخ نفس النص الذي يستخدم في copyExcelData()
+                    document.body.appendChild(tempTextarea);
+                    tempTextarea.select();
+
+                    try {
+                        const successful = document.execCommand('copy');
+                        // النسخ تم بنجاح أو فشل
+                        console.log(successful ? "تم النسخ بنجاح" : "فشل النسخ");
+                    } catch (err) {
+                        console.error("خطأ في النسخ:", err);
+                    }
+
+                    document.body.removeChild(tempTextarea);
+                }, 2000);
+            }
+
+            function generateExcelText() {
+                const fieldsData = [], numFields = 7;
+                for (let i = 0; i < numFields; i++) {
+                    fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+                }
+                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+                let text = "";
+
+                for (let r = 0; r < maxRows; r++) {
+                    const rawDate = fieldsData[0][r] || "";
+                    const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+
+                    const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
+
+                    const rowData = [
+                        fieldsData[1][r] || "",  // A: ID CASE
+                        fieldsData[4][r] || "",  // B: Accès réseau
+                        parsedDate || "",        // C
+                        parsedDate || "",        // D
+                        fieldsData[5][r] || "",  // E
+                        fieldsData[6][r] || "",  // F
+                        parsedDate || "",        // G
+                        firstWord,               // H
+                        fieldsData[3][r] || "",  // I
+                        fieldsData[2][r] || "",  // J
+                        "", "", parsedDate || "" // K, L, N
+                    ];
+
+                    text += rowData.join("\t") + "\n";
+                }
+
+                return text;
+            }
 
 
 
@@ -434,7 +434,7 @@ function generateExcelText() {
             function parseFrenchDateToDDMMYYYY(str) {
                 const months = {
                     janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
-                    juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
+                    juin: "06", juillet: "07", aoét: "08", aout: "08", septembre: "09",
                     octobre: "10", novembre: "11", décembre: "12", decembre: "12"
                 };
 
@@ -535,4 +535,3 @@ function generateExcelText() {
         </script>
 </body>
 </html>
-
