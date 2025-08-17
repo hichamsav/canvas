@@ -5,18 +5,17 @@
     <title>EXTRACTION CANVAS</title>
     <style>
         body {
-            direction: rtl;
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 10px;
-            padding-top: 150px; /* ✅ هذه هي المساحة من الأعلى */
-            display: flex;
-            gap: 10px;
-            height: 100vh;
-            font-size: 13px;
-            overflow: hidden; /* يمنع التمرير */
-            box-sizing: border-box;
-        }
+    direction: rtl;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    font-size: 13px;
+    box-sizing: border-box;
+
+    display: block; /* أو احذف display:flex */
+    overflow-y: auto; /* يسمح بالتمرير العمودي */
+}
+
 
         .container {
             flex: 1;
@@ -109,7 +108,7 @@
 <body>
 
     <div class="container" style="max-width: 45%;">
-        <h1 style="text-align: center; margin: auto; padding: 40px 0;">📁 EXTRACTION CANVAS 📁</h1>
+<h1 style="text-align: center; margin-top: 40px;">📁 EXTRACTION CANVAS 📁</h1>
         <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt,.html" />
         <button onclick="mergeFolderTxt()">دمج الملفات</button>
 
@@ -536,6 +535,7 @@
         </script>
 </body>
 </html>
+
 
 
 
