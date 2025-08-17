@@ -207,29 +207,55 @@
             }
 
 
-            function extractSingleKeyword() {
-                const keywordText = document.getElementById("singleKeywordInput").value.trim();
-                const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
-                if (!keywordText) { alert("يرجى كتابة كلمة أو أكثر مفصولة بفاصلة للاستخراج."); return; }
-                const keywords = keywordText.split(",").map(k => k.trim()).filter(k => k.length > 0);
-                const lines = document.getElementById("filteredOutput").value.split("\n");
-                const extracted = [];
-                let buffer = [];
-                let skip = false;
-                for (const line of lines) {
-const skipKeywords = ["sans", "SANS"];
-if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
-    buffer = [];
-    skip = true;
-    continue;
+   <script>
+function extractSingleKeyword() {
+    const keywordText = document.getElementById("singleKeywordInput").value.trim();
+    const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
+    if (!keywordText) {
+        alert("يرجى كتابة كلمة أو أكثر مفصولة بفاصلة للاستخراج.");
+        return;
+    }
+
+    const keywords = keywordText.split(",").map(k => k.trim()).filter(k => k.length > 0);
+    const lines = document.getElementById("filteredOutput").value.split("\n");
+    const extracted = [];
+    const chunkSize = 50; // ✅ كل دفعة تعالج 50 سطر
+    let i = 0;
+    let buffer = [];
+    let skip = false;
+
+    function processChunk() {
+        const end = Math.min(i + chunkSize, lines.length);
+        for (; i < end; i++) {
+            const line = lines[i];
+            const skipKeywords = ["sans", "SANS"];
+            if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
+                buffer = [];
+                skip = true;
+                continue;
+            }
+            if (skip && line.includes("Adresse Installation")) {
+                skip = false;
+                continue;
+            }
+
+            buffer.push(line);
+            if (keywords.some(k => line.startsWith(k))) {
+                extracted.push(...buffer);
+                buffer = [];
+            }
+        }
+
+        if (i < lines.length) {
+            setTimeout(processChunk, 10); // ⏱️ أعطِ المتصفح وقتًا بسيطًا بين كل دفعة
+        } else {
+            document.getElementById("singleKeywordOutput").value = extracted.join("\n");
+            filterAndDistribute(); // بعد انتهاء المعالجة نكمل التقسيم للحقل
+        }
+    }
+
+    processChunk(); // ⬅️ بدء التنفيذ
 }
-                    if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
-                    buffer.push(line);
-                    if (keywords.some(k => line.startsWith(k))) {
-                        extracted.push(...buffer);
-                        buffer = [];
-                    }
-                }
                 document.getElementById("singleKeywordOutput").value = extracted.join("\n");
                 filterAndDistribute();
             }
@@ -568,6 +594,7 @@ function generateExcelText() {
         </script>
 </body>
 </html>
+
 
 
 
