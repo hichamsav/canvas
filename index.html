@@ -237,81 +237,82 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
             }
 
             function filterAndDistribute() {
-                const text = document.getElementById('singleKeywordOutput').value.split("\n");
-                const fields = [[], [], [], [], [], [], []];
-                let current = {};
+    const text = document.getElementById('singleKeywordOutput').value.split("\n");
+    const fields = [[], [], [], [], [], [], []];
+    let current = {};
+    let i = 0;
 
-                function cleanValue(line, keyword) {
-                    let value = "";
+    function cleanValue(line, keyword) {
+        let value = "";
+        if (line.includes(":")) {
+            value = line.split(":").slice(1).join(":").trim();
+        } else {
+            value = line.replace(keyword, "").trim();
+        }
 
-                    if (line.includes(":")) {
-                        value = line.split(":").slice(1).join(":").trim();
-                    } else {
-                        value = line.replace(keyword, "").trim();
-                    }
+        return value
+            .replace(/�/g, "é")
+            .replace(/Ã©/g, "é")
+            .replace(/Ã¨/g, "è")
+            .replace(/Ã/g, "à")
+            .replace(/Ã´/g, "ô")
+            .replace(/Ãª/g, "ê")
+            .replace(/Ã¢/g, "â")
+            .replace(/Ã¼/g, "ü")
+            .replace(/Ã§/g, "ç")
+            .replace(/Â/g, "")
+            .replace(/[^\x00-\x7F]/g, c => c);
+    }
 
-                    value = decodeCorruptedCharacters(value);
+    function normalizePhone(phone) {
+        return phone.startsWith("0") ? phone.substring(1) : phone;
+    }
 
-                    return value;
+    function processBatch() {
+        const chunkSize = 200; // دفعة من 200 سطر
+        let end = Math.min(i + chunkSize, text.length);
+
+        for (; i < end; i++) {
+            const line = text[i].trim();
+
+            if (/^(Envoy�|Sent)\b/.test(line)) {
+                current[0] = cleanValue(line, line.split(":")[0]);
+            } else if (line.startsWith("ID CASE")) {
+                current[1] = cleanValue(line, "ID CASE");
+            } else if (line.startsWith("Client :")) {
+                current[2] = cleanValue(line, "Client :");
+            } else if (line.startsWith("T�l�phone")) {
+                current[3] = normalizePhone(cleanValue(line, "T�l�phone"));
+            } else if (line.startsWith("Acc�s r�seau")) {
+                current[4] = normalizePhone(cleanValue(line, "Acc�s r�seau"));
+            } else if (line.startsWith("Activit�s de service")) {
+                let rawValue = cleanValue(line, "Activit�s de service");
+                let parts = rawValue.split("|");
+                let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+                lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+                current[5] = lastPart;
+            } else if (line.startsWith("Adresse Installation")) {
+                current[6] = cleanValue(line, "Adresse Installation");
+                for (let j = 0; j <= 6; j++) {
+                    fields[j].push(current[j] || "");
                 }
-
-                function decodeCorruptedCharacters(text) {
-                    return text
-                        .replace(/�/g, "é")
-                        .replace(/Ã©/g, "é")
-                        .replace(/Ã¨/g, "è")
-                        .replace(/Ã/g, "à")
-                        .replace(/Ã´/g, "ô")
-                        .replace(/Ãª/g, "ê")
-                        .replace(/Ã¢/g, "â")
-                        .replace(/Ã¼/g, "ü")
-                        .replace(/Ã§/g, "ç")
-                        .replace(/Â/g, "")
-                        .replace(/[^\x00-\x7F]/g, c => c);
-                }
-
-
-                function normalizePhone(phone) {
-                    return phone.startsWith("0") ? phone.substring(1) : phone;
-                }
-
-                for (let i = 0; i < text.length; i++) {
-                    const line = text[i].trim();
-
-                    if (/^(Envoy�|Sent)\b/.test(line)) {
-                        current[0] = cleanValue(line, line.split(":")[0]);
-                    }
-
-                    else if (line.startsWith("ID CASE")) current[1] = cleanValue(line, "ID CASE");
-                    else if (line.startsWith("Client :")) current[2] = cleanValue(line, "Client :");
-                    else if (line.startsWith("T�l�phone")) current[3] = normalizePhone(cleanValue(line, "T�l�phone"));
-                    else if (line.startsWith("Acc�s r�seau")) current[4] = normalizePhone(cleanValue(line, "Acc�s r�seau"));
-                    else if (line.startsWith("Activit�s de service")) {
-                        let rawValue = cleanValue(line, "Activit�s de service");
-                        // استخراج الجزء الأخير بعد آخر "|"
-                        let parts = rawValue.split("|");
-                        let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-                        // حذف أي رموز غير حروف وأرقام ومسافات
-                        lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-                        current[5] = lastPart;
-                    }
-
-
-                    else if (line.startsWith("Adresse Installation")) {
-                        current[6] = cleanValue(line, "Adresse Installation");
-
-                        for (let j = 0; j <= 6; j++) {
-                            fields[j].push(current[j] || "");
-                        }
-                        current = {};
-                    }
-                }
-
-                for (let i = 0; i <= 6; i++) {
-                    document.getElementById("field" + i).value = fields[i].join("\n");
-                    document.getElementById("count" + i).textContent = fields[i].length + " سطر";
-                }
+                current = {};
             }
+        }
+
+        if (i < text.length) {
+            setTimeout(processBatch, 0); // استمر بالدفعة التالية
+        } else {
+            for (let j = 0; j <= 6; j++) {
+                document.getElementById("field" + j).value = fields[j].join("\n");
+                document.getElementById("count" + j).textContent = fields[j].length + " سطر";
+            }
+        }
+    }
+
+    processBatch();
+}
+
 
 
 
@@ -440,6 +441,7 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
         </script>
 </body>
 </html>
+
 
 
 
