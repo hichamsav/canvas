@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8" />
@@ -349,13 +349,27 @@ function startsWithAnyStrict(line, keywords) {
 }
 
 function removeDuplicatesAndAutoCopy() {
-    // أولاً: حذف التكرار
     removeDuplicatesBasedOnField1();
 
-    // ثانياً: انتظر ثانيتين ثم انسخ البيانات
+    // إنشاء زر مخفي مؤقتاً لتنفيذ النسخ بعد 2 ثانية
     setTimeout(() => {
-        copyExcelData();
-        alert("✅ تم نسخ البيانات بعد إزالة التكرارات.");
+        // إنشاء عنصر textarea مؤقت
+        const tempTextarea = document.createElement("textarea");
+        tempTextarea.style.position = "fixed";
+        tempTextarea.style.opacity = "0";
+        tempTextarea.value = generateExcelText(); // ننسخ نفس النص الذي يستخدم في copyExcelData()
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            // النسخ تم بنجاح أو فشل
+            console.log(successful ? "تم النسخ بنجاح" : "فشل النسخ");
+        } catch (err) {
+            console.error("خطأ في النسخ:", err);
+        }
+
+        document.body.removeChild(tempTextarea);
     }, 2000);
 }
 
@@ -488,6 +502,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
