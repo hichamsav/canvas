@@ -349,14 +349,13 @@ function startsWithAnyStrict(line, keywords) {
 }
 
 function removeDuplicatesAndAutoCopy() {
-    // أولاً: حذف التكرار
     removeDuplicatesBasedOnField1();
-
-    // ثانياً: انتظر ثانيتين ثم انسخ البيانات
     setTimeout(() => {
         copyExcelData();
+        // تم النسخ بدون رسالة تنبيه
     }, 2000);
 }
+
 
 
 
@@ -485,6 +484,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
