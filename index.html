@@ -364,9 +364,9 @@ function removeDuplicatesAndAutoCopy() {
         try {
             const successful = document.execCommand('copy');
             // النسخ تم بنجاح أو فشل
-            console.log(successful ? "تم النسخ بنجاح" : "فشل النسخ");
+            //console.log(successful ? "تم النسخ بنجاح" : "فشل النسخ");
         } catch (err) {
-            console.error("خطأ في النسخ:", err);
+            //console.error("خطأ في النسخ:", err);
         }
 
         document.body.removeChild(tempTextarea);
@@ -535,6 +535,7 @@ function generateExcelText() {
         </script>
 </body>
 </html>
+
 
 
 
