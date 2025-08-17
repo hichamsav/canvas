@@ -168,7 +168,7 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-         <button onclick="removeDuplicatesAndCopy()" style="background-color:#dc3545; color:white;">🗑️ مسح التكرار ونسخ</button>
+<button onclick="removeDuplicatesAndCopy()" style="background-color:#dc3545; color:white;">🗑️ مسح التكرار ونسخ بعد 3 ثوان</button>
             <button onclick="copyExcelData()" style="background-color:#28a745; color:white;">📋 نسخ الكل</button>
             <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
         </div>
@@ -201,12 +201,7 @@
                     reader.readAsText(f);
                 });
             }
-function removeDuplicatesAndCopy() {
-    removeDuplicatesBasedOnField1(); // حذف التكرار
-    setTimeout(() => {
-        copyExcelData(); // نسخ الكل بعد 3 ثواني
-    }, 2500);
-}
+
 
             function extractSingleKeyword() {
                 const keywordText = document.getElementById("singleKeywordInput").value.trim();
@@ -355,6 +350,16 @@ function startsWithAnyStrict(line, keywords) {
 }
 
 
+function removeDuplicatesAndCopy() {
+    // 1. نفذ حذف التكرار
+    removeDuplicatesBasedOnField1();
+
+    // 2. انتظر 3 ثوانٍ ثم انسخ
+    setTimeout(() => {
+        copyExcelData();
+        alert("✅ تم النسخ بعد إزالة التكرار");
+    }, 2000);
+}
 
 
 
@@ -482,6 +487,7 @@ function startsWithAnyStrict(line, keywords) {
         </script>
 </body>
 </html>
+
 
 
 
