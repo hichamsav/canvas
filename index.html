@@ -171,6 +171,9 @@
 <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 مسح التكرار + 📋 نسخ بعد 2 ثوان</button>
             <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
         </div>
+<div id="progressContainer" style="width: 100%; height: 8px; background-color: #e0e0e0; position: fixed; bottom: 0; right: 0; left: 0; display: none; z-index: 9999;">
+    <div id="progressBar" style="height: 100%; width: 0%; background-color: #007bff; transition: width 0.1s ease;"></div>
+</div>
 
         <script>
             document.addEventListener("contextmenu", e => e.preventDefault());
@@ -239,24 +242,29 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
 function startsWithAny(line, keywords) {
     return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
 }
-            function filterAndDistribute() {
-    const text = document.getElementById('singleKeywordOutput').value.split("\n");
+function filterAndDistribute() {
+    const lines = document.getElementById('singleKeywordOutput').value.split("\n");
     const fields = [[], [], [], [], [], [], []];
     let current = {};
 
-function cleanValue(line, keyword) {
-    let value = "";
+    const progressContainer = document.getElementById("progressContainer");
+    const progressBar = document.getElementById("progressBar");
 
-    if (line.includes(":")) {
-        value = line.split(":").slice(1).join(":").trim();
-    } else {
-        value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
+    progressContainer.style.display = "block";
+    progressBar.style.width = "0%";
+
+    function cleanValue(line, keyword) {
+        let value = "";
+
+        if (line.includes(":")) {
+            value = line.split(":").slice(1).join(":").trim();
+        } else {
+            value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
+        }
+
+        value = decodeCorruptedCharacters(value);
+        return value;
     }
-
-    value = decodeCorruptedCharacters(value);
-    return value;
-}
-
 
     function decodeCorruptedCharacters(text) {
         return text
@@ -277,76 +285,96 @@ function cleanValue(line, keyword) {
         return phone.startsWith("0") ? phone.substring(1) : phone;
     }
 
-    // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
-function startsWithAnyStrict(line, keywords) {
-    line = line.trimStart(); // إزالة الفراغات من بداية السطر
-    for (let keyword of keywords) {
-        const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
-        if (regex.test(line)) return keyword;
+    function startsWithAnyStrict(line, keywords) {
+        line = line.trimStart();
+        for (let keyword of keywords) {
+            const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
+            if (regex.test(line)) return keyword;
+        }
+        return null;
     }
-    return null;
-}
 
+    let i = 0;
+    const batchSize = 100;
+    const total = lines.length;
 
-    for (let i = 0; i < text.length; i++) {
-        const line = text[i].trim();
+    function processBatch() {
+        const end = Math.min(i + batchSize, total);
+        for (; i < end; i++) {
+            const line = lines[i].trim();
 
-        // الحقل 0 - Envoyé أو Sent
-        const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
-        if (envoyKey) {
-            current[0] = cleanValue(line, envoyKey);
-        }
-
-        // الحقل 1 - ID CASE
-        else if (startsWithAnyStrict(line, ["ID CASE"])) {
-            current[1] = cleanValue(line, "ID CASE");
-        }
-
-        // الحقل 2 - Client
-        else if (startsWithAnyStrict(line, ["Client"])) {
-            current[2] = cleanValue(line, "Client");
-        }
-
-        // الحقل 3 - Téléphone
-        const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
-        if (telKey) {
-            current[3] = normalizePhone(cleanValue(line, telKey));
-        }
-
-        // الحقل 4 - Accès réseau
-        const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
-        if (reseauKey) {
-            current[4] = normalizePhone(cleanValue(line, reseauKey));
-        }
-
-        // الحقل 5 - Activités de service
-        const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
-        if (activitesKey) {
-            let rawValue = cleanValue(line, activitesKey);
-            let parts = rawValue.split("|");
-            let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-            lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-            current[5] = lastPart;
-        }
-
-        // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
-        else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
-            current[6] = cleanValue(line, "Adresse Installation");
-
-            // نسجّل السطر الحالي في الأعمدة السبعة
-            for (let j = 0; j <= 6; j++) {
-                fields[j].push(current[j] || "");
+            const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
+            if (envoyKey) {
+                current[0] = cleanValue(line, envoyKey);
+                continue;
             }
-            current = {}; // إعادة تعيين السجل
+
+            if (startsWithAnyStrict(line, ["ID CASE"])) {
+                current[1] = cleanValue(line, "ID CASE");
+                continue;
+            }
+
+            if (startsWithAnyStrict(line, ["Client"])) {
+                current[2] = cleanValue(line, "Client");
+                continue;
+            }
+
+            const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
+            if (telKey) {
+                current[3] = normalizePhone(cleanValue(line, telKey));
+                continue;
+            }
+
+            const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
+            if (reseauKey) {
+                current[4] = normalizePhone(cleanValue(line, reseauKey));
+                continue;
+            }
+
+            const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
+            if (activitesKey) {
+                let rawValue = cleanValue(line, activitesKey);
+                let parts = rawValue.split("|");
+                let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+                lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+                current[5] = lastPart;
+                continue;
+            }
+
+            const adresseKey = startsWithAnyStrict(line, ["Adresse Installation"]);
+            if (adresseKey) {
+                current[6] = cleanValue(line, "Adresse Installation");
+
+                for (let j = 0; j <= 6; j++) {
+                    fields[j].push(current[j] || "");
+                }
+                current = {};
+            }
+        }
+
+        // ⏳ تحديث شريط التقدم
+        const progress = Math.floor((i / total) * 100);
+        progressBar.style.width = progress + "%";
+
+        if (i < total) {
+            setTimeout(processBatch, 0);
+        } else {
+            for (let j = 0; j <= 6; j++) {
+                document.getElementById("field" + j).value = fields[j].join("\n");
+                document.getElementById("count" + j).textContent = fields[j].length + " سطر";
+            }
+
+            // ✅ بعد الانتهاء، إخفاء شريط التقدم
+            setTimeout(() => {
+                progressContainer.style.display = "none";
+                progressBar.style.width = "0%";
+            }, 400);
         }
     }
 
-    // عرض النتائج في الواجهة
-    for (let i = 0; i <= 6; i++) {
-        document.getElementById("field" + i).value = fields[i].join("\n");
-        document.getElementById("count" + i).textContent = fields[i].length + " سطر";
-    }
+    processBatch();
 }
+          
 
 function removeDuplicatesAndAutoCopy() {
     removeDuplicatesBasedOnField1();
@@ -535,6 +563,7 @@ function generateExcelText() {
         </script>
 </body>
 </html>
+
 
 
 
