@@ -244,18 +244,19 @@ function startsWithAny(line, keywords) {
     const fields = [[], [], [], [], [], [], []];
     let current = {};
 
-    function cleanValue(line, keyword) {
-        let value = "";
+function cleanValue(line, keyword) {
+    let value = "";
 
-        if (line.includes(":")) {
-            value = line.split(":").slice(1).join(":").trim();
-        } else {
-            value = line.replace(keyword, "").trim();
-        }
-
-        value = decodeCorruptedCharacters(value);
-        return value;
+    if (line.includes(":")) {
+        value = line.split(":").slice(1).join(":").trim();
+    } else {
+        value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
     }
+
+    value = decodeCorruptedCharacters(value);
+    return value;
+}
+
 
     function decodeCorruptedCharacters(text) {
         return text
@@ -277,12 +278,15 @@ function startsWithAny(line, keywords) {
     }
 
     // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
-    function startsWithAnyStrict(line, keywords) {
-        return keywords.find(keyword => {
-            const pattern = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
-            return pattern.test(line);
-        });
+function startsWithAnyStrict(line, keywords) {
+    line = line.trimStart(); // إزالة الفراغات من بداية السطر
+    for (let keyword of keywords) {
+        const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
+        if (regex.test(line)) return keyword;
     }
+    return null;
+}
+
 
     for (let i = 0; i < text.length; i++) {
         const line = text[i].trim();
@@ -472,6 +476,7 @@ function startsWithAny(line, keywords) {
         </script>
 </body>
 </html>
+
 
 
 
