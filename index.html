@@ -240,85 +240,106 @@ function startsWithAny(line, keywords) {
     return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
 }
             function filterAndDistribute() {
-                const text = document.getElementById('singleKeywordOutput').value.split("\n");
-                const fields = [[], [], [], [], [], [], []];
-                let current = {};
+    const text = document.getElementById('singleKeywordOutput').value.split("\n");
+    const fields = [[], [], [], [], [], [], []];
+    let current = {};
 
-                function cleanValue(line, keyword) {
-                    let value = "";
+    function cleanValue(line, keyword) {
+        let value = "";
 
-                    if (line.includes(":")) {
-                        value = line.split(":").slice(1).join(":").trim();
-                    } else {
-                        value = line.replace(keyword, "").trim();
-                    }
+        if (line.includes(":")) {
+            value = line.split(":").slice(1).join(":").trim();
+        } else {
+            value = line.replace(keyword, "").trim();
+        }
 
-                    value = decodeCorruptedCharacters(value);
+        value = decodeCorruptedCharacters(value);
 
-                    return value;
-                }
+        return value;
+    }
 
-                function decodeCorruptedCharacters(text) {
-                    return text
-                        .replace(/�/g, "é")
-                        .replace(/Ã©/g, "é")
-                        .replace(/Ã¨/g, "è")
-                        .replace(/Ã/g, "à")
-                        .replace(/Ã´/g, "ô")
-                        .replace(/Ãª/g, "ê")
-                        .replace(/Ã¢/g, "â")
-                        .replace(/Ã¼/g, "ü")
-                        .replace(/Ã§/g, "ç")
-                        .replace(/Â/g, "")
-                        .replace(/[^\x00-\x7F]/g, c => c);
-                }
+    function decodeCorruptedCharacters(text) {
+        return text
+            .replace(/�/g, "é")
+            .replace(/Ã©/g, "é")
+            .replace(/Ã¨/g, "è")
+            .replace(/Ã/g, "à")
+            .replace(/Ã´/g, "ô")
+            .replace(/Ãª/g, "ê")
+            .replace(/Ã¢/g, "â")
+            .replace(/Ã¼/g, "ü")
+            .replace(/Ã§/g, "ç")
+            .replace(/Â/g, "")
+            .replace(/[^\x00-\x7F]/g, c => c);
+    }
 
+    function normalizePhone(phone) {
+        return phone.startsWith("0") ? phone.substring(1) : phone;
+    }
 
-                function normalizePhone(phone) {
-                    return phone.startsWith("0") ? phone.substring(1) : phone;
-                }
+    function startsWithAny(line, keywords) {
+        return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
+    }
 
-                for (let i = 0; i < text.length; i++) {
-                    const line = text[i].trim();
-                    
-                            if (/^Envoy\S*\b|^Sent\b/i.test(line)) {
-    current[0] = cleanValue(line, line.split(":")[0]);
-}
+    for (let i = 0; i < text.length; i++) {
+        const line = text[i].trim();
 
-                    else if (line.startsWith("ID CASE")) current[1] = cleanValue(line, "ID CASE");
-                    else if (line.startsWith("Client :")) current[2] = cleanValue(line, "Client :");
-const telKey = startsWithAny(line, ["T�l�phone", "Téléphone"]);
-if (telKey) current[3] = normalizePhone(cleanValue(line, telKey));
+        // Envoyé / Sent (الحقل 0)
+        const envoyKey = startsWithAny(line, ["Envoyé", "Envoy�", "Sent"]);
+        if (envoyKey) {
+            current[0] = cleanValue(line, envoyKey);
+        }
 
-const reseauKey = startsWithAny(line, ["Acc�s r�seau", "Accès réseau"]);
-if (reseauKey) current[4] = normalizePhone(cleanValue(line, reseauKey));
+        // ID CASE (الحقل 1)
+        else if (line.toLowerCase().startsWith("id case")) {
+            current[1] = cleanValue(line, "ID CASE");
+        }
 
-const activitesKey = startsWithAny(line, ["Activit�s de service", "Activités de service"]);
-if (activitesKey) {
-    let rawValue = cleanValue(line, activitesKey);
-    let parts = rawValue.split("|");
-    let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-    lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-    current[5] = lastPart;
-}
+        // Client (الحقل 2)
+        else if (startsWithAny(line, ["Client :", "Client"])) {
+            current[2] = cleanValue(line, "Client");
+        }
 
+        // Téléphone (الحقل 3)
+        const telKey = startsWithAny(line, ["T�l�phone", "Téléphone"]);
+        if (telKey) {
+            current[3] = normalizePhone(cleanValue(line, telKey));
+        }
 
+        // Accès réseau (الحقل 4)
+        const reseauKey = startsWithAny(line, ["Acc�s r�seau", "Accès réseau"]);
+        if (reseauKey) {
+            current[4] = normalizePhone(cleanValue(line, reseauKey));
+        }
 
-                    else if (line.startsWith("Adresse Installation")) {
-                        current[6] = cleanValue(line, "Adresse Installation");
+        // Activités de service (الحقل 5)
+        const activitesKey = startsWithAny(line, ["Activit�s de service", "Activités de service"]);
+        if (activitesKey) {
+            let rawValue = cleanValue(line, activitesKey);
+            let parts = rawValue.split("|");
+            let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+            lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+            current[5] = lastPart;
+        }
 
-                        for (let j = 0; j <= 6; j++) {
-                            fields[j].push(current[j] || "");
-                        }
-                        current = {};
-                    }
-                }
+        // Adresse Installation (الحقل 6) ← يعتبر نهاية السجل
+        else if (startsWithAny(line, ["Adresse Installation"])) {
+            current[6] = cleanValue(line, "Adresse Installation");
 
-                for (let i = 0; i <= 6; i++) {
-                    document.getElementById("field" + i).value = fields[i].join("\n");
-                    document.getElementById("count" + i).textContent = fields[i].length + " سطر";
-                }
+            // بعد اكتمال كل البيانات، نضيفها للحقول
+            for (let j = 0; j <= 6; j++) {
+                fields[j].push(current[j] || "");
             }
+            current = {};
+        }
+    }
+
+    // عرض النتائج
+    for (let i = 0; i <= 6; i++) {
+        document.getElementById("field" + i).value = fields[i].join("\n");
+        document.getElementById("count" + i).textContent = fields[i].length + " سطر";
+    }
+}
 
 
 
@@ -447,6 +468,7 @@ if (activitesKey) {
         </script>
 </body>
 </html>
+
 
 
 
