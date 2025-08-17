@@ -235,7 +235,10 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
                 const parts = line.split(":");
                 return parts.length > 1 ? parts.slice(1).join(":").trim() : line.trim();
             }
-
+            
+function startsWithAny(line, keywords) {
+    return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
+}
             function filterAndDistribute() {
                 const text = document.getElementById('singleKeywordOutput').value.split("\n");
                 const fields = [[], [], [], [], [], [], []];
@@ -284,17 +287,21 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
 
                     else if (line.startsWith("ID CASE")) current[1] = cleanValue(line, "ID CASE");
                     else if (line.startsWith("Client :")) current[2] = cleanValue(line, "Client :");
-                    else if (line.startsWith("T�l�phone","Téléphone")) current[3] = normalizePhone(cleanValue(line, "T�l�phone","Téléphone"));
-                    else if (line.startsWith("Acc�s r�seau")) current[4] = normalizePhone(cleanValue(line, "Acc�s r�seau"));
-                    else if (line.startsWith("Activit�s de service")) {
-                        let rawValue = cleanValue(line, "Activit�s de service");
-                        // استخراج الجزء الأخير بعد آخر "|"
-                        let parts = rawValue.split("|");
-                        let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-                        // حذف أي رموز غير حروف وأرقام ومسافات
-                        lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-                        current[5] = lastPart;
-                    }
+const telKey = startsWithAny(line, ["T�l�phone", "Téléphone"]);
+if (telKey) current[3] = normalizePhone(cleanValue(line, telKey));
+
+const reseauKey = startsWithAny(line, ["Acc�s r�seau", "Accès réseau"]);
+if (reseauKey) current[4] = normalizePhone(cleanValue(line, reseauKey));
+
+const activitesKey = startsWithAny(line, ["Activit�s de service", "Activités de service"]);
+if (activitesKey) {
+    let rawValue = cleanValue(line, activitesKey);
+    let parts = rawValue.split("|");
+    let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+    lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+    current[5] = lastPart;
+}
+
 
 
                     else if (line.startsWith("Adresse Installation")) {
@@ -440,6 +447,7 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
         </script>
 </body>
 </html>
+
 
 
 
