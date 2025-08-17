@@ -240,10 +240,14 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
     const text = document.getElementById('singleKeywordOutput').value.split("\n");
     const fields = [[], [], [], [], [], [], []];
     let current = {};
-    let i = 0;
+    let index = 0;
+
+    const chunkSize = 500;
+    const delayBetweenChunks = 10000; // 10 ثواني = 10000 ملي ثانية
 
     function cleanValue(line, keyword) {
         let value = "";
+
         if (line.includes(":")) {
             value = line.split(":").slice(1).join(":").trim();
         } else {
@@ -268,12 +272,10 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
         return phone.startsWith("0") ? phone.substring(1) : phone;
     }
 
-    function processBatch() {
-        const chunkSize = 200; // دفعة من 200 سطر
-        let end = Math.min(i + chunkSize, text.length);
-
-        for (; i < end; i++) {
-            const line = text[i].trim();
+    function processChunk() {
+        const end = Math.min(index + chunkSize, text.length);
+        for (; index < end; index++) {
+            const line = text[index].trim();
 
             if (/^(Envoy�|Sent)\b/.test(line)) {
                 current[0] = cleanValue(line, line.split(":")[0]);
@@ -300,21 +302,25 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
             }
         }
 
-        if (i < text.length) {
-            setTimeout(processBatch, 0); // استمر بالدفعة التالية
+        updateUI();
+
+        if (index < text.length) {
+            console.log(`✅ معالجة ${index} سطر... التالي خلال 10 ثواني...`);
+            setTimeout(processChunk, delayBetweenChunks);
         } else {
-            for (let j = 0; j <= 6; j++) {
-                document.getElementById("field" + j).value = fields[j].join("\n");
-                document.getElementById("count" + j).textContent = fields[j].length + " سطر";
-            }
+            console.log("🎉 تم الانتهاء من كل المعالجة!");
         }
     }
 
-    processBatch();
+    function updateUI() {
+        for (let j = 0; j <= 6; j++) {
+            document.getElementById("field" + j).value = fields[j].join("\n");
+            document.getElementById("count" + j).textContent = fields[j].length + " سطر";
+        }
+    }
+
+    processChunk(); // ابدأ أول دفعة
 }
-
-
-
 
 
             function removeDuplicatesBasedOnField1() {
@@ -441,6 +447,7 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
         </script>
 </body>
 </html>
+
 
 
 
