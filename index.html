@@ -278,9 +278,9 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
                 for (let i = 0; i < text.length; i++) {
                     const line = text[i].trim();
                     
-                        if (/^Envoy\S*\b|^Sent\b/.test(line)) {
-                        current[0] = cleanValue(line, line.split(":")[0]);
-                    }
+                            if (/^Envoy\S*\b|^Sent\b/i.test(line)) {
+    current[0] = cleanValue(line, line.split(":")[0]);
+}
 
                     else if (line.startsWith("ID CASE")) current[1] = cleanValue(line, "ID CASE");
                     else if (line.startsWith("Client :")) current[2] = cleanValue(line, "Client :");
@@ -440,4 +440,5 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) 
         </script>
 </body>
 </html>
+
 
