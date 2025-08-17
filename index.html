@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar">
 <head>
     <meta charset="UTF-8" />
-    <title>EXTRACTION CANVAS — محسّن</title>
+    <title>EXTRACTION CANVAS</title>
     <style>
         body {
             direction: rtl;
@@ -13,9 +13,10 @@
             gap: 10px;
             height: 100vh;
             font-size: 13px;
-            overflow: hidden;
+            overflow: hidden; /* يمنع التمرير */
             box-sizing: border-box;
         }
+
         .container {
             flex: 1;
             max-width: 50%;
@@ -27,8 +28,16 @@
             box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-        h1, h3 { font-size: 16px; margin-top: 0; text-align:center; }
-        input[type="file"], input[type="text"], textarea {
+
+        h1, h2, h3 {
+            font-size: 16px;
+            margin-top: 0;
+            text-align: center;
+        }
+
+        input[type="file"],
+        input[type="text"],
+        textarea {
             width: 100%;
             font-size: 12px;
             padding: 8px;
@@ -38,6 +47,7 @@
             height: 60px;
             resize: none;
         }
+
         button {
             padding: 6px 10px;
             font-size: 13px;
@@ -49,43 +59,70 @@
             margin-bottom: 8px;
             transition: background-color 0.3s ease;
         }
-        button:hover { background-color: #0056b3; }
-        .copy-button { background-color: #28a745; }
-        .copy-button:hover { background-color: #1e7e34; }
-        .row { display:flex; gap:6px; margin-bottom:10px; }
-        .field-container { flex:1; display:flex; flex-direction:column; }
-        .line-count { font-weight:bold; font-size:12px; color:#007bff; text-align:center; margin-bottom:4px; }
-        label { font-weight:bold; font-size:12px; margin-bottom:4px; }
-        #progressContainer { width:100%; height:8px; background:#e0e0e0; position:fixed; bottom:0; right:0; left:0; display:none; z-index:9999; }
-        #progressBar { height:100%; width:0%; background:#007bff; transition:width .1s ease; }
-    </style>
 
-    <!-- SheetJS (unchanged) -->
-    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .copy-button {
+            background-color: #28a745;
+        }
+
+            .copy-button:hover {
+                background-color: #1e7e34;
+            }
+
+        .row {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .field-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .line-count {
+            font-weight: bold;
+            font-size: 12px;
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        label {
+            font-weight: bold;
+            font-size: 12px;
+            margin-bottom: 4px;
+        }
+
+            #keyword,
+            label[for="keyword"] {
+                display: none;
+            }
+    </style>
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <div class="container" style="max-width:45%;">
-        <h1>📁 EXTRACTION CANVAS — محسّن (Web Worker + تدفق)</h1>
 
-        <!-- اختيار مجلد -->
+    <div class="container" style="max-width: 45%;">
+        <h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
         <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt,.html" />
-        <div class="row">
-            <button id="mergeBtn">🔁 دمج ومعالجة (الخلفية)</button>
-            <button id="cancelBtn" style="background:#6c757d;">إيقاف</button>
-        </div>
+        <button onclick="mergeFolderTxt()">دمج الملفات</button>
+
+<textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Envoy,Sent,ID CASE,Client :,Téléphone,Accès réseau,Activités de service,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
-        <button id="extractBtn">🔎 استخراج</button>
-        <button id="copySingleBtn" class="copy-button">📋 نسخ نتائج الاستخراج</button>
-
-        <textarea id="singleKeywordOutput" rows="6" readonly placeholder="ستظهر هنا الأسطر المستخرجة (خلفياً)"></textarea>
-
-        <p style="font-size:12px;color:#666;">ملاحظة: استخدام Web Worker لمعالجة الملفات الكبيرة يقلل تجميد واجهة المستخدم ويحسن الأداء والذاكرة.</p>
+        <button onclick="extractSingleKeyword()">🔎 استخراج</button>
+<textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
+        <button onclick="copySingleKeyword()" class="copy-button">📋 نسخ نتائج الاستخراج</button>
     </div>
 
-    <div class="container" style="max-width:50%;">
+    <div class="container" style="max-width: 50%;">
         <div class="row">
             <div class="field-container">
                 <div class="line-count" id="count0">0 سطر</div>
@@ -130,479 +167,372 @@
             </div>
         </div>
 
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px;">
-            <button id="dedupBtn" style="background:#dc3545;">🧹 مسح التكرار + نسخ بعد 2 ث</button>
-            <button id="exportBtn" style="background:#ff6600;">⬇️ تصدير إلى Excel</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+<button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 مسح التكرار + 📋 نسخ بعد 2 ثوان</button>
+            <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
         </div>
-    </div>
 
-    <div id="progressContainer">
-        <div id="progressBar"></div>
-    </div>
+        <script>
+            document.addEventListener("contextmenu", e => e.preventDefault());
+            document.addEventListener("keydown", e => {
+                if (e.key === "F12" || (e.ctrlKey && ["u", "s"].includes(e.key.toLowerCase())) || (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key))) { e.preventDefault(); return false; }
+            });
 
-<script>
-/*
-  التحسينات الأساسية:
-  - استخدام Web Worker لمعالجة الدمج والاستخراج من دون تجميد واجهة المستخدم.
-  - قراءة الملفات بالتتابع (stream) إن أمكن لتقليل الذاكرة المستخدمة.
-  - إرسال أجزاء (chunks) إلى الWorker لمعالجة تدريجية.
-  - إرسال تحديثات التقدم من الWorker للواجهة لعرض شريط تقدم حقيقي.
-  - دعم إيقاف المعالجة مبكراً.
-*/
+            let originalMergedContent = "";
 
-/* ---- إنشاء Worker (ملف خارجي) ---- */
-let worker = null;
-let workerUrl = null;
-function createWorker() {
-    if (worker) return worker;
-    // نحمّل ملف worker.js من Blob (مضمّن داخل index.html بواسطة مسار داخلي)
-    // هذا يسمح بوضع worker.js منفصل في المستقبل.
-    const workerCode = WORKER_JS_CODE; // سيتم استبداله لاحقًا عند الإدراج
-    const blob = new Blob([workerCode], { type: 'application/javascript' });
-    workerUrl = URL.createObjectURL(blob);
-    worker = new Worker(workerUrl);
-    return worker;
-}
-
-/* ---- عناصر الواجهة ---- */
-const folderInput = document.getElementById('folderInput');
-const mergeBtn = document.getElementById('mergeBtn');
-const extractBtn = document.getElementById('extractBtn');
-const copySingleBtn = document.getElementById('copySingleBtn');
-const cancelBtn = document.getElementById('cancelBtn');
-const singleKeywordInput = document.getElementById('singleKeywordInput');
-const startOnlyCheckbox = document.getElementById('startOnlySingleCheckbox');
-const singleKeywordOutput = document.getElementById('singleKeywordOutput');
-const progressContainer = document.getElementById('progressContainer');
-const progressBar = document.getElementById('progressBar');
-const exportBtn = document.getElementById('exportBtn');
-const dedupBtn = document.getElementById('dedupBtn');
-
-let processing = false;
-
-/* --- تهيئة Worker والربط بحدثاته --- */
-function initWorkerHandlers() {
-    createWorker();
-    worker.onmessage = (e) => {
-        const msg = e.data;
-        if (msg.type === 'progress') {
-            progressContainer.style.display = 'block';
-            progressBar.style.width = msg.progress + '%';
-        } else if (msg.type === 'extractedLines') {
-            // يعرض النص المستخرج (مقتطف) تدريجياً
-            singleKeywordOutput.value = msg.text;
-        } else if (msg.type === 'finished') {
-            // استبدال الحقول بالنتيجة النهائية (مصفوفات الحقول)
-            applyFields(msg.fields);
-            singleKeywordOutput.value = msg.rawExtractedText || singleKeywordOutput.value;
-            progressBar.style.width = '100%';
-            setTimeout(() => { progressContainer.style.display = 'none'; progressBar.style.width = '0%'; }, 400);
-            processing = false;
-        } else if (msg.type === 'log') {
-            //console.log('worker:', msg.msg);
-        } else if (msg.type === 'error') {
-            alert('خطأ أثناء المعالجة: ' + msg.msg);
-            processing = false;
-            progressContainer.style.display = 'none';
-            progressBar.style.width = '0%';
-        }
-    };
-}
-
-/* --- تطبيق النتائج على الحقول في الواجهة --- */
-function applyFields(fields) {
-    for (let i = 0; i < 7; i++) {
-        const text = (fields[i] || []).join('\n');
-        document.getElementById('field' + i).value = text;
-        document.getElementById('count' + i).textContent = (fields[i] || []).length + ' سطر';
-    }
-}
-
-/* --- دمج الملفات وإرسالها للWorker كدفعات (stream) --- */
-async function mergeFolderTxt() {
-    if (processing) return;
-    const files = Array.from(folderInput.files).filter(f => f.name.toLowerCase().endsWith('.txt') || f.name.toLowerCase().endsWith('.html'));
-    if (!files.length) { alert('يرجى اختيار مجلد يحتوي على ملفات .txt أو .html'); return; }
-    files.sort((a,b) => a.name.localeCompare(b.name));
-
-    processing = true;
-    initWorkerHandlers();
-
-    // إرسال إعدادات الكلمات إلى الWorker
-    worker.postMessage({
-        type: 'config',
-        keywords: singleKeywordInput.value,
-        startOnly: startOnlyCheckbox.checked
-    });
-
-    // قراءة كل ملف بالتتابع وإرسال chunks للworker
-    let totalBytes = files.reduce((s,f) => s + f.size, 0);
-    let processedBytes = 0;
-
-    for (const f of files) {
-        if (!processing) break;
-        // نخبر الWorker عن اسم الملف حتى يمكن إضافة فاصل لو أردنا ذلك
-        worker.postMessage({ type: 'fileStart', name: f.name });
-
-        // نستخدم stream إن وُجد
-        if (f.stream && typeof f.stream === 'function') {
-            const reader = f.stream().getReader();
-            const decoder = new TextDecoder('utf-8');
-            let done = false;
-            while (!done) {
-                const { value, done: rDone } = await reader.read();
-                done = rDone;
-                if (value) {
-                    const chunkText = decoder.decode(value, { stream: !done });
-                    worker.postMessage({ type: 'fileChunk', chunk: chunkText });
-                    processedBytes += value.byteLength;
-                    const progress = Math.min(99, Math.floor((processedBytes / totalBytes) * 100));
-                    worker.postMessage({ type: 'progressHint', progress });
-                }
+            function mergeFolderTxt() {
+                const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
+                if (!files.length) { alert("يرجى اختيار مجلد يحتوي على ملفات .txt."); return; }
+                files.sort((a, b) => a.name.localeCompare(b.name));
+                let merged = "";
+                let processed = 0;
+                files.forEach(f => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
+                        processed++;
+                        if (processed === files.length) {
+                            originalMergedContent = merged;
+                            document.getElementById("filteredOutput").value = merged;
+                            extractSingleKeyword();
+                        }
+                    };
+                    reader.readAsText(f);
+                });
             }
-        } else {
-            // fallback: FileReader (يقرأ الملف كاملاً لكن نقوم بالتتابع بين الملفات)
-            const text = await f.text();
-            worker.postMessage({ type: 'fileChunk', chunk: text });
-            processedBytes += f.size;
-            const progress = Math.min(99, Math.floor((processedBytes / totalBytes) * 100));
-            worker.postMessage({ type: 'progressHint', progress });
-        }
 
-        // نخبر الWorker بأن الملف انتهى
-        worker.postMessage({ type: 'fileEnd', name: f.name });
+
+            function extractSingleKeyword() {
+                const keywordText = document.getElementById("singleKeywordInput").value.trim();
+                const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
+                if (!keywordText) { alert("يرجى كتابة كلمة أو أكثر مفصولة بفاصلة للاستخراج."); return; }
+                const keywords = keywordText.split(",").map(k => k.trim()).filter(k => k.length > 0);
+                const lines = document.getElementById("filteredOutput").value.split("\n");
+                const extracted = [];
+                let buffer = [];
+                let skip = false;
+                for (const line of lines) {
+const skipKeywords = ["sans", "SANS"];
+if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
+    buffer = [];
+    skip = true;
+    continue;
+}
+                    if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
+                    buffer.push(line);
+                    if (keywords.some(k => line.startsWith(k))) {
+                        extracted.push(...buffer);
+                        buffer = [];
+                    }
+                }
+                document.getElementById("singleKeywordOutput").value = extracted.join("\n");
+                filterAndDistribute();
+            }
+
+            function copySingleKeyword() { const t = document.getElementById("singleKeywordOutput"); t.select(); document.execCommand("copy"); window.getSelection().removeAllRanges(); }
+
+            function getTextAfterColon(line) {
+                const parts = line.split(":");
+                return parts.length > 1 ? parts.slice(1).join(":").trim() : line.trim();
+            }
+            
+function startsWithAny(line, keywords) {
+    return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
+}
+            function filterAndDistribute() {
+    const text = document.getElementById('singleKeywordOutput').value.split("\n");
+    const fields = [[], [], [], [], [], [], []];
+    let current = {};
+
+function cleanValue(line, keyword) {
+    let value = "";
+
+    if (line.includes(":")) {
+        value = line.split(":").slice(1).join(":").trim();
+    } else {
+        value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
     }
 
-    // أخيراً نطلب من الWorker إنهاء المعالجة وإرسال النتائج
-    worker.postMessage({ type: 'finalize' });
+    value = decodeCorruptedCharacters(value);
+    return value;
 }
 
-/* --- ربط أزرار الواجهة --- */
-mergeBtn.addEventListener('click', mergeFolderTxt);
-extractBtn.addEventListener('click', () => {
-    // استخراج مباشر عبر الWorker من محتوى current merged (سيعيد توزيع الحقول)
-    if (!worker) initWorkerHandlers();
-    worker.postMessage({ type: 'config', keywords: singleKeywordInput.value, startOnly: startOnlyCheckbox.checked });
-    worker.postMessage({ type: 'reprocess' });
-});
-copySingleBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(singleKeywordOutput.value).catch(()=>{});
-});
-cancelBtn.addEventListener('click', () => {
-    // إيقاف المعالجة وإلغاء الWorker إذا كان نشطاً
-    processing = false;
-    if (worker) {
-        worker.terminate();
-        worker = null;
-        if (workerUrl) { URL.revokeObjectURL(workerUrl); workerUrl = null; }
+
+    function decodeCorruptedCharacters(text) {
+        return text
+            .replace(/�/g, "é")
+            .replace(/Ã©/g, "é")
+            .replace(/Ã¨/g, "è")
+            .replace(/Ã/g, "à")
+            .replace(/Ã´/g, "ô")
+            .replace(/Ãª/g, "ê")
+            .replace(/Ã¢/g, "â")
+            .replace(/Ã¼/g, "ü")
+            .replace(/Ã§/g, "ç")
+            .replace(/Â/g, "")
+            .replace(/[^\x00-\x7F]/g, c => c);
     }
-    progressContainer.style.display = 'none';
-    progressBar.style.width = '0%';
-});
 
-/* --- نسخ حقل معين --- */
-function copyField(n) {
-    const f = document.getElementById('field' + n);
-    navigator.clipboard.writeText(f.value).catch(()=>{});
-}
-
-/* --- مسح التكرار + نسخ بعد 2 ثانية --- */
-dedupBtn.addEventListener('click', () => {
-    removeDuplicatesBasedOnField1();
-    setTimeout(() => copyExcelData(), 2000);
-});
-
-/* --- تصدير إلى Excel --- */
-exportBtn.addEventListener('click', () => {
-    exportToExcel();
-});
-
-/* --- دوال مساعدة (استنسخ من ملفك الأصلي مع تحسين طفيف) --- */
-function parseFrenchDateToDDMMYYYY(str) {
-    const months = {
-        janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
-        juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
-        octobre: "10", novembre: "11", décembre: "12", decembre: "12"
-    };
-    const dateString = str.replace(/^(?:\w+\s+)+(\d{1,2})\s+([a-zéû]+)\s+(\d{4})\s+\d{1,2}:\d{2}$/, '$1 $2 $3');
-    const match = dateString.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
-    if (match) {
-        const day = match[1].padStart(2, "0");
-        const month = months[match[2].toLowerCase()] || "01";
-        const year = match[3];
-        return `${day}/${month}/${year}`;
+    function normalizePhone(phone) {
+        return phone.startsWith("0") ? phone.substring(1) : phone;
     }
-    return "";
-}
 
-function exportToExcel() {
-    const numFields = 7, fieldsData = [];
-    for (let i = 0; i < numFields; i++) fieldsData[i] = document.getElementById("field"+i).value.split("\n");
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    const wsData = [];
-    for (let r = 0; r < maxRows; r++) {
-        const rawDateLine = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
-        wsData[r] = [
-            fieldsData[1][r] || "",
-            fieldsData[4][r] || "",
-            parsedDate || "",
-            parsedDate || "",
-            fieldsData[5][r] || "",
-            fieldsData[6][r] || "",
-            parsedDate || "",
-            (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA",
-            fieldsData[3][r] || "",
-            fieldsData[2][r] || "",
-            "", "", parsedDate || ""
-        ];
-    }
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "extracted_data.xlsx");
-}
-
-/* --- حذف التكرار بناءً على الحقل 1 (ID CASE) --- */
-function removeDuplicatesBasedOnField1() {
-    const numFields = 7, fieldsData = [];
-    for (let i = 0; i < numFields; i++) fieldsData[i] = document.getElementById("field"+i).value.split("\n");
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    const seen = new Set(), uniqueRows = [];
-    for (let r = 0; r < maxRows; r++) {
-        const v = (fieldsData[1][r] || "").trim();
-        if (!seen.has(v) && v !== "") {
-            seen.add(v);
-            const row = [];
-            for (let c = 0; c < numFields; c++) row.push(fieldsData[c][r] || "");
-            uniqueRows.push(row);
-        }
-    }
-    const newFields = Array.from({ length: numFields }, () => []);
-    uniqueRows.forEach(row => { for (let c = 0; c < numFields; c++) newFields[c].push(row[c]); });
-    for (let i = 0; i < numFields; i++) {
-        document.getElementById("field"+i).value = newFields[i].join("\n");
-        document.getElementById("count"+i).textContent = newFields[i].length + " سطر";
-    }
-}
-
-/* --- نسخ بيانات الإكسل إلى الحافظة (مستخدمة بعد حذف التكرار) --- */
-function copyExcelData() {
-    const numFields = 7, fieldsData = [];
-    for (let i = 0; i < numFields; i++) fieldsData[i] = document.getElementById("field"+i).value.split("\n");
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    let text = "";
-    for (let r = 0; r < maxRows; r++) {
-        const rawDate = fieldsData[0][r] || "", parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
-        const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
-        const rowData = [
-            fieldsData[1][r] || "",
-            fieldsData[4][r] || "",
-            parsedDate || "",
-            parsedDate || "",
-            fieldsData[5][r] || "",
-            fieldsData[6][r] || "",
-            parsedDate || "",
-            firstWord,
-            fieldsData[3][r] || "",
-            fieldsData[2][r] || "",
-            "", "", parsedDate || ""
-        ];
-        text += rowData.join("\t") + "\n";
-    }
-    navigator.clipboard.writeText(text).catch(()=>{});
-}
-
-/* ---- تحميل كود الWorker داخل المتغير WORKER_JS_CODE ---- */
-/* لتسهيل النشر ضمن ملف واحد قمت بتضمين كود worker كـ string أدناه.
-   في حال رغبت يمكنك نقل المحتوى إلى ملف منفصل worker.js واستبدال createObjectURL accordingly.
-*/
-const WORKER_JS_CODE = `
-/* Worker: معالجة الدمج والاستخراج تدريجياً */
-let keywords = [];
-let startOnly = true;
-
-let bufferLines = []; // buffer lines until we find extraction triggers
-let skipMode = false;
-let extractedLines = []; // نص تم استخراجه (سلسلة)
-let fields = [[],[],[],[],[],[],[]]; // Envoyé, ID, Client, Tel, Reseau, Activites, Adresse
-
-function postProgress(p) {
-    postMessage({ type: 'progress', progress: p });
-}
-
-function decodeCorruptedCharacters(text) {
-    return text
-        .replace(/�/g, "é")
-        .replace(/Ã©/g, "é")
-        .replace(/Ã¨/g, "è")
-        .replace(/Ã/g, "à")
-        .replace(/Ã´/g, "ô")
-        .replace(/Ãª/g, "ê")
-        .replace(/Ã¢/g, "â")
-        .replace(/Ã¼/g, "ü")
-        .replace(/Ã§/g, "ç")
-        .replace(/Â/g, "")
-        .replace(/[^\x00-\x7F]/g, c => c);
-}
-
-function normalizePhone(phone) {
-    const s = phone.trim();
-    return s.startsWith("0") ? s.substring(1) : s;
-}
-
-function startsWithAnyStrict(line, list) {
-    line = line.trimStart();
-    for (let k of list) {
-        const esc = k.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\\\$&');
-        const re = new RegExp("^" + esc + "\\s*:", "i");
-        if (re.test(line)) return k;
+    // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
+function startsWithAnyStrict(line, keywords) {
+    line = line.trimStart(); // إزالة الفراغات من بداية السطر
+    for (let keyword of keywords) {
+        const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
+        if (regex.test(line)) return keyword;
     }
     return null;
 }
 
-/* تحليل أسطر الاستخراج (مثل الدالة filterAndDistribute الأصلية) */
-function consumeExtractedLines(linesArr) {
-    // linesArr: array of lines from one extracted block (could be many)
-    let current = {};
-    for (const rawLine of linesArr) {
-        const line = rawLine.trim();
-        if (!line) continue;
 
+    for (let i = 0; i < text.length; i++) {
+        const line = text[i].trim();
+
+        // الحقل 0 - Envoyé أو Sent
         const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
-        if (envoyKey) { current[0] = cleanValue(line, envoyKey); continue; }
-        if (startsWithAnyStrict(line, ["ID CASE"])) { current[1] = cleanValue(line, "ID CASE"); continue; }
-        if (startsWithAnyStrict(line, ["Client"])) { current[2] = cleanValue(line, "Client"); continue; }
+        if (envoyKey) {
+            current[0] = cleanValue(line, envoyKey);
+        }
+
+        // الحقل 1 - ID CASE
+        else if (startsWithAnyStrict(line, ["ID CASE"])) {
+            current[1] = cleanValue(line, "ID CASE");
+        }
+
+        // الحقل 2 - Client
+        else if (startsWithAnyStrict(line, ["Client"])) {
+            current[2] = cleanValue(line, "Client");
+        }
+
+        // الحقل 3 - Téléphone
         const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
-        if (telKey) { current[3] = normalizePhone(cleanValue(line, telKey)); continue; }
+        if (telKey) {
+            current[3] = normalizePhone(cleanValue(line, telKey));
+        }
+
+        // الحقل 4 - Accès réseau
         const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
-        if (reseauKey) { current[4] = normalizePhone(cleanValue(line, reseauKey)); continue; }
+        if (reseauKey) {
+            current[4] = normalizePhone(cleanValue(line, reseauKey));
+        }
+
+        // الحقل 5 - Activités de service
         const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
         if (activitesKey) {
             let rawValue = cleanValue(line, activitesKey);
             let parts = rawValue.split("|");
-            let lastPart = parts.length>1 ? parts[parts.length-1].trim() : rawValue.trim();
-            lastPart = lastPart.replace(/[^\\w\\s\\u00C0-\\u017F]/g, '').trim();
+            let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+            lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
             current[5] = lastPart;
-            continue;
         }
-        const adresseKey = startsWithAnyStrict(line, ["Adresse Installation"]);
-        if (adresseKey) {
+
+        // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
+        else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
             current[6] = cleanValue(line, "Adresse Installation");
-            // flush record
-            for (let j=0;j<=6;j++) fields[j].push(current[j] || "");
-            current = {};
-            continue;
+
+            // نسجّل السطر الحالي في الأعمدة السبعة
+            for (let j = 0; j <= 6; j++) {
+                fields[j].push(current[j] || "");
+            }
+            current = {}; // إعادة تعيين السجل
         }
-        // قيّم حال وجود سطر يحتوي على ':' يمكن أن يساعد على التقاط قيم مفقودة
-        if (line.includes(":")) {
-            const key = line.split(":")[0].trim();
-            if (["Envoyé","Sent","Envoy�"].some(k=>k.toLowerCase()===key.toLowerCase())) current[0] = cleanValue(line,key);
-            else if (key.toLowerCase().includes("id")) current[1] = cleanValue(line,key);
-            else if (key.toLowerCase().includes("client")) current[2] = cleanValue(line,key);
-        }
+    }
+
+    // عرض النتائج في الواجهة
+    for (let i = 0; i <= 6; i++) {
+        document.getElementById("field" + i).value = fields[i].join("\n");
+        document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
 
-function cleanValue(line, keyword) {
-    let value = "";
-    if (line.includes(":")) value = line.split(":").slice(1).join(":").trim();
-    else value = line.replace(new RegExp("^" + keyword.replace(/[-\\/\\\\^$*+?.()|[\\]{}]/g,'\\\\$&'), "i"), "").trim();
-    return decodeCorruptedCharacters(value);
+function removeDuplicatesAndAutoCopy() {
+    removeDuplicatesBasedOnField1();
+
+    // إنشاء زر مخفي مؤقتاً لتنفيذ النسخ بعد 2 ثانية
+    setTimeout(() => {
+        // إنشاء عنصر textarea مؤقت
+        const tempTextarea = document.createElement("textarea");
+        tempTextarea.style.position = "fixed";
+        tempTextarea.style.opacity = "0";
+        tempTextarea.value = generateExcelText(); // ننسخ نفس النص الذي يستخدم في copyExcelData()
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            // النسخ تم بنجاح أو فشل
+            console.log(successful ? "تم النسخ بنجاح" : "فشل النسخ");
+        } catch (err) {
+            console.error("خطأ في النسخ:", err);
+        }
+
+        document.body.removeChild(tempTextarea);
+    }, 2000);
 }
 
-/* --- استقبال الرسائل من الMain thread --- */
-let partial = ""; // جزء من chunk لم يُنهي بسطر
-let totalHintProgress = 0;
-
-onmessage = function(e) {
-    try {
-        const msg = e.data;
-        if (msg.type === 'config') {
-            keywords = (msg.keywords || "").split(",").map(s=>s.trim()).filter(Boolean);
-            startOnly = !!msg.startOnly;
-            postMessage({ type:'log', msg: 'config set' });
-        } else if (msg.type === 'fileStart') {
-            // يمكننا إضافة فاصل لتمييز الملفات إن أردنا، نرسل سطر فاصل أيضاً
-            partial += "\\n===== " + (msg.name||"file") + " =====\\n";
-        } else if (msg.type === 'fileChunk') {
-            // استلام جزء من النص — نقسم إلى أسطر، ونعالج أي أسطر مستخرجة مباشرة لتقليل الذاكرة
-            const combined = partial + (msg.chunk || "");
-            const parts = combined.split(/\\r?\\n/);
-            partial = parts.pop() || ""; // آخر جزء غير مكتمل يبقى في partial
-
-            // معالجة الأسطر المتاحة
-            for (const line of parts) {
-                processLineForExtraction(line);
-            }
-            // نرسل تحديث للنص المستخرج (مختصر لتقليل النقل)
-            if (extractedLines.length > 0) {
-                postMessage({ type:'extractedLines', text: extractedLines.join("\\n") });
-            }
-        } else if (msg.type === 'fileEnd') {
-            // نكمل ما تبقى في partial كسطر واحد
-            if (partial) {
-                processLineForExtraction(partial);
-                partial = "";
-            }
-            // نضيف فاصل نهاية ملف
-            // (لا حاجة حالياً)
-        } else if (msg.type === 'progressHint') {
-            totalHintProgress = msg.progress || totalHintProgress;
-            postProgress(totalHintProgress);
-        } else if (msg.type === 'finalize') {
-            // flush أي جزئيات، إنهاء وإرسال النتائج
-            if (partial) { processLineForExtraction(partial); partial = ""; }
-            postMessage({ type:'finished', fields: fields, rawExtractedText: extractedLines.join("\\n") });
-            // تنظيف الذاكرة داخل الWorker (ليست ضرورية دائماً)
-            //fields = [[],[],[],[],[],[],[]];
-        } else if (msg.type === 'reprocess') {
-            // في حال أردنا إعادة معالجة ما نملك (لم نطبق تخزين للنص الكامل هنا)
-            postMessage({ type:'log', msg: 'reprocess requested but not implemented in worker' });
-        }
-    } catch (err) {
-        postMessage({ type:'error', msg: err && err.message ? err.message : String(err) });
+function generateExcelText() {
+    const fieldsData = [], numFields = 7;
+    for (let i = 0; i < numFields; i++) {
+        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
     }
-};
+    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+    let text = "";
 
-/* --- منطق الاستخراج المباشر أثناء قراءة الأسطر --- */
-const skipKeywords = ["sans", "SANS"];
+    for (let r = 0; r < maxRows; r++) {
+        const rawDate = fieldsData[0][r] || "";
+        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
 
-function processLineForExtraction(rawLine) {
-    const line = rawLine || "";
-    // skip logic
-    if (skipKeywords.some(w => line.toLowerCase().includes(w.toLowerCase()))) {
-        bufferLines = [];
-        skipMode = true;
-        return;
+        const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
+
+        const rowData = [
+            fieldsData[1][r] || "",  // A: ID CASE
+            fieldsData[4][r] || "",  // B: Accès réseau
+            parsedDate || "",        // C
+            parsedDate || "",        // D
+            fieldsData[5][r] || "",  // E
+            fieldsData[6][r] || "",  // F
+            parsedDate || "",        // G
+            firstWord,               // H
+            fieldsData[3][r] || "",  // I
+            fieldsData[2][r] || "",  // J
+            "", "", parsedDate || "" // K, L, N
+        ];
+
+        text += rowData.join("\t") + "\n";
     }
-    if (skipMode && line.includes("Adresse Installation")) {
-        skipMode = false;
-        return;
-    }
-    bufferLines.push(line);
 
-    // نتحقق إذا كان أي من الكلمات المفتاحية يبدأ بها السطر (حسب الإعداد startOnly أو لا)
-    const matched = keywords.some(k => {
-        if (!k) return false;
-        if (startOnly) {
-            return line.trim().toLowerCase().startsWith(k.toLowerCase());
-        } else {
-            return line.toLowerCase().includes(k.toLowerCase());
-        }
-    });
-
-    if (matched) {
-        // أضف bufferLines إلى extractedLines (ليس كل السطور قد تكون مفيدة لكن نحافظ على سلوكك الأصلي)
-        extractedLines.push(...bufferLines);
-        // معالجة مباشرة لخطوط الاستخراج (التوزيع إلى الحقول)
-        consumeExtractedLines(bufferLines);
-        bufferLines = [];
-    }
+    return text;
 }
-`;
 
-/* انتهى كود الWorker المضمّن */
-</script>
+
+
+
+
+            function removeDuplicatesBasedOnField1() {
+                const numFields = 7, fieldsData = [];
+                for (let i = 0; i < numFields; i++) fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+                const seen = new Set(), uniqueRows = [];
+                for (let r = 0; r < maxRows; r++) {
+                    const v = fieldsData[1][r] || "";
+                    if (!seen.has(v)) { seen.add(v); const row = []; for (let c = 0; c < numFields; c++) row.push(fieldsData[c][r] || ""); uniqueRows.push(row); }
+                }
+                const newFields = Array.from({ length: numFields }, () => []);
+                uniqueRows.forEach(row => { for (let c = 0; c < numFields; c++) newFields[c].push(row[c]); });
+                for (let i = 0; i < numFields; i++) { document.getElementById("field" + i).value = newFields[i].join("\n"); document.getElementById("count" + i).textContent = newFields[i].length + " سطر"; }
+            }
+
+            function copyField(n) { const f = document.getElementById("field" + n); f.select(); document.execCommand("copy"); }
+
+            function getSelectedDate() { return new Date().toLocaleDateString("fr-FR"); }
+
+            function getFirstWord(text) { const w = (text || "").trim().split(/\s+/)[0]; return w ? w : "CASABLANCA"; }
+
+            function parseFrenchDateToDDMMYYYY(str) {
+                const months = {
+                    janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
+                    juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
+                    octobre: "10", novembre: "11", décembre: "12", decembre: "12"
+                };
+
+                // إزالة اسم اليوم والوقت (المحتوى بعد الوقت)
+                const dateString = str.replace(/^(?:\w+\s+)+(\d{1,2})\s+([a-zéû]+)\s+(\d{4})\s+\d{1,2}:\d{2}$/, '$1 $2 $3');
+
+                const match = dateString.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
+
+                if (match) {
+                    const day = match[1].padStart(2, "0");
+                    const month = months[match[2].toLowerCase()] || "01";
+                    const year = match[3];
+
+                    return `${day}/${month}/${year}`;
+                }
+
+                return ""; // فارغ إذا لم يتطابق
+            }
+
+
+            function exportToExcel() {
+                const fieldsData = [], numFields = 7;
+                for (let i = 0; i < numFields; i++) {
+                    fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+                }
+                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+                const wsData = [];
+
+                for (let r = 0; r < maxRows; r++) {
+                    const rawDateLine = fieldsData[0][r] || "";  // الحصول على التاريخ
+                    const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
+
+                    // وضع التاريخ المحول فقط في الأعمدة C, D, G, N
+                    wsData[r] = [
+                        fieldsData[1][r] || "",  // A: ID CASE
+                        fieldsData[4][r] || "",  // B: Accès réseau
+                        parsedDate || "",        // C: Envoyé
+                        parsedDate || "",        // D: Envoyé (مكرر)
+                        fieldsData[5][r] || "",  // E: Activités de service
+                        fieldsData[6][r] || "",  // F: Adresse Installation
+                        parsedDate || "",        // G: Envoyé (مكرر)
+                        (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA", // H: الكلمة الأولى من Adresse Installation أو CASABLANCA
+                        fieldsData[3][r] || "",  // I: Téléphone
+                        fieldsData[2][r] || "",  // J: Client
+                        "",                      // K: فراغ
+                        "",                      // L: فراغ
+                        parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
+                    ];
+                }
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                XLSX.writeFile(wb, "extracted_data.xlsx");
+            }
+
+
+            function copyExcelData() {
+                const fieldsData = [], numFields = 7;
+                for (let i = 0; i < numFields; i++) {
+                    fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+                }
+                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+                let text = "";
+
+                for (let r = 0; r < maxRows; r++) {
+                    const rawDate = fieldsData[0][r] || "";
+                    const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+
+                    const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
+
+                    const rowData = [
+                        fieldsData[1][r] || "",  // A: ID CASE
+                        fieldsData[4][r] || "",  // B: Accès réseau
+                        parsedDate || "",        // C: Envoyé (التاريخ المحول في العمود C)
+                        parsedDate || "",        // D: Envoyé (التاريخ المحول في العمود D)
+                        fieldsData[5][r] || "",  // E: Activités de service
+                        fieldsData[6][r] || "",  // F: Adresse Installation
+                        parsedDate || "",        // G: Envoyé (التاريخ المحول في العمود G)
+                        firstWord,               // H: الكلمة الأولى أو CASABLANCA
+                        fieldsData[3][r] || "",  // I: Téléphone
+                        fieldsData[2][r] || "",  // J: Client
+                        "",                      // K: فراغ
+                        "",                      // L: فراغ
+                        parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
+                    ];
+
+                    text += rowData.join("\t") + "\n";
+                }
+
+                // نسخ المحتويات إلى الحافظة بدون رسائل تنبيه
+                navigator.clipboard.writeText(text)
+                    .catch(() => { }); // تجاهل أي أخطاء بدون إظهار رسائل
+            }
+
+
+
+        </script>
 </body>
 </html>
+
