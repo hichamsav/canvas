@@ -214,13 +214,10 @@
                 let skip = false;
                 for (const line of lines) {
                     const skipKeywords = ["sans", "SANS"];
-const regex = /sans\s+ca\w*/i; // شرط "sans" + كلمة تبدأ بـ "ca"
-
-if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase())) || regex.test(line)) {
-    buffer = [];
-    skip = true;
-    continue;
-}
+                    if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
+                        buffer = [];
+                        skip = true;
+                        continue;
                     }
                     if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
                     buffer.push(line);
@@ -539,6 +536,4 @@ if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase())) |
         </script>
 </body>
 </html>
-
-
 
