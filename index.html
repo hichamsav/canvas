@@ -213,8 +213,8 @@
                 let buffer = [];
                 let skip = false;
                 for (const line of lines) {
-                    const skipKeywords = ["sans", "SANS"];
-                    if (skipKeywords.some(word => line.toLowerCase().includes(word.toLowerCase()))) {
+                    const regexSkip = /sans\s+ca[\w\-]*/i; // يتحقق من وجود "sans" يليها كلمة تبدأ بـ ca
+                    if (regexSkip.test(line)) {
                         buffer = [];
                         skip = true;
                         continue;
