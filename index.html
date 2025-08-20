@@ -518,7 +518,38 @@ function removeDuplicatesBasedOnField1() {
     }
 }
 
-       
+       function removeDuplicatesByAccesReseauAndDate() {
+    const field0 = document.getElementById("field0").value.split("\n"); // Envoyé
+    const field4 = document.getElementById("field4").value.split("\n"); // Accès réseau
+    const numFields = 7;
+    const fields = [];
+
+    for (let i = 0; i < numFields; i++) {
+        fields[i] = document.getElementById("field" + i).value.split("\n");
+    }
+
+    const seen = new Set();
+    const uniqueIndexes = [];
+
+    for (let i = 0; i < field0.length; i++) {
+        const date = parseFrenchDateToDDMMYYYY(field0[i]);
+        const reseau = field4[i];
+
+        const key = `${date}|${reseau}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            uniqueIndexes.push(i); // هذا السطر نحتفظ به
+        }
+    }
+
+    // إعادة بناء الحقول بدون التكرارات
+    for (let f = 0; f < numFields; f++) {
+        const newLines = uniqueIndexes.map(i => fields[f][i] || "");
+        document.getElementById("field" + f).value = newLines.join("\n");
+        document.getElementById("count" + f).textContent = newLines.length + " سطر";
+    }
+}
+
 
             function copyField(n) { const f = document.getElementById("field" + n); f.select(); document.execCommand("copy"); }
 
@@ -630,6 +661,7 @@ function removeDuplicatesBasedOnField1() {
         </script>
 </body>
 </html>
+
 
 
 
