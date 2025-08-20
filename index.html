@@ -100,7 +100,7 @@
   <!-- القسم الأول - رفع ودمج ملفات TXT -->
   <div class="container" style="max-width: 45%;">
 <h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
-    <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt" />
+<input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt,.html" />
     <button onclick="mergeFolderTxt()">دمج الملفات</button>
 
     <!-- النص بعد الدمج مخفي -->
@@ -205,6 +205,24 @@
 
 
 <script>
+
+  // تعطيل الزر الأيمن
+document.addEventListener("contextmenu", function(e) {
+  e.preventDefault();
+});
+
+// تعطيل بعض اختصارات لوحة المفاتيح
+document.addEventListener("keydown", function(e) {
+  if (
+    e.key === "F12" ||
+    (e.ctrlKey && e.key.toLowerCase() === "u") ||    // Ctrl+U
+    (e.ctrlKey && e.key.toLowerCase() === "s") ||    // Ctrl+S
+    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) // Ctrl+Shift+I/J
+  ) {
+    e.preventDefault();
+    return false;
+  }
+});
   let originalMergedContent = "";
 
   // دمج ملفات TXT
@@ -425,8 +443,6 @@ function removeDuplicatesBasedOnField1() {
     document.getElementById('field' + i).value = text;
     document.getElementById('count' + i).textContent = newFieldsData[i].length + ' سطر';
   }
-
-  alert('تم حذف التكرار بناءً على خانة 1!');
 }
 
 
@@ -468,13 +484,12 @@ wsData[row] = [
   removeLeadingZero(fieldsData[1][row] || ""),  // A
   removeLeadingZero(fieldsData[4][row] || ""),  // B
   todayStr,                                     // C
-  todayStr,                                     // D
-  removeLeadingZero(fieldsData[5][row] || ""),  // E
-  removeLeadingZero(fieldsData[6][row] || ""),  // F
-  todayStr,                                     // G
-  getFirstWord(fieldsData[6][row] || ""),       // ✅ H = أول كلمة أو CASABLANCA
-  removeLeadingZero(fieldsData[3][row] || ""),  // I
-  removeLeadingZero(fieldsData[2][row] || "")   // J
+  removeLeadingZero(fieldsData[5][row] || ""),  // D
+  removeLeadingZero(fieldsData[6][row] || ""),  // E
+  todayStr,                                     // F
+  getFirstWord(fieldsData[6][row] || ""),       // G 
+  removeLeadingZero(fieldsData[3][row] || ""),  // H
+  removeLeadingZero(fieldsData[2][row] || "")   // I
 ];
 
 
@@ -525,21 +540,25 @@ const todayStr = getSelectedDate();
   let textToCopy = "";
   for (let row = 0; row < maxRows; row++) {
     const rowData = [
-      removeLeadingZero(fieldsData[1][row] || ""),  // A
-      removeLeadingZero(fieldsData[4][row] || ""),  // B
-      todayStr,                                     // C
-      todayStr,                                     // D
-      removeLeadingZero(fieldsData[5][row] || ""),  // E
-      removeLeadingZero(fieldsData[6][row] || ""),  // F
-      todayStr,                                     // G
-      getFirstWord(fieldsData[6][row] || ""),       // H
-      removeLeadingZero(fieldsData[3][row] || ""),  // I
-      removeLeadingZero(fieldsData[2][row] || "")   // J
+    removeLeadingZero(fieldsData[1][row] || ""),  // A
+    removeLeadingZero(fieldsData[4][row] || ""),  // B
+    todayStr,                                     // C
+    todayStr,                                     // D
+    removeLeadingZero(fieldsData[5][row] || ""),  // E
+    removeLeadingZero(fieldsData[6][row] || ""),  // F
+    todayStr,                                     // G
+    getFirstWord(fieldsData[6][row] || ""),       // H
+    removeLeadingZero(fieldsData[3][row] || ""),  // I
+    removeLeadingZero(fieldsData[2][row] || ""),  // J
+    "",                                           // K (فارغ)
+    "",                                           // L (فارغ)
+    "",                                           // M (فارغ)
+    todayStr                                      // N (جديد)
     ];
     textToCopy += rowData.join('\t') + '\n';
   }
 
-  navigator.clipboard.writeText(textToCopy).then(() => {
+  navigator.clipboard.writeText(textToCopy).catch(() => {
     alert('تم نسخ محتويات ملف Excel! يمكنك الآن لصقها في ملف Excel على SharePoint.');
   }).catch(() => {
     alert('حدث خطأ أثناء النسخ. حاول مجددًا.');
@@ -556,10 +575,8 @@ function copyAllFields() {
   }
 
   // استخدام Clipboard API
-  navigator.clipboard.writeText(combinedText).then(() => {
-    alert('✅ تم نسخ جميع الخانات بنجاح!');
+  navigator.clipboard.writeText(combinedText).catch(() => {
   }).catch(() => {
-    alert('❌ حدث خطأ أثناء النسخ، يرجى المحاولة مجددًا.');
   });
 }
 function getSelectedDate() {
@@ -598,24 +615,9 @@ function getSelectedDate() {
 
   return formatDate(today); // fallback
 }
-// تعطيل الزر الأيمن
-document.addEventListener("contextmenu", function(e) {
-  e.preventDefault();
-});
 
-// تعطيل بعض اختصارات لوحة المفاتيح
-document.addEventListener("keydown", function(e) {
-  if (
-    e.key === "F12" ||
-    (e.ctrlKey && e.key.toLowerCase() === "u") ||    // Ctrl+U
-    (e.ctrlKey && e.key.toLowerCase() === "s") ||    // Ctrl+S
-    (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "J")) // Ctrl+Shift+I/J
-  ) {
-    e.preventDefault();
-    return false;
-  }
-});
 </script>
 
 </body>
 </html>
+
