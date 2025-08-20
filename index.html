@@ -200,7 +200,6 @@
 
             let originalMergedContent = "";
 
-
 function mergeFolderTxt() {
     const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
     if (!files.length) {
@@ -218,37 +217,39 @@ function mergeFolderTxt() {
             merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
             processed++;
             if (processed === files.length) {
-    originalMergedContent = merged;
-    document.getElementById("filteredOutput").value = merged;
-    extractSingleKeyword();
+                originalMergedContent = merged;
+                document.getElementById("filteredOutput").value = merged;
+                extractSingleKeyword();
 
-    // ✅ ضغطة واحدة مباشرة بعد الدمج
-const copyAllButton = Array.from(document.querySelectorAll('button'))
-    .find(btn => btn.textContent.includes("🧹"));
-if (copyAllButton) {
-    copyAllButton.click(); // ضغطة واحدة فورية
+                // ✅ تنفيذ النسخ وإزالة التكرار مباشرة بعد الدمج
+                removeDuplicatesAndAutoCopy();
 
-    // ⏱️ بعد دقيقة، نبدأ الضغط التلقائي السريع 10 مرات خلال 10 مللي ثانية
-    setTimeout(() => {
-        let pressCount = 0;
-        const maxPresses = 10;
-        const pressInterval = 1; // 1ms = 0.001 ثانية
+                // ✅ الضغط مرة واحدة على زر 🧹 مباشرة
+                const copyAllButton = Array.from(document.querySelectorAll('button'))
+                    .find(btn => btn.textContent.includes("🧹"));
+                if (copyAllButton) {
+                    copyAllButton.click();
 
-        const interval = setInterval(() => {
-            copyAllButton.click();
-            pressCount++;
-            if (pressCount >= maxPresses) {
-                clearInterval(interval);
+                    // ⏱️ بعد دقيقة، نبدأ الضغط التلقائي السريع 10 مرات خلال 10 مللي ثانية
+                    setTimeout(() => {
+                        let pressCount = 0;
+                        const maxPresses = 10;
+                        const pressInterval = 1; // 1ms = 0.001 ثانية
+
+                        const interval = setInterval(() => {
+                            copyAllButton.click();
+                            pressCount++;
+                            if (pressCount >= maxPresses) {
+                                clearInterval(interval);
+                            }
+                        }, pressInterval);
+                    }, 60000); // ⏱️ انتظر 60 ثانية = دقيقة واحدة
+                }
             }
-        }, pressInterval);
-    }, 60000); // ⏱️ انتظر 60 ثانية = دقيقة واحدة
-}
-
         };
         reader.readAsText(f);
     });
 }
-
 
 
             function extractSingleKeyword() {
@@ -593,6 +594,7 @@ worker.postMessage(document.getElementById("someTextarea").value);
         </script>
 </body>
 </html>
+
 
 
 
