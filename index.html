@@ -221,7 +221,9 @@ function mergeFolderTxt() {
                 originalMergedContent = merged;
                 document.getElementById("filteredOutput").value = merged;
                 extractSingleKeyword();
-
+                
+startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
+}, 5000); // ⏱️ يبدأ بعد 5000ms = 5 ثوانٍ
             }
         };
         reader.readAsText(f);
@@ -285,8 +287,7 @@ function mergeFolderTxt() {
                     return value;
                 }
                 
-startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
-}, 5000); // ⏱️ يبدأ بعد 5000ms = 5 ثوانٍ
+
 
                 function decodeCorruptedCharacters(text) {
                     return text
@@ -666,6 +667,7 @@ function extractDateOnly(dateStr) {
         </script>
 </body>
 </html>
+
 
 
 
