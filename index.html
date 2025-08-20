@@ -169,9 +169,11 @@
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-            <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
-            <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
-        </div>
+    <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
+    <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
+    <span id="countdown" style="font-weight: bold; color: red; font-size: 14px;"></span>
+</div>
+
 
         <script>
             document.addEventListener("contextmenu", e => e.preventDefault());
@@ -192,11 +194,29 @@
                     reader.onload = e => {
                         merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
                         processed++;
-                        if (processed === files.length) {
-                            originalMergedContent = merged;
-                            document.getElementById("filteredOutput").value = merged;
-                            extractSingleKeyword();
-                        }
+if (processed === files.length) {
+    originalMergedContent = merged;
+    document.getElementById("filteredOutput").value = merged;
+    extractSingleKeyword();
+
+    let countdown = 15;
+    const countdownEl = document.getElementById("countdown");
+    countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
+
+    const timer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
+        } else {
+            clearInterval(timer);
+            countdownEl.textContent = "";
+            removeDuplicatesAndAutoCopy();
+        }
+    }, 1000); // كل ثانية
+}
+
+}
+
                     };
                     reader.readAsText(f);
                 });
@@ -536,4 +556,5 @@
         </script>
 </body>
 </html>
+
 
