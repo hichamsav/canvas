@@ -237,15 +237,29 @@ function mergeFolderTxt() {
 
                         // ✅ تنفيذ النسخ
                         removeDuplicatesAndAutoCopy();
+// ✅ أول ضغطة بعد 0.001 ثانية
+setTimeout(() => {
+    const copyAllButton = Array.from(document.querySelectorAll('button'))
+        .find(btn => btn.textContent.includes("🧹"));
+    if (copyAllButton) copyAllButton.click();
 
-                        // ✅ بعد 1 ثانية، الضغط على زر "Remove & Copy ALL"
-                        setTimeout(() => {
-                            const copyAllButton = Array.from(document.querySelectorAll('button'))
-                                .find(btn => btn.textContent.includes("🧹"));
-                            if (copyAllButton) copyAllButton.click();
-                        }, 1000); // ⏲️ بعد ثانية واحدة
-                    }
-                }, 1000); // ⏲️ كل ثانية
+    // ✅ بعد 15 ثانية من الضغطة الأولى → ابدأ المسار السريع
+    setTimeout(() => {
+        let fastPress = setInterval(() => {
+            const copyAllButton = Array.from(document.querySelectorAll('button'))
+                .find(btn => btn.textContent.includes("🧹"));
+            if (copyAllButton) copyAllButton.click();
+        }, 1); // 0.001 ثانية ≈ 1ms
+
+        // ⏱️ توقف المسار السريع بعد دقيقة
+        setTimeout(() => {
+            clearInterval(fastPress);
+        }, 60000);
+
+    }, 15000); // بعد 15 ثانية من الضغطة الأولى
+
+}, 1); // أول ضغطة بعد 0.001 ثانية
+
             }
         };
         reader.readAsText(f);
@@ -596,5 +610,6 @@ worker.postMessage(document.getElementById("someTextarea").value);
         </script>
 </body>
 </html>
+
 
 
