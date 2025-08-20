@@ -519,23 +519,6 @@ function removeDuplicatesByAccesReseauAndDate() {
     }
 }
 
-function startRapidClickingByText(buttonText, durationSeconds = 30, intervalMs = 1) {
-    const btn = Array.from(document.querySelectorAll("button"))
-        .find(b => b.textContent.includes(buttonText));
-
-    if (!btn) return console.warn("🔴 لم يتم العثور على الزر المطلوب.");
-
-    const endTime = Date.now() + durationSeconds * 1000;
-
-    const interval = setInterval(() => {
-        if (Date.now() >= endTime) {
-            clearInterval(interval);
-            console.log("✅ انتهت عملية الضغط السريع.");
-            return;
-        }
-        btn.click();
-    }, intervalMs);
-}
 
 function extractDateOnly(dateStr) {
     const months = {
@@ -662,10 +645,23 @@ function extractDateOnly(dateStr) {
             }
 
 
+function startRapidClickingByText(buttonText, durationInSeconds = 30, intervalInMs = 1) {
+    const interval = setInterval(() => {
+        const button = Array.from(document.querySelectorAll("button"))
+            .find(btn => btn.textContent.trim() === buttonText.trim());
+        if (button) button.click();
+    }, intervalInMs);
+
+    setTimeout(() => {
+        clearInterval(interval);
+    }, durationInSeconds * 1000);
+}
+
 
         </script>
 </body>
 </html>
+
 
 
 
