@@ -218,35 +218,45 @@ function mergeFolderTxt() {
             merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
             processed++;
             if (processed === files.length) {
-                originalMergedContent = merged;
-                document.getElementById("filteredOutput").value = merged;
-                extractSingleKeyword();
+    originalMergedContent = merged;
+    document.getElementById("filteredOutput").value = merged;
+    extractSingleKeyword();
 
-                // ⏱️ عداد 3 ثواني
-                let countdown = 0;
-                const countdownEl = document.getElementById("countdown");
-                if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
+    // ⏱️ عداد 3 ثواني
+    let countdown = 0;
+    const countdownEl = document.getElementById("countdown");
+    if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
 
-                const timer = setInterval(() => {
-                    countdown--;
-                    if (countdown > 0) {
-                        if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
-                    } else {
-                        clearInterval(timer);
-                        if (countdownEl) countdownEl.textContent = "";
+    const timer = setInterval(() => {
+        countdown--;
+        if (countdown > 0) {
+            if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
+        } else {
+            clearInterval(timer);
+            if (countdownEl) countdownEl.textContent = "";
 
-                        // ✅ تنفيذ النسخ
-                        removeDuplicatesAndAutoCopy();
+            // ✅ تنفيذ النسخ
+            removeDuplicatesAndAutoCopy();
 
-                        // ✅ بعد 1 ثانية، الضغط على زر "Remove & Copy ALL"
-                        setTimeout(() => {
-                            const copyAllButton = Array.from(document.querySelectorAll('button'))
-                                .find(btn => btn.textContent.includes("🧹"));
-                            if (copyAllButton) copyAllButton.click();
-                        }, 1000); // ⏲️ بعد ثانية واحدة
+            // ✅ الضغط 10 مرات بسرعة (كل 1 ميلي ثانية)
+            const copyAllButton = Array.from(document.querySelectorAll('button'))
+                .find(btn => btn.textContent.includes("🧹"));
+            if (copyAllButton) {
+                let pressCount = 0;
+                const maxPresses = 10;
+                const pressInterval = 1; // 0.001 ثانية = 1ms
+
+                const interval = setInterval(() => {
+                    copyAllButton.click();
+                    pressCount++;
+                    if (pressCount >= maxPresses) {
+                        clearInterval(interval);
                     }
-                }, 1000); // ⏲️ كل ثانية
+                }, pressInterval);
             }
+        }
+    }, 1000); // ⏲️ كل ثانية
+}
         };
         reader.readAsText(f);
     });
@@ -596,6 +606,7 @@ worker.postMessage(document.getElementById("someTextarea").value);
         </script>
 </body>
 </html>
+
 
 
 
