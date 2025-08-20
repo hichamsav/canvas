@@ -645,7 +645,7 @@ function extractDateOnly(dateStr) {
             }
 
 
-function startRapidClickingByText(buttonText, durationInSeconds = 30, intervalInMs = 1) {
+function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalInMs = 1) {
     const interval = setInterval(() => {
         const button = Array.from(document.querySelectorAll("button"))
             .find(btn => btn.textContent.trim() === buttonText.trim());
@@ -661,6 +661,7 @@ function startRapidClickingByText(buttonText, durationInSeconds = 30, intervalIn
         </script>
 </body>
 </html>
+
 
 
 
