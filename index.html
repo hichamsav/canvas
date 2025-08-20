@@ -518,7 +518,7 @@ function removeDuplicatesBasedOnField1() {
     }
 }
 
-       function removeDuplicatesByAccesReseauAndDate() {
+function removeDuplicatesByAccesReseauAndDate() {
     const field0 = document.getElementById("field0").value.split("\n"); // Envoyé
     const field4 = document.getElementById("field4").value.split("\n"); // Accès réseau
     const numFields = 7;
@@ -532,13 +532,17 @@ function removeDuplicatesBasedOnField1() {
     const uniqueIndexes = [];
 
     for (let i = 0; i < field0.length; i++) {
-        const date = parseFrenchDateToDDMMYYYY(field0[i]);
+        const rawDate = field0[i];
         const reseau = field4[i];
 
-        const key = `${date}|${reseau}`;
-        if (!seen.has(key)) {
-            seen.add(key);
-            uniqueIndexes.push(i); // هذا السطر نحتفظ به
+        // 🔎 نأخذ اليوم + الشهر + السنة فقط بدون الساعة
+        const dateKey = extractDateOnly(rawDate); // مثال: 24/07/2025
+        const reseauKey = reseau.trim();
+
+        const combinedKey = `${reseauKey}|${dateKey}`;
+        if (!seen.has(combinedKey)) {
+            seen.add(combinedKey);
+            uniqueIndexes.push(i); // نحتفظ بهذا السطر
         }
     }
 
@@ -550,6 +554,25 @@ function removeDuplicatesBasedOnField1() {
     }
 }
 
+
+function extractDateOnly(dateStr) {
+    const months = {
+        janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
+        juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
+        octobre: "10", novembre: "11", décembre: "12", decembre: "12"
+    };
+
+    const match = dateStr.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
+
+    if (match) {
+        const day = match[1].padStart(2, "0");
+        const month = months[match[2].toLowerCase()] || "01";
+        const year = match[3];
+        return `${day}/${month}/${year}`;
+    }
+
+    return "";
+}
 
             function copyField(n) { const f = document.getElementById("field" + n); f.select(); document.execCommand("copy"); }
 
@@ -661,6 +684,7 @@ function removeDuplicatesBasedOnField1() {
         </script>
 </body>
 </html>
+
 
 
 
