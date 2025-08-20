@@ -221,16 +221,11 @@ if (processed === files.length) {
     originalMergedContent = merged;
     document.getElementById("filteredOutput").value = merged;
     extractSingleKeyword();
-
-    // ⏱️ نبدأ الضغط التلقائي بعد 5 ثوانٍ فقط بعد انتهاء الاستخراج
+  // ⏱️ انتظر 5 ثوانٍ ثم ابدأ الضغط السريع
     setTimeout(() => {
-        startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
-    }, 5000);
+        startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 30, 1); // ← 30 ثانية، كل 1ms
+    }, 5000); // ← انتظر 5 ثواني قبل البدء
 }
-
-
-
-
             function extractSingleKeyword() {
                 const keywordText = document.getElementById("singleKeywordInput").value.trim();
                 const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
@@ -649,11 +644,16 @@ function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalIn
     const interval = setInterval(() => {
         const button = Array.from(document.querySelectorAll("button"))
             .find(btn => btn.textContent.trim() === buttonText.trim());
-        if (button) button.click();
+
+        if (button) {
+            button.click();
+            console.log("✅ ضغط على الزر:", buttonText);
+        }
     }, intervalInMs);
 
     setTimeout(() => {
         clearInterval(interval);
+        console.log("⏹️ تم إيقاف الضغط التلقائي بعد", durationInSeconds, "ثواني");
     }, durationInSeconds * 1000);
 }
 
@@ -661,6 +661,7 @@ function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalIn
         </script>
 </body>
 </html>
+
 
 
 
