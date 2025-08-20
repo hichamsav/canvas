@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            padding-top: 100px; /* ✅ هذه هي المساحة من الأعلى */
+            padding-top: 150px; /* ✅ هذه هي المساحة من الأعلى */
             display: flex;
             gap: 10px;
             height: 100vh;
@@ -168,13 +168,10 @@
             </div>
         </div>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-    <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
-    <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
-    <span id="countdown" style="font-weight: bold; color: red; font-size: 14px; margin-right: 10px;"></span>
-</div>
-
-
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+            <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
+            <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
+        </div>
 
         <script>
             document.addEventListener("contextmenu", e => e.preventDefault());
@@ -184,58 +181,26 @@
 
             let originalMergedContent = "";
 
-
-function mergeFolderTxt() {
-    const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
-    if (!files.length) {
-        alert("يرجى اختيار مجلد يحتوي على ملفات .txt.");
-        return;
-    }
-
-    files.sort((a, b) => a.name.localeCompare(b.name));
-    let merged = "";
-    let processed = 0;
-
-    files.forEach(f => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
-            processed++;
-            if (processed === files.length) {
-                originalMergedContent = merged;
-                document.getElementById("filteredOutput").value = merged;
-                extractSingleKeyword();
-
-                // ⏱️ عداد 3 ثواني
-                let countdown = 0;
-                const countdownEl = document.getElementById("countdown");
-                if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
-
-                const timer = setInterval(() => {
-                    countdown--;
-                    if (countdown > 0) {
-                        if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
-                    } else {
-                        clearInterval(timer);
-                        if (countdownEl) countdownEl.textContent = "";
-
-                        // ✅ تنفيذ النسخ
-                        removeDuplicatesAndAutoCopy();
-
-                        // ✅ بعد 1 ثانية، الضغط على زر "Remove & Copy ALL"
-                        setTimeout(() => {
-                            const copyAllButton = Array.from(document.querySelectorAll('button'))
-                                .find(btn => btn.textContent.includes("🧹"));
-                            if (copyAllButton) copyAllButton.click();
-                        }, 1000); // ⏲️ بعد ثانية واحدة
-                    }
-                }, 1000); // ⏲️ كل ثانية
+            function mergeFolderTxt() {
+                const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
+                if (!files.length) { alert("يرجى اختيار مجلد يحتوي على ملفات .txt."); return; }
+                files.sort((a, b) => a.name.localeCompare(b.name));
+                let merged = "";
+                let processed = 0;
+                files.forEach(f => {
+                    const reader = new FileReader();
+                    reader.onload = e => {
+                        merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
+                        processed++;
+                        if (processed === files.length) {
+                            originalMergedContent = merged;
+                            document.getElementById("filteredOutput").value = merged;
+                            extractSingleKeyword();
+                        }
+                    };
+                    reader.readAsText(f);
+                });
             }
-        };
-        reader.readAsText(f);
-    });
-}
-
 
 
             function extractSingleKeyword() {
@@ -571,11 +536,3 @@ function mergeFolderTxt() {
         </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
