@@ -217,15 +217,21 @@ function mergeFolderTxt() {
         reader.onload = e => {
             merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
             processed++;
-if (processed === files.length) {
-    originalMergedContent = merged;
-    document.getElementById("filteredOutput").value = merged;
-    extractSingleKeyword();
-  // ⏱️ انتظر 5 ثوانٍ ثم ابدأ الضغط السريع
-    setTimeout(() => {
-        startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 30, 1); // ← 30 ثانية، كل 1ms
-    }, 5000); // ← انتظر 5 ثواني قبل البدء
+            if (processed === files.length) {
+                originalMergedContent = merged;
+                document.getElementById("filteredOutput").value = merged;
+                extractSingleKeyword();
+
+                // ⏱️ انتظر 5 ثوانٍ ثم ابدأ الضغط السريع
+                setTimeout(() => {
+                    startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 30, 100); // ضغط كل 100ms
+                }, 5000);
+            }
+        };
+        reader.readAsText(f);
+    });
 }
+
             function extractSingleKeyword() {
                 const keywordText = document.getElementById("singleKeywordInput").value.trim();
                 const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
@@ -640,7 +646,7 @@ function extractDateOnly(dateStr) {
             }
 
 
-function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalInMs = 1) {
+function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalInMs = 50) {
     const interval = setInterval(() => {
         const button = Array.from(document.querySelectorAll("button"))
             .find(btn => btn.textContent.trim() === buttonText.trim());
@@ -661,6 +667,7 @@ function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalIn
         </script>
 </body>
 </html>
+
 
 
 
