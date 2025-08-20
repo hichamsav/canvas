@@ -17,12 +17,7 @@
             overflow: hidden; /* يمنع التمرير */
             box-sizing: border-box;
         }
-    /* ✅ هنا إضافة الخلفية */
-    background-image: url('https://www.vernegroup.com/wp-content/uploads/2021/08/Image-1-1-1.png'); 
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-}
+
         .container {
             flex: 1;
             max-width: 50%;
@@ -34,6 +29,19 @@
             box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
             overflow: hidden;
         }
+.header-logo {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    text-align: center;
+}
+
+.header-logo img {
+    height: 60px; /* يمكنك تعديل الحجم حسب شعارك */
+    object-fit: contain;
+}
 
         h1, h2, h3 {
             font-size: 16px;
@@ -112,6 +120,9 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
+<div class="header-logo">
+    <img src="https://www.vernegroup.com/wp-content/uploads/2021/08/Image-1-1-1.png" alt="الشعار" />
+</div>
 
     <div class="container" style="max-width: 45%;">
         <h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
@@ -585,5 +596,6 @@ worker.postMessage(document.getElementById("someTextarea").value);
         </script>
 </body>
 </html>
+
 
 
