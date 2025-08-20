@@ -206,14 +206,14 @@ function mergeFolderTxt() {
                 extractSingleKeyword();
 
                 // ⏱️ بدء العداد التنازلي
-                let countdown = 15;
+                let countdown = 3;
                 const countdownEl = document.getElementById("countdown");
-                countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
+                countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
 
                 const timer = setInterval(() => {
                     countdown--;
                     if (countdown > 0) {
-                        countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
+                        countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
                     } else {
                         clearInterval(timer);
                         countdownEl.textContent = ""; // إزالة العداد
@@ -560,6 +560,7 @@ function mergeFolderTxt() {
         </script>
 </body>
 </html>
+
 
 
 
