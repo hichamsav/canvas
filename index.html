@@ -200,6 +200,7 @@
 
             let originalMergedContent = "";
 
+
 function mergeFolderTxt() {
     const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
     if (!files.length) {
@@ -221,17 +222,24 @@ function mergeFolderTxt() {
                 document.getElementById("filteredOutput").value = merged;
                 extractSingleKeyword();
 
-                // ✅ تنفيذ النسخ وإزالة التكرار مباشرة بعد الدمج
-                removeDuplicatesAndAutoCopy();
+                // ⏱️ عداد 3 ثواني
+                let countdown = 0;
+                const countdownEl = document.getElementById("countdown");
+                if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
 
-                // ✅ الضغط مرة واحدة على زر 🧹 مباشرة
-                const copyAllButton = Array.from(document.querySelectorAll('button'))
-                    .find(btn => btn.textContent.includes("🧹"));
-                if (copyAllButton) {
-                    copyAllButton.click();
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
+                    } else {
+                        clearInterval(timer);
+                        if (countdownEl) countdownEl.textContent = "";
 
-                    // ⏱️ بعد دقيقة، نبدأ الضغط التلقائي السريع 10 مرات خلال 10 مللي ثانية
-                    setTimeout(() => {
+                        // ✅ تنفيذ النسخ
+                        removeDuplicatesAndAutoCopy();
+
+                        // ✅ بعد 1 ثانية، الضغط على زر "Remove & Copy ALL"
+                                   setTimeout(() => {
                         let pressCount = 0;
                         const maxPresses = 10;
                         const pressInterval = 1; // 1ms = 0.001 ثانية
@@ -244,12 +252,12 @@ function mergeFolderTxt() {
                             }
                         }, pressInterval);
                     }, 60000); // ⏱️ انتظر 60 ثانية = دقيقة واحدة
-                }
             }
         };
         reader.readAsText(f);
     });
 }
+
 
 
             function extractSingleKeyword() {
@@ -594,9 +602,5 @@ worker.postMessage(document.getElementById("someTextarea").value);
         </script>
 </body>
 </html>
-
-
-
-
 
 
