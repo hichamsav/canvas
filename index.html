@@ -222,41 +222,28 @@ function mergeFolderTxt() {
     document.getElementById("filteredOutput").value = merged;
     extractSingleKeyword();
 
-    // ⏱️ عداد 3 ثواني
-    let countdown = 0;
-    const countdownEl = document.getElementById("countdown");
-    if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
+    // ✅ ضغطة واحدة مباشرة بعد الدمج
+const copyAllButton = Array.from(document.querySelectorAll('button'))
+    .find(btn => btn.textContent.includes("🧹"));
+if (copyAllButton) {
+    copyAllButton.click(); // ضغطة واحدة فورية
 
-    const timer = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-            if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
-        } else {
-            clearInterval(timer);
-            if (countdownEl) countdownEl.textContent = "";
+    // ⏱️ بعد دقيقة، نبدأ الضغط التلقائي السريع 10 مرات خلال 10 مللي ثانية
+    setTimeout(() => {
+        let pressCount = 0;
+        const maxPresses = 10;
+        const pressInterval = 1; // 1ms = 0.001 ثانية
 
-            // ✅ تنفيذ النسخ
-            removeDuplicatesAndAutoCopy();
-
-            // ✅ الضغط 10 مرات بسرعة (كل 1 ميلي ثانية)
-            const copyAllButton = Array.from(document.querySelectorAll('button'))
-                .find(btn => btn.textContent.includes("🧹"));
-            if (copyAllButton) {
-                let pressCount = 0;
-                const maxPresses = 10;
-                const pressInterval = 1; // 0.001 ثانية = 1ms
-
-                const interval = setInterval(() => {
-                    copyAllButton.click();
-                    pressCount++;
-                    if (pressCount >= maxPresses) {
-                        clearInterval(interval);
-                    }
-                }, pressInterval);
+        const interval = setInterval(() => {
+            copyAllButton.click();
+            pressCount++;
+            if (pressCount >= maxPresses) {
+                clearInterval(interval);
             }
-        }
-    }, 1000); // ⏲️ كل ثانية
+        }, pressInterval);
+    }, 60000); // ⏱️ انتظر 60 ثانية = دقيقة واحدة
 }
+
         };
         reader.readAsText(f);
     });
@@ -606,6 +593,7 @@ worker.postMessage(document.getElementById("someTextarea").value);
         </script>
 </body>
 </html>
+
 
 
 
