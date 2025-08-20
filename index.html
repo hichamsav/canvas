@@ -221,16 +221,16 @@ function mergeFolderTxt() {
                 originalMergedContent = merged;
                 document.getElementById("filteredOutput").value = merged;
                 extractSingleKeyword();
-
-                // ⏱️ انتظر 5 ثوانٍ ثم ابدأ الضغط السريع
-                setTimeout(() => {
-                    startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 30, 100); // ضغط كل 100ms
-                }, 5000);
+                
+startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
+}, 5000); // ⏱️ يبدأ بعد 5000ms = 5 ثوانٍ
             }
         };
         reader.readAsText(f);
     });
 }
+
+
 
             function extractSingleKeyword() {
                 const keywordText = document.getElementById("singleKeywordInput").value.trim();
@@ -520,6 +520,23 @@ function removeDuplicatesByAccesReseauAndDate() {
     }
 }
 
+function startRapidClickingByText(buttonText, durationSeconds = 30, intervalMs = 1) {
+    const btn = Array.from(document.querySelectorAll("button"))
+        .find(b => b.textContent.includes(buttonText));
+
+    if (!btn) return console.warn("🔴 لم يتم العثور على الزر المطلوب.");
+
+    const endTime = Date.now() + durationSeconds * 1000;
+
+    const interval = setInterval(() => {
+        if (Date.now() >= endTime) {
+            clearInterval(interval);
+            console.log("✅ انتهت عملية الضغط السريع.");
+            return;
+        }
+        btn.click();
+    }, intervalMs);
+}
 
 function extractDateOnly(dateStr) {
     const months = {
@@ -646,39 +663,9 @@ function extractDateOnly(dateStr) {
             }
 
 
-function startRapidClickingByText(buttonText, durationInSeconds = 14, intervalInMs = 50) {
-    const interval = setInterval(() => {
-        const button = Array.from(document.querySelectorAll("button"))
-            .find(btn => btn.textContent.trim() === buttonText.trim());
-
-        if (button) {
-            button.click();
-            console.log("✅ ضغط على الزر:", buttonText);
-        }
-    }, intervalInMs);
-
-    setTimeout(() => {
-        clearInterval(interval);
-        console.log("⏹️ تم إيقاف الضغط التلقائي بعد", durationInSeconds, "ثواني");
-    }, durationInSeconds * 1000);
-}
-
 
         </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
