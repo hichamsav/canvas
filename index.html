@@ -217,18 +217,17 @@ function mergeFolderTxt() {
         reader.onload = e => {
             merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
             processed++;
-            if (processed === files.length) {
-                originalMergedContent = merged;
-                document.getElementById("filteredOutput").value = merged;
-                extractSingleKeyword();
-                
-startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
-}, 5000); // ⏱️ يبدأ بعد 5000ms = 5 ثوانٍ
-            }
-        };
-        reader.readAsText(f);
-    });
+if (processed === files.length) {
+    originalMergedContent = merged;
+    document.getElementById("filteredOutput").value = merged;
+    extractSingleKeyword();
+
+    // ⏱️ نبدأ الضغط التلقائي بعد 5 ثوانٍ فقط بعد انتهاء الاستخراج
+    setTimeout(() => {
+        startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
+    }, 5000);
 }
+
 
 
 
@@ -667,6 +666,7 @@ function extractDateOnly(dateStr) {
         </script>
 </body>
 </html>
+
 
 
 
