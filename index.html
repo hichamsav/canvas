@@ -205,26 +205,35 @@ function mergeFolderTxt() {
                 document.getElementById("filteredOutput").value = merged;
                 extractSingleKeyword();
 
-                // ⏱️ بدء العداد التنازلي
-                let countdown = 0;
+                // ⏱️ عداد تنازلي 3 ثواني
+                let countdown = 1;
                 const countdownEl = document.getElementById("countdown");
-                countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
+                if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ...`;
 
                 const timer = setInterval(() => {
                     countdown--;
                     if (countdown > 0) {
-                        countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثواني...`;
+                        if (countdownEl) countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ...`;
                     } else {
                         clearInterval(timer);
-                        countdownEl.textContent = ""; // إزالة العداد
-                        removeDuplicatesAndAutoCopy(); // تنفيذ النسخ التلقائي
+                        if (countdownEl) countdownEl.textContent = "";
+
+                        // ✅ تنفيذ النسخ
+                        removeDuplicatesAndAutoCopy();
+
+                        // ✅ بعد ثانية، نعيد الضغط على نفس زر "دمج الملفات"
+                        setTimeout(() => {
+                            const mergeButton = document.querySelector('button[onclick="mergeFolderTxt()"]');
+                            if (mergeButton) mergeButton.click();
+                        }, 1000); // ⏲️ copy all
                     }
-                }, 1000); // كل ثانية
+                }, 1000);
             }
         };
         reader.readAsText(f);
     });
 }
+
 
 
             function extractSingleKeyword() {
@@ -560,6 +569,7 @@ function mergeFolderTxt() {
         </script>
 </body>
 </html>
+
 
 
 
