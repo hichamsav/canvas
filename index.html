@@ -168,11 +168,12 @@
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
     <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
     <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
-    <span id="countdown" style="font-weight: bold; color: red; font-size: 14px;"></span>
+    <span id="countdown" style="font-weight: bold; color: red; font-size: 14px; margin-right: 10px;"></span>
 </div>
+
 
 
         <script>
@@ -183,44 +184,47 @@
 
             let originalMergedContent = "";
 
-            function mergeFolderTxt() {
-                const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
-                if (!files.length) { alert("يرجى اختيار مجلد يحتوي على ملفات .txt."); return; }
-                files.sort((a, b) => a.name.localeCompare(b.name));
-                let merged = "";
-                let processed = 0;
-                files.forEach(f => {
-                    const reader = new FileReader();
-                    reader.onload = e => {
-                        merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
-                        processed++;
-if (processed === files.length) {
-    originalMergedContent = merged;
-    document.getElementById("filteredOutput").value = merged;
-    extractSingleKeyword();
+function mergeFolderTxt() {
+    const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
+    if (!files.length) {
+        alert("يرجى اختيار مجلد يحتوي على ملفات .txt.");
+        return;
+    }
 
-    let countdown = 15;
-    const countdownEl = document.getElementById("countdown");
-    countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
+    files.sort((a, b) => a.name.localeCompare(b.name));
+    let merged = "";
+    let processed = 0;
 
-    const timer = setInterval(() => {
-        countdown--;
-        if (countdown > 0) {
-            countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
-        } else {
-            clearInterval(timer);
-            countdownEl.textContent = "";
-            removeDuplicatesAndAutoCopy();
-        }
-    }, 1000); // كل ثانية
-}
+    files.forEach(f => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
+            processed++;
+            if (processed === files.length) {
+                originalMergedContent = merged;
+                document.getElementById("filteredOutput").value = merged;
+                extractSingleKeyword();
 
-}
+                // ⏱️ بدء العداد التنازلي
+                let countdown = 15;
+                const countdownEl = document.getElementById("countdown");
+                countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
 
-                    };
-                    reader.readAsText(f);
-                });
+                const timer = setInterval(() => {
+                    countdown--;
+                    if (countdown > 0) {
+                        countdownEl.textContent = `⬇️ سيتم النسخ التلقائي خلال ${countdown} ثانية...`;
+                    } else {
+                        clearInterval(timer);
+                        countdownEl.textContent = ""; // إزالة العداد
+                        removeDuplicatesAndAutoCopy(); // تنفيذ النسخ التلقائي
+                    }
+                }, 1000); // كل ثانية
             }
+        };
+        reader.readAsText(f);
+    });
+}
 
 
             function extractSingleKeyword() {
@@ -556,5 +560,6 @@ if (processed === files.length) {
         </script>
 </body>
 </html>
+
 
 
