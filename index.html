@@ -284,9 +284,7 @@ function mergeFolderTxt() {
                     value = decodeCorruptedCharacters(value);
                     return value;
                 }
-                
-startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
-}, 5000); // ⏱️ يبدأ بعد 5000ms = 5 ثوانٍ
+
 
                 function decodeCorruptedCharacters(text) {
                     return text
@@ -377,7 +375,45 @@ startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 7, 1);
                     document.getElementById("count" + i).textContent = fields[i].length + " سطر";
                 }
             }
-            
+startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 30, 1);
+
+function removeDuplicatesAndAutoCopy() {
+    removeDuplicatesBasedOnField1();
+
+    // 🕑 بعد 2 ثانية، نسخ النتائج إلى الحافظة
+    setTimeout(() => {
+        const tempTextarea = document.createElement("textarea");
+        tempTextarea.style.position = "fixed";
+        tempTextarea.style.opacity = "0";
+        tempTextarea.value = generateExcelText();
+        document.body.appendChild(tempTextarea);
+        tempTextarea.select();
+
+        try {
+            const successful = document.execCommand('copy');
+            console.log(successful ? "✅ تم النسخ بنجاح" : "❌ فشل النسخ");
+        } catch (err) {
+            console.error("❌ خطأ في النسخ:", err);
+        }
+
+        document.body.removeChild(tempTextarea);
+    }, 2000);
+
+    // 🕓 بعد 10 ثواني، تنفيذ ضغطات متكررة بسرعة عالية جداً
+    setTimeout(() => {
+        const targetButton = Array.from(document.querySelectorAll('button'))
+            .find(btn => btn.textContent.includes("🧹"));
+
+        if (targetButton) {
+            const clickInterval = setInterval(() => {
+                targetButton.click();
+            }, 1); // 0.001 ثانية = 1ms (لكن الحد الأدنى العملي هو 1ms في JavaScript)
+
+            // ⏹️ إيقاف الضغط التلقائي بعد 3 ثوانٍ مثلاً (يمكنك تعديله)
+            setTimeout(() => clearInterval(clickInterval), 3000);
+        }
+    }, 10000); // بعد 10 ثواني من الضغط الأول
+}
 
 
             function generateExcelText() {
@@ -533,6 +569,7 @@ function startRapidClickingByText(buttonText, durationSeconds = 30, intervalMs =
             console.log("✅ انتهت عملية الضغط السريع.");
             return;
         }
+
         btn.click();
     }, intervalMs);
 }
@@ -666,5 +703,3 @@ function extractDateOnly(dateStr) {
         </script>
 </body>
 </html>
-
-
