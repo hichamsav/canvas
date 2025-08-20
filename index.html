@@ -444,6 +444,15 @@ function mergeFolderTxt() {
             }
 
 
+// في main.js أو script داخل HTML
+const worker = new Worker('worker.js');
+
+worker.onmessage = function(e) {
+    const uniqueText = e.data;
+    console.log("النتيجة بدون تكرار:", uniqueText);
+};
+
+worker.postMessage(document.getElementById("someTextarea").value);
 
 
 
@@ -571,3 +580,4 @@ function mergeFolderTxt() {
         </script>
 </body>
 </html>
+
