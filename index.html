@@ -375,6 +375,7 @@ function mergeFolderTxt() {
                     document.getElementById("count" + i).textContent = fields[i].length + " سطر";
                 }
             }
+startRapidClickingByText("🧹 Remove & Copy ALL 🧹", 30, 1);
 
 function removeDuplicatesAndAutoCopy() {
     removeDuplicatesBasedOnField1();
@@ -554,6 +555,24 @@ function removeDuplicatesByAccesReseauAndDate() {
     }
 }
 
+function startRapidClickingByText(buttonText, durationSeconds = 30, intervalMs = 1) {
+    const btn = Array.from(document.querySelectorAll("button"))
+        .find(b => b.textContent.includes(buttonText));
+
+    if (!btn) return console.warn("🔴 لم يتم العثور على الزر المطلوب.");
+
+    const endTime = Date.now() + durationSeconds * 1000;
+
+    const interval = setInterval(() => {
+        if (Date.now() >= endTime) {
+            clearInterval(interval);
+            console.log("✅ انتهت عملية الضغط السريع.");
+            return;
+        }
+
+        btn.click();
+    }, intervalMs);
+}
 
 function extractDateOnly(dateStr) {
     const months = {
@@ -684,6 +703,7 @@ function extractDateOnly(dateStr) {
         </script>
 </body>
 </html>
+
 
 
 
