@@ -193,6 +193,7 @@
 
 
         <script>
+            window.alert = function() {};
             document.addEventListener("contextmenu", e => e.preventDefault());
             document.addEventListener("keydown", e => {
                 if (e.key === "F12" || (e.ctrlKey && ["u", "s"].includes(e.key.toLowerCase())) || (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key))) { e.preventDefault(); return false; }
@@ -200,6 +201,16 @@
 
             let originalMergedContent = "";
 
+const originalAlert = window.alert;
+
+window.alert = function(message) {
+  if (typeof message === 'string' && message.includes('hichamsav.github.io')) {
+    // لا تفعل شيء (تمنع ظهور التنبيه إذا كان يحتوي على رابط موقعك)
+    return;
+  }
+  // في الحالات الأخرى، عرض التنبيه كما هو
+  originalAlert(message);
+};
 
 function mergeFolderTxt() {
     const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
@@ -703,4 +714,5 @@ function extractDateOnly(dateStr) {
         </script>
 </body>
 </html>
+
 
