@@ -132,7 +132,7 @@
 <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Reçu le,Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
         <button onclick="extractSingleKeyword()">🔎 استخراج</button>
 <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
@@ -332,7 +332,7 @@ function mergeFolderTxt() {
                     const line = text[i].trim();
 
                     // الحقل 0 - Envoyé أو Sent
-                    const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent"]);
+                    const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent","Reçu le"]);
                     if (envoyKey) {
                         current[0] = cleanValue(line, envoyKey);
                     }
@@ -662,6 +662,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
