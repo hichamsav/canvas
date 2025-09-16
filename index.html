@@ -527,9 +527,16 @@ function isSimilar(word1, word2, threshold = 2) {
 }
 
 function getValidLocationFromAddress(address) {
-    const validLocations = ["laayoune", "casablanca", "tetouan"];
+    const validLocations = ["laayoune", "casablanca","tetouan"];
     const corrections = {
         "casabalnca": "Casablanca",
+         "casa": "Casablanca",
+        "casablana": "Casablanca",
+        "casablanc": "Casablanca",
+        "laayoun": "Laayoune",
+        "laayoune": "Laayoune",
+        "tétouan": "Tetouan",
+        "tetouan": "Tetouan"
     };
 
     if (!address || address.trim() === "") return "Sans Adresse";
@@ -608,5 +615,6 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
