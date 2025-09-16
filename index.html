@@ -279,126 +279,133 @@ function mergeFolderTxt() {
             function startsWithAny(line, keywords) {
                 return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
             }
-            function filterAndDistribute() {
-                const text = document.getElementById('singleKeywordOutput').value.split("\n");
-                const fields = [[], [], [], [], [], [], []];
-                let current = {};
 
-                function cleanValue(line, keyword) {
-                    let value = "";
+function filterAndDistribute() {
+    const text = document.getElementById('singleKeywordOutput').value.split("\n");
+    const fields = [[], [], [], [], [], [], []];
+    let current = {};
+    let adresseInCurrentRecord = "";  // نحتفظ بـ Adresse لهذا السجل
+    let inRecord = false; // هل نحن داخل سجل؟
 
-                    if (line.includes(":")) {
-                        value = line.split(":").slice(1).join(":").trim();
-                    } else {
-                        value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
-                    }
+    function cleanValue(line, keyword) {
+        let value = "";
 
-                    value = decodeCorruptedCharacters(value);
-                    return value;
-                }
+        if (line.includes(":")) {
+            value = line.split(":").slice(1).join(":").trim();
+        } else {
+            value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
+        }
 
-
-                function decodeCorruptedCharacters(text) {
-                    return text
-                        .replace(/�/g, "é")
-                        .replace(/Ã©/g, "é")
-                        .replace(/Ã¨/g, "è")
-                        .replace(/Ã/g, "à")
-                        .replace(/Ã´/g, "ô")
-                        .replace(/Ãª/g, "ê")
-                        .replace(/Ã¢/g, "â")
-                        .replace(/Ã¼/g, "ü")
-                        .replace(/Ã§/g, "ç")
-                        .replace(/Â/g, "")
-                        .replace(/[^\x00-\x7F]/g, c => c);
-                }
-
-                function normalizePhone(phone) {
-                    return phone.startsWith("0") ? phone.substring(1) : phone;
-                }
-
-                // ✅ دالة جديدة تتحقق من أن الكلمة في أول السطر ومتبوعة بـ :
-                function startsWithAnyStrict(line, keywords) {
-                    line = line.trimStart(); // إزالة الفراغات من بداية السطر
-                    for (let keyword of keywords) {
-                        const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
-                        if (regex.test(line)) return keyword;
-                    }
-                    return null;
-                }
-
-for (let i = 0; i < text.length; i++) {
-    const line = text[i].trim();
-
-    // الحقل 0 - Envoyé أو Sent
-    const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent","Reçu le"]);
-    if (envoyKey) {
-        current[0] = cleanValue(line, envoyKey);
+        value = decodeCorruptedCharacters(value);
+        return value;
     }
-    // الحقل 1 - ID CASE
-    else if (startsWithAnyStrict(line, ["ID CASE"])) {
-        current[1] = cleanValue(line, "ID CASE");
+
+    function decodeCorruptedCharacters(text) {
+        return text
+            .replace(/�/g, "é")
+            .replace(/Ã©/g, "é")
+            .replace(/Ã¨/g, "è")
+            .replace(/Ã/g, "à")
+            .replace(/Ã´/g, "ô")
+            .replace(/Ãª/g, "ê")
+            .replace(/Ã¢/g, "â")
+            .replace(/Ã¼/g, "ü")
+            .replace(/Ã§/g, "ç")
+            .replace(/Â/g, "")
+            .replace(/[^\x00-\x7F]/g, c => c);
     }
-    // الحقل 2 - Client
-    else if (startsWithAnyStrict(line, ["Client"])) {
-        current[2] = cleanValue(line, "Client");
+
+    function normalizePhone(phone) {
+        return phone.startsWith("0") ? phone.substring(1) : phone;
     }
-    // الحقل 3 - Téléphone
-    else if (startsWithAnyStrict(line, ["T�l�phone", "Téléphone"])) {
+
+    function startsWithAnyStrict(line, keywords) {
+        line = line.trimStart();
+        for (let keyword of keywords) {
+            const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
+            if (regex.test(line)) return keyword;
+        }
+        return null;
+    }
+
+    for (let i = 0; i < text.length; i++) {
+        const line = text[i].trim();
+
+        // نبدأ سجل جديد عندما نلتقط ID CASE
+        if (startsWithAnyStrict(line, ["ID CASE"])) {
+            inRecord = true;
+            adresseInCurrentRecord = "";  // إعادة تعيين العنوان في بداية السجل
+        }
+
+        // الحقل 0 - Envoyé أو Sent
+        const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent", "Reçu le"]);
+        if (envoyKey) {
+            current[0] = cleanValue(line, envoyKey);
+        }
+        // الحقل 1 - ID CASE
+        else if (startsWithAnyStrict(line, ["ID CASE"])) {
+            current[1] = cleanValue(line, "ID CASE");
+        }
+        // الحقل 2 - Client
+        else if (startsWithAnyStrict(line, ["Client"])) {
+            current[2] = cleanValue(line, "Client");
+        }
+        // الحقل 3 - Téléphone
         const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
-        current[3] = normalizePhone(cleanValue(line, telKey));
-    }
-    // الحقل 4 - Accès réseau
-    else if (startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"])) {
+        if (telKey) {
+            current[3] = normalizePhone(cleanValue(line, telKey));
+        }
+        // الحقل 4 - Accès réseau
         const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
-        current[4] = normalizePhone(cleanValue(line, reseauKey));
-    }
-    // الحقل 5 - Activités de service
-    else if (startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"])) {
+        if (reseauKey) {
+            current[4] = normalizePhone(cleanValue(line, reseauKey));
+        }
+        // الحقل 5 - Activités de service
         const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
-        let rawValue = cleanValue(line, activitesKey);
-        let parts = rawValue.split("|");
-        let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-        lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-        current[5] = lastPart;
-    }
-    // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
-    else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
-        let adresseInstallationValue = cleanValue(line, "Adresse Installation");
+        if (activitesKey) {
+            let rawValue = cleanValue(line, activitesKey);
+            let parts = rawValue.split("|");
+            let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+            lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+            current[5] = lastPart;
+        }
 
-        // ننظر للسطر السابق لنرى هل فيه adresse (أي يبدأ بـ adresse أو -adresse)
-        let adresseValue = "";
-        if (i > 0) {
-            let prevLine = text[i - 1].trim().toLowerCase();
-            if (prevLine.match(/^[-]*adresse\s*:/)) {
-                // استخراج القيمة من السطر السابق
-                adresseValue = cleanValue(text[i - 1], "adresse");
+        // تخزين Adresse إذا وجدناها ضمن السجل (بين ID CASE و Adresse Installation)
+        if (startsWithAnyStrict(line, ["Adresse"])) {
+            if (inRecord) {
+                adresseInCurrentRecord = cleanValue(line, "Adresse");
             }
         }
 
-        // إذا كان Adresse Installation فارغ، نستخدم adresse إذا وجد
-        if (!adresseInstallationValue && adresseValue) {
-            adresseInstallationValue = adresseValue;
-        }
+        // الحقل 6 - Adresse Installation ← نهاية السجل
+        if (startsWithAnyStrict(line, ["Adresse Installation"])) {
+            let adresseInstallationValue = cleanValue(line, "Adresse Installation");
 
-        current[6] = adresseInstallationValue;
+            // إذا كانت Adresse Installation فارغة، نستخدم adresseInCurrentRecord فقط إذا موجودة
+            if (!adresseInstallationValue && adresseInCurrentRecord) {
+                adresseInstallationValue = adresseInCurrentRecord;
+            }
 
-        // نسجّل السطر الحالي في الأعمدة السبعة
-        for (let j = 0; j <= 6; j++) {
-            fields[j].push(current[j] || "");
+            current[6] = adresseInstallationValue;
+
+            // نسجل السجل كاملاً
+            for (let j = 0; j <= 6; j++) {
+                fields[j].push(current[j] || "");
+            }
+
+            // إعادة تعيين المتغيرات لنبدأ سجل جديد
+            current = {};
+            adresseInCurrentRecord = "";
+            inRecord = false;  // انتهى السجل
         }
-        current = {}; // إعادة تعيين السجل
+    }
+
+    // عرض النتائج
+    for (let i = 0; i <= 6; i++) {
+        document.getElementById("field" + i).value = fields[i].join("\n");
+        document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
-
-                
-
-                // عرض النتائج في الواجهة
-                for (let i = 0; i <= 6; i++) {
-                    document.getElementById("field" + i).value = fields[i].join("\n");
-                    document.getElementById("count" + i).textContent = fields[i].length + " سطر";
-                }
-            }
 
 
 
@@ -674,5 +681,6 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
