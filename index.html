@@ -284,8 +284,8 @@ function filterAndDistribute() {
     const text = document.getElementById('singleKeywordOutput').value.split("\n");
     const fields = Array.from({ length: 7 }, () => []);
     let current = {};
-    let adresseValue = "";  // لتخزين Adresse للسجل الحالي
-    let villeValue = "";    // لتخزين Ville للسجل الحالي
+    let adresseValue = "";
+    let villeValue = "";
 
     function cleanValue(line, keyword) {
         let value = "";
@@ -298,21 +298,19 @@ function filterAndDistribute() {
         return value;
     }
 
-function decodeCorruptedCharacters(text) {
-    return text
-        .replace(/�/g, "é")
-        .replace(/Ã©/g, "é")
-        .replace(/Ã¨/g, "è")
-        .replace(/Ã/g, "à")
-        .replace(/Ã´/g, "ô")
-        .replace(/Ãª/g, "ê")
-        .replace(/Ã¢/g, "â")
-        .replace(/Ã¼/g, "ü")
-        .replace(/Ã§/g, "ç")
-        .replace(/Â/g, "");
-        // تم حذف السطر الذي يحذف الحروف غير ASCII
-}
-
+    function decodeCorruptedCharacters(text) {
+        return text
+            .replace(/�/g, "é")
+            .replace(/Ã©/g, "é")
+            .replace(/Ã¨/g, "è")
+            .replace(/Ã/g, "à")
+            .replace(/Ã´/g, "ô")
+            .replace(/Ãª/g, "ê")
+            .replace(/Ã¢/g, "â")
+            .replace(/Ã¼/g, "ü")
+            .replace(/Ã§/g, "ç")
+            .replace(/Â/g, "");
+    }
 
     function normalizePhone(phone) {
         return phone.startsWith("0") ? phone.substring(1) : phone;
@@ -330,25 +328,21 @@ function decodeCorruptedCharacters(text) {
     for (let i = 0; i < text.length; i++) {
         const line = text[i].trim();
 
-        // بداية سجل جديد (ID CASE) → إعادة تعيين adresseValue و villeValue
         if (startsWithAnyStrict(line, ["ID CASE"])) {
             adresseValue = "";
             villeValue = "";
         }
 
-        // تخزين Adresse إذا وجدناه
         if (startsWithAnyStrict(line, ["Adresse"])) {
             adresseValue = cleanValue(line, "Adresse");
             continue;
         }
 
-        // تخزين Ville إذا وجدناه
         if (startsWithAnyStrict(line, ["Ville"])) {
             villeValue = cleanValue(line, "Ville");
             continue;
         }
 
-        // باقي الحقول كما هي
         const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent", "Reçu le"]);
         if (envoyKey) {
             current[0] = cleanValue(line, envoyKey);
@@ -382,23 +376,19 @@ function decodeCorruptedCharacters(text) {
             continue;
         }
 
-        // عند وصول Adresse Installation ← نهاية السجل
         if (startsWithAnyStrict(line, ["Adresse Installation"])) {
             let adresseInstallationValue = cleanValue(line, "Adresse Installation");
 
-            // إذا كانت Adresse Installation فارغة، نعوض بقيمة adresseValue أو villeValue إذا كانت موجودة
             if (!adresseInstallationValue) {
                 adresseInstallationValue = adresseValue || villeValue || "";
             }
 
             current[6] = adresseInstallationValue;
 
-            // تسجيل السجل كاملًا في الحقول
             for (let j = 0; j <= 6; j++) {
                 fields[j].push(current[j] || "");
             }
 
-            // إعادة تعيين current و القيم للمسجل التالي
             current = {};
             adresseValue = "";
             villeValue = "";
@@ -406,23 +396,22 @@ function decodeCorruptedCharacters(text) {
         }
     }
 
-    // تحديث حقول الإدخال والعدادات بالواجهة
     for (let i = 0; i <= 6; i++) {
         document.getElementById("field" + i).value = fields[i].join("\n");
         document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
 
-
-
-function extractDateOnly(dateStr) {
+function parseFrenchDateToDDMMYYYY(str) {
     const months = {
         janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
         juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
         octobre: "10", novembre: "11", décembre: "12", decembre: "12"
     };
 
-    const match = dateStr.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
+    const dateString = str.replace(/^(?:\w+\s+)+(\d{1,2})\s+([a-zéû]+)\s+(\d{4})\s+\d{1,2}:\d{2}$/, '$1 $2 $3');
+
+    const match = dateString.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
 
     if (match) {
         const day = match[1].padStart(2, "0");
@@ -434,37 +423,7 @@ function extractDateOnly(dateStr) {
     return "";
 }
 
-            function copyField(n) { const f = document.getElementById("field" + n); f.select(); document.execCommand("copy"); }
-
-            function getSelectedDate() { return new Date().toLocaleDateString("fr-FR"); }
-
-            function getFirstWord(text) { const w = (text || "").trim().split(/\s+/)[0]; return w ? w : "CASABLANCA"; }
-
-            function parseFrenchDateToDDMMYYYY(str) {
-                const months = {
-                    janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
-                    juin: "06", juillet: "07", aoét: "08", aout: "08", septembre: "09",
-                    octobre: "10", novembre: "11", décembre: "12", decembre: "12"
-                };
-
-                // إزالة اسم اليوم والوقت (المحتوى بعد الوقت)
-                const dateString = str.replace(/^(?:\w+\s+)+(\d{1,2})\s+([a-zéû]+)\s+(\d{4})\s+\d{1,2}:\d{2}$/, '$1 $2 $3');
-
-                const match = dateString.match(/(\d{1,2})\s+([a-zéû]+)\s+(\d{4})/i);
-
-                if (match) {
-                    const day = match[1].padStart(2, "0");
-                    const month = months[match[2].toLowerCase()] || "01";
-                    const year = match[3];
-
-                    return `${day}/${month}/${year}`;
-                }
-
-                return ""; // فارغ إذا لم يتطابق
-            }
-
-
-     function exportToExcel() {
+function exportToExcel() {
     const fieldsData = [], numFields = 7;
     for (let i = 0; i < numFields; i++) {
         fieldsData[i] = document.getElementById("field" + i).value.split("\n");
@@ -535,11 +494,10 @@ function copyExcelData() {
     navigator.clipboard.writeText(text).catch(() => { });
 }
 
-// دالة حساب مسافة ليڤنشتاين (Levenshtein Distance) بسيطة لقياس التشابه
+// دالة لحساب مسافة ليڤنشتاين
 function levenshteinDistance(a, b) {
     const matrix = [];
 
-    // زيادة الطول بمقدار 1 لتضمين الحالة الفارغة
     for (let i = 0; i <= b.length; i++) {
         matrix[i] = [i];
     }
@@ -553,9 +511,9 @@ function levenshteinDistance(a, b) {
                 matrix[i][j] = matrix[i - 1][j - 1];
             } else {
                 matrix[i][j] = Math.min(
-                    matrix[i - 1][j - 1] + 1, // تبديل حرف
-                    matrix[i][j - 1] + 1,     // حذف حرف
-                    matrix[i - 1][j] + 1      // إضافة حرف
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
                 );
             }
         }
@@ -564,7 +522,6 @@ function levenshteinDistance(a, b) {
     return matrix[b.length][a.length];
 }
 
-// دالة تتحقق من التشابه اعتماداً على مسافة Levenshtein
 function isSimilar(word1, word2, threshold = 2) {
     return levenshteinDistance(word1.toLowerCase(), word2.toLowerCase()) <= threshold;
 }
@@ -573,7 +530,6 @@ function getValidLocationFromAddress(address) {
     const validLocations = ["laayoune", "casablanca", "tetouan"];
     const corrections = {
         "casabalnca": "Casablanca",
-        // أضف أخطاء شائعة هنا إذا أردت
     };
 
     if (!address || address.trim() === "") return "Sans Adresse";
@@ -581,19 +537,16 @@ function getValidLocationFromAddress(address) {
     const words = address.trim().split(/\s+/);
     const firstWord = words[0];
 
-    // تحقق من التصحيحات أولاً
     if (corrections[firstWord.toLowerCase()]) {
         return corrections[firstWord.toLowerCase()];
     }
 
-    // تحقق تطابق مباشر أولاً
     for (const loc of validLocations) {
         if (firstWord.toLowerCase() === loc) {
             return capitalizeFirstLetter(loc);
         }
     }
 
-    // تحقق تطابق تقريبي (تشابه مع threshold معين)
     for (const loc of validLocations) {
         for (const word of words) {
             if (isSimilar(word, loc)) {
@@ -602,14 +555,12 @@ function getValidLocationFromAddress(address) {
         }
     }
 
-    // تحقق من وجود كلمات مصححة في السطر
     for (const [wrong, correct] of Object.entries(corrections)) {
         if (address.toLowerCase().includes(wrong)) {
             return correct;
         }
     }
 
-    // لا يوجد تطابق، نرجع أول كلمة كما هي
     return firstWord;
 }
 
@@ -617,16 +568,47 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
+// دالة إزالة التكرار على الحقل 1 (ID CASE)
+function removeDuplicatesBasedOnField1() {
+    const numFields = 7;
+    const fieldsData = [];
 
-       
+    for (let i = 0; i < numFields; i++) {
+        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+    }
 
-function removeDuplicatesAndAutoCopy() {
-    removeDuplicatesBasedOnField1(); // أولاً نحذف التكرارات
-    copyExcelData();                 // ثم ننسخ البيانات بعد التنظيف
+    const seen = new Set();
+    const newFieldsData = Array.from({ length: numFields }, () => []);
+
+    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+
+    for (let r = 0; r < maxRows; r++) {
+        const key = fieldsData[1][r] || "";
+        if (key && !seen.has(key)) {
+            seen.add(key);
+            for (let c = 0; c < numFields; c++) {
+                newFieldsData[c].push(fieldsData[c][r] || "");
+            }
+        }
+    }
+
+    for (let i = 0; i < numFields; i++) {
+        document.getElementById("field" + i).value = newFieldsData[i].join("\n");
+        document.getElementById("count" + i).textContent = newFieldsData[i].length + " سطر";
+    }
 }
+
+// دالة تنضيف التكرار + نسخ البيانات + إشعار المستخدم
+function removeDuplicatesAndAutoCopy() {
+    removeDuplicatesBasedOnField1();
+    copyExcelData();
+    alert("تم تنظيف البيانات ونسخها بنجاح!");
+}
+
         </script>
 </body>
 </html>
+
 
 
 
