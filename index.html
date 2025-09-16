@@ -597,80 +597,103 @@ function extractDateOnly(dateStr) {
             }
 
 
-            function exportToExcel() {
-                const fieldsData = [], numFields = 7;
-                for (let i = 0; i < numFields; i++) {
-                    fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-                }
-                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-                const wsData = [];
+     function exportToExcel() {
+    const fieldsData = [], numFields = 7;
+    for (let i = 0; i < numFields; i++) {
+        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+    }
+    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+    const wsData = [];
 
-                for (let r = 0; r < maxRows; r++) {
-                    const rawDateLine = fieldsData[0][r] || "";  // الحصول على التاريخ
-                    const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
+    for (let r = 0; r < maxRows; r++) {
+        const rawDateLine = fieldsData[0][r] || "";  // الحصول على التاريخ
+        const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
 
-                    // وضع التاريخ المحول فقط في الأعمدة C, D, G, N
-                    wsData[r] = [
-                        fieldsData[1][r] || "",  // A: ID CASE
-                        fieldsData[4][r] || "",  // B: Accès réseau
-                        parsedDate || "",        // C: Envoyé
-                        parsedDate || "",        // D: Envoyé (مكرر)
-                        fieldsData[5][r] || "",  // E: Activités de service
-                        fieldsData[6][r] || "",  // F: Adresse Installation
-                        parsedDate || "",        // G: Envoyé (مكرر)
-                        (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA", // H: الكلمة الأولى من Adresse Installation أو CASABLANCA
-                        fieldsData[3][r] || "",  // I: Téléphone
-                        fieldsData[2][r] || "",  // J: Client
-                        "",                      // K: فراغ
-                        "",                      // L: فراغ
-                        parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
-                    ];
-                }
+        wsData[r] = [
+            fieldsData[1][r] || "",  // A: ID CASE
+            fieldsData[4][r] || "",  // B: Accès réseau
+            parsedDate || "",        // C: Envoyé
+            parsedDate || "",        // D: Envoyé (مكرر)
+            fieldsData[5][r] || "",  // E: Activités de service
+            fieldsData[6][r] || "",  // F: Adresse Installation
+            parsedDate || "",        // G: Envoyé (مكرر)
+            getValidLocationFromAddress(fieldsData[6][r]), // H: الكلمة الأولى أو حسب الفحص الجديد
+            fieldsData[3][r] || "",  // I: Téléphone
+            fieldsData[2][r] || "",  // J: Client
+            "",                      // K: فراغ
+            "",                      // L: فراغ
+            parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
+        ];
+    }
 
-                const ws = XLSX.utils.aoa_to_sheet(wsData);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-                XLSX.writeFile(wb, "extracted_data.xlsx");
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+    XLSX.writeFile(wb, "extracted_data.xlsx");
+}
+
+
+function copyExcelData() {
+    const fieldsData = [], numFields = 7;
+    for (let i = 0; i < numFields; i++) {
+        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+    }
+    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+    let text = "";
+
+    for (let r = 0; r < maxRows; r++) {
+        const rawDate = fieldsData[0][r] || "";
+        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+
+        const location = getValidLocationFromAddress(fieldsData[6][r]);
+
+        const rowData = [
+            fieldsData[1][r] || "",  // A: ID CASE
+            fieldsData[4][r] || "",  // B: Accès réseau
+            parsedDate || "",        // C: Envoyé (التاريخ المحول في العمود C)
+            parsedDate || "",        // D: Envoyé (التاريخ المحول في العمود D)
+            fieldsData[5][r] || "",  // E: Activités de service
+            fieldsData[6][r] || "",  // F: Adresse Installation
+            parsedDate || "",        // G: Envoyé (التاريخ المحول في العمود G)
+            location,                // H: الكلمة الأولى أو حسب الفحص الجديد
+            fieldsData[3][r] || "",  // I: Téléphone
+            fieldsData[2][r] || "",  // J: Client
+            "",                      // K: فراغ
+            "",                      // L: فراغ
+            parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
+        ];
+
+        text += rowData.join("\t") + "\n";
+    }
+
+    navigator.clipboard.writeText(text).catch(() => { });
+}
+
+
+function getValidLocationFromAddress(address) {
+    const validLocations = ["laayoune", "casablanca", "tetouan"];
+    if (!address) return "CASABLANCA";
+
+    const words = address.trim().toLowerCase().split(/\s+/);
+    const firstWord = words[0] || "";
+
+    if (validLocations.includes(firstWord)) {
+        return capitalizeFirstLetter(firstWord);
+    } else {
+        for (const loc of validLocations) {
+            if (address.toLowerCase().includes(loc)) {
+                return capitalizeFirstLetter(loc);
             }
+        }
+    }
 
+    return "CASABLANCA";
+}
 
-            function copyExcelData() {
-                const fieldsData = [], numFields = 7;
-                for (let i = 0; i < numFields; i++) {
-                    fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-                }
-                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-                let text = "";
-
-                for (let r = 0; r < maxRows; r++) {
-                    const rawDate = fieldsData[0][r] || "";
-                    const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
-
-                    const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
-
-                    const rowData = [
-                        fieldsData[1][r] || "",  // A: ID CASE
-                        fieldsData[4][r] || "",  // B: Accès réseau
-                        parsedDate || "",        // C: Envoyé (التاريخ المحول في العمود C)
-                        parsedDate || "",        // D: Envoyé (التاريخ المحول في العمود D)
-                        fieldsData[5][r] || "",  // E: Activités de service
-                        fieldsData[6][r] || "",  // F: Adresse Installation
-                        parsedDate || "",        // G: Envoyé (التاريخ المحول في العمود G)
-                        firstWord,               // H: الكلمة الأولى أو CASABLANCA
-                        fieldsData[3][r] || "",  // I: Téléphone
-                        fieldsData[2][r] || "",  // J: Client
-                        "",                      // K: فراغ
-                        "",                      // L: فراغ
-                        parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
-                    ];
-
-                    text += rowData.join("\t") + "\n";
-                }
-
-                // نسخ المحتويات إلى الحافظة بدون رسائل تنبيه
-                navigator.clipboard.writeText(text)
-                    .catch(() => { }); // تجاهل أي أخطاء بدون إظهار رسائل
-            }
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+       
 
 function removeDuplicatesAndAutoCopy() {
     removeDuplicatesBasedOnField1(); // أولاً نحذف التكرارات
@@ -680,6 +703,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
