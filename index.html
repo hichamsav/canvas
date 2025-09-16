@@ -132,7 +132,7 @@
 <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Reçu le,Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Reçu le,Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Adresse,-Adresse,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
         <button onclick="extractSingleKeyword()">🔎 استخراج</button>
 <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
@@ -370,14 +370,33 @@ function mergeFolderTxt() {
                     }
 
                     // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
-                    else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
-                        current[6] = cleanValue(line, "Adresse Installation");
+else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
+    let adresseInstallationValue = cleanValue(line, "Adresse Installation");
 
-                        // نسجّل السطر الحالي في الأعمدة السبعة
-                        for (let j = 0; j <= 6; j++) {
-                            fields[j].push(current[j] || "");
-                        }
-                        current = {}; // إعادة تعيين السجل
+    // ننظر للسطر السابق لنرى هل فيه adresse (أي يبدأ بـ adresse أو -adresse)
+    let adresseValue = "";
+    if (i > 0) {
+        let prevLine = text[i - 1].trim().toLowerCase();
+        if (prevLine.match(/^[-]*adresse\s*:/)) {
+            // استخراج القيمة من السطر السابق
+            adresseValue = cleanValue(text[i - 1], "adresse");
+        }
+    }
+
+    // إذا كان Adresse Installation فارغ، نستخدم adresse إذا وجد
+    if (!adresseInstallationValue && adresseValue) {
+        adresseInstallationValue = adresseValue;
+    }
+
+    current[6] = adresseInstallationValue;
+
+    // نسجّل السطر الحالي في الأعمدة السبعة
+    for (let j = 0; j <= 6; j++) {
+        fields[j].push(current[j] || "");
+    }
+    current = {}; // إعادة تعيين السجل
+}
+                        
                     }
                 }
 
@@ -662,3 +681,4 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
