@@ -530,46 +530,28 @@ function getValidLocationFromAddress(address) {
     const validLocations = ["laayoune", "casablanca", "tetouan"];
     const corrections = {
         "casabalnca": "Casablanca",
-        "casa": "Casablanca",
-        "casablana": "Casablanca",
-        "casablanc": "Casablanca",
-        "laayoun": "Laayoune",
-        "laayoune": "Laayoune",
-        "tétouan": "Tetouan",
-        "tetouan": "Tetouan"
     };
 
     if (!address || address.trim() === "") return "Sans Adresse";
 
-    const words = address.trim().toLowerCase().split(/\s+/);
+    const words = address.trim().split(/\s+/);
     const firstWord = words[0];
 
-    // تحقق من التصحيحات أولاً
-    for (const word of words) {
-        if (corrections[word]) {
-            return corrections[word];
-        }
+    if (corrections[firstWord.toLowerCase()]) {
+        return corrections[firstWord.toLowerCase()];
     }
 
-    // تحقق من المواقع الصحيحة مباشرة
     for (const loc of validLocations) {
-        if (words.includes(loc)) {
+        if (firstWord.toLowerCase() === loc) {
             return capitalizeFirstLetter(loc);
         }
     }
 
-    // تحقق باستخدام تشابه ليڤنشتاين
     for (const loc of validLocations) {
         for (const word of words) {
             if (isSimilar(word, loc)) {
                 return capitalizeFirstLetter(loc);
             }
-        }
-    }
-
-    return capitalizeFirstLetter(firstWord);
-}
-
         }
     }
 
@@ -626,3 +608,5 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
+
