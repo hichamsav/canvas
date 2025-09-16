@@ -606,58 +606,23 @@ function extractDateOnly(dateStr) {
     const wsData = [];
 
     for (let r = 0; r < maxRows; r++) {
-        const rawDateLine = fieldsData[0][r] || "";  // الحصول على التاريخ
+        const rawDateLine = fieldsData[0][r] || "";
         const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
 
         wsData[r] = [
-            fieldsData[1][r] || "",  // A: ID CASE
-            fieldsData[4][r] || "",  // B: Accès réseau
-            parsedDate || "",        // C: Envoyé
-            parsedDate || "",        // D: Envoyé (مكرر)
-            fieldsData[5][r] || "",  // E: Activités de service
-            fieldsData[6][r] || "",  // F: Adresse Installation
-            parsedDate || "",        // G: Envoyé (مكرر)
-            getValidLocationFromAddress(fieldsData[6][r]), // H: الكلمة الأولى أو حسب الفحص الجديد
-            fieldsData[3][r] || "",  // I: Téléphone
-            fieldsData[2][r] || "",  // J: Client
-            "",                      // K: فراغ
-            "",                      // L: فراغ
-            parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
-        ];
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "extracted_data.xlsx");
-}
-
-function exportToExcel() {
-    const fieldsData = [], numFields = 7;
-    for (let i = 0; i < numFields; i++) {
-        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-    }
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    const wsData = [];
-
-    for (let r = 0; r < maxRows; r++) {
-        const rawDateLine = fieldsData[0][r] || "";  // الحصول على التاريخ
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
-
-        wsData[r] = [
-            fieldsData[1][r] || "",  // A: ID CASE
-            fieldsData[4][r] || "",  // B: Accès réseau
-            parsedDate || "",        // C: Envoyé
-            parsedDate || "",        // D: Envoyé (مكرر)
-            fieldsData[5][r] || "",  // E: Activités de service
-            fieldsData[6][r] || "",  // F: Adresse Installation
-            parsedDate || "",        // G: Envoyé (مكرر)
-            getValidLocationFromAddress(fieldsData[6][r]), // H: حسب الشروط الجديدة
-            fieldsData[3][r] || "",  // I: Téléphone
-            fieldsData[2][r] || "",  // J: Client
-            "",                      // K: فراغ
-            "",                      // L: فراغ
-            parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
+            fieldsData[1][r] || "",
+            fieldsData[4][r] || "",
+            parsedDate || "",
+            parsedDate || "",
+            fieldsData[5][r] || "",
+            fieldsData[6][r] || "",
+            parsedDate || "",
+            getValidLocationFromAddress(fieldsData[6][r]),
+            fieldsData[3][r] || "",
+            fieldsData[2][r] || "",
+            "",
+            "",
+            parsedDate || ""
         ];
     }
 
@@ -682,19 +647,19 @@ function copyExcelData() {
         const location = getValidLocationFromAddress(fieldsData[6][r]);
 
         const rowData = [
-            fieldsData[1][r] || "",  // A: ID CASE
-            fieldsData[4][r] || "",  // B: Accès réseau
-            parsedDate || "",        // C: Envoyé (التاريخ المحول في العمود C)
-            parsedDate || "",        // D: Envoyé (التاريخ المحول في العمود D)
-            fieldsData[5][r] || "",  // E: Activités de service
-            fieldsData[6][r] || "",  // F: Adresse Installation
-            parsedDate || "",        // G: Envoyé (التاريخ المحول في العمود G)
-            location,                // H: حسب الشروط الجديدة
-            fieldsData[3][r] || "",  // I: Téléphone
-            fieldsData[2][r] || "",  // J: Client
-            "",                      // K: فراغ
-            "",                      // L: فراغ
-            parsedDate || ""         // N: التاريخ بصيغة DD/MM/YYYY
+            fieldsData[1][r] || "",
+            fieldsData[4][r] || "",
+            parsedDate || "",
+            parsedDate || "",
+            fieldsData[5][r] || "",
+            fieldsData[6][r] || "",
+            parsedDate || "",
+            location,
+            fieldsData[3][r] || "",
+            fieldsData[2][r] || "",
+            "",
+            "",
+            parsedDate || ""
         ];
 
         text += rowData.join("\t") + "\n";
@@ -703,33 +668,88 @@ function copyExcelData() {
     navigator.clipboard.writeText(text).catch(() => { });
 }
 
-function getValidLocationFromAddress(address) {
-    const validLocations = ["laayoune", "casablanca", "tetouan"];
-    if (!address || address.trim() === "") return "Sans Adresse";
+// دالة حساب مسافة ليڤنشتاين (Levenshtein Distance) بسيطة لقياس التشابه
+function levenshteinDistance(a, b) {
+    const matrix = [];
 
-    const lowerAddress = address.toLowerCase().trim();
-    const words = address.trim().split(/\s+/); // الكلمات بالحالة الأصلية
-    const firstWordLower = words[0].toLowerCase();
+    // زيادة الطول بمقدار 1 لتضمين الحالة الفارغة
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
 
-    if (validLocations.includes(firstWordLower)) {
-        // أول كلمة ضمن القائمة نرجعها مع أول حرف كبير
-        return capitalizeFirstLetter(firstWordLower);
-    } else {
-        // نبحث في السطر بالكامل عن أي كلمة من validLocations
-        for (const loc of validLocations) {
-            if (lowerAddress.includes(loc)) {
-                return loc; // نرجع الكلمة كما هي من القائمة (lowercase)
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1, // تبديل حرف
+                    matrix[i][j - 1] + 1,     // حذف حرف
+                    matrix[i - 1][j] + 1      // إضافة حرف
+                );
             }
         }
     }
 
-    // إذا لم نجد أي من الكلمات الثلاث، نرجع أول كلمة كما هي (بحالتها الأصلية)
-    return words[0];
+    return matrix[b.length][a.length];
+}
+
+// دالة تتحقق من التشابه اعتماداً على مسافة Levenshtein
+function isSimilar(word1, word2, threshold = 2) {
+    return levenshteinDistance(word1.toLowerCase(), word2.toLowerCase()) <= threshold;
+}
+
+function getValidLocationFromAddress(address) {
+    const validLocations = ["laayoune", "casablanca", "tetouan"];
+    const corrections = {
+        "casabalnca": "Casablanca",
+        // أضف أخطاء شائعة هنا إذا أردت
+    };
+
+    if (!address || address.trim() === "") return "Sans Adresse";
+
+    const words = address.trim().split(/\s+/);
+    const firstWord = words[0];
+
+    // تحقق من التصحيحات أولاً
+    if (corrections[firstWord.toLowerCase()]) {
+        return corrections[firstWord.toLowerCase()];
+    }
+
+    // تحقق تطابق مباشر أولاً
+    for (const loc of validLocations) {
+        if (firstWord.toLowerCase() === loc) {
+            return capitalizeFirstLetter(loc);
+        }
+    }
+
+    // تحقق تطابق تقريبي (تشابه مع threshold معين)
+    for (const loc of validLocations) {
+        for (const word of words) {
+            if (isSimilar(word, loc)) {
+                return capitalizeFirstLetter(loc);
+            }
+        }
+    }
+
+    // تحقق من وجود كلمات مصححة في السطر
+    for (const [wrong, correct] of Object.entries(corrections)) {
+        if (address.toLowerCase().includes(wrong)) {
+            return correct;
+        }
+    }
+
+    // لا يوجد تطابق، نرجع أول كلمة كما هي
+    return firstWord;
 }
 
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
 
        
 
@@ -741,6 +761,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
