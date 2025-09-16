@@ -132,7 +132,7 @@
 <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Reçu le,Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Adresse,-Adresse,Activités de service,Commentaire,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Reçu le,Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Adresse,-Adresse,ville,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
         <button onclick="extractSingleKeyword()">🔎 استخراج</button>
 <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
@@ -282,19 +282,18 @@ function mergeFolderTxt() {
 
 function filterAndDistribute() {
     const text = document.getElementById('singleKeywordOutput').value.split("\n");
-    const fields = [[], [], [], [], [], [], []];
+    const fields = Array.from({ length: 7 }, () => []);
     let current = {};
     let adresseValue = "";  // لتخزين Adresse للسجل الحالي
+    let villeValue = "";    // لتخزين Ville للسجل الحالي
 
     function cleanValue(line, keyword) {
         let value = "";
-
         if (line.includes(":")) {
             value = line.split(":").slice(1).join(":").trim();
         } else {
             value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
         }
-
         value = decodeCorruptedCharacters(value);
         return value;
     }
@@ -311,7 +310,7 @@ function filterAndDistribute() {
             .replace(/Ã¼/g, "ü")
             .replace(/Ã§/g, "ç")
             .replace(/Â/g, "")
-            .replace(/[^\x00-\x7F]/g, c => c);
+            .replace(/[^\x00-\x7F]/g, "");
     }
 
     function normalizePhone(phone) {
@@ -330,15 +329,22 @@ function filterAndDistribute() {
     for (let i = 0; i < text.length; i++) {
         const line = text[i].trim();
 
-        // كلما بدأ سجل جديد (ID CASE) نعيد تعيين adresseValue
+        // بداية سجل جديد (ID CASE) → إعادة تعيين adresseValue و villeValue
         if (startsWithAnyStrict(line, ["ID CASE"])) {
             adresseValue = "";
+            villeValue = "";
         }
 
-        // تخزين قيمة Adresse إذا وجدنا السطر
+        // تخزين Adresse إذا وجدناه
         if (startsWithAnyStrict(line, ["Adresse"])) {
             adresseValue = cleanValue(line, "Adresse");
-            continue;  // نتابع السطر التالي مباشرة
+            continue;
+        }
+
+        // تخزين Ville إذا وجدناه
+        if (startsWithAnyStrict(line, ["Ville"])) {
+            villeValue = cleanValue(line, "Ville");
+            continue;
         }
 
         // باقي الحقول كما هي
@@ -379,173 +385,33 @@ function filterAndDistribute() {
         if (startsWithAnyStrict(line, ["Adresse Installation"])) {
             let adresseInstallationValue = cleanValue(line, "Adresse Installation");
 
-            // إذا كانت Adresse Installation فارغة، نعوض بقيمة adresseValue إذا كانت موجودة
-            if (!adresseInstallationValue && adresseValue) {
-                adresseInstallationValue = adresseValue;
+            // إذا كانت Adresse Installation فارغة، نعوض بقيمة adresseValue أو villeValue إذا كانت موجودة
+            if (!adresseInstallationValue) {
+                adresseInstallationValue = adresseValue || villeValue || "";
             }
 
             current[6] = adresseInstallationValue;
 
-            // نسجل السجل كاملًا
+            // تسجيل السجل كاملًا في الحقول
             for (let j = 0; j <= 6; j++) {
                 fields[j].push(current[j] || "");
             }
 
-            // إعادة تعيين current للسجل التالي
+            // إعادة تعيين current و القيم للمسجل التالي
             current = {};
             adresseValue = "";
+            villeValue = "";
             continue;
         }
     }
 
-    // عرض النتائج
+    // تحديث حقول الإدخال والعدادات بالواجهة
     for (let i = 0; i <= 6; i++) {
         document.getElementById("field" + i).value = fields[i].join("\n");
         document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
 
-
-
-
-            function generateExcelText() {
-                const fieldsData = [], numFields = 7;
-                for (let i = 0; i < numFields; i++) {
-                    fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-                }
-                const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-                let text = "";
-
-                for (let r = 0; r < maxRows; r++) {
-                    const rawDate = fieldsData[0][r] || "";
-                    const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
-
-                    const firstWord = (fieldsData[6][r] || "").trim().split(/\s+/)[0] || "CASABLANCA";
-
-                    const rowData = [
-                        fieldsData[1][r] || "",  // A: ID CASE
-                        fieldsData[4][r] || "",  // B: Accès réseau
-                        parsedDate || "",        // C
-                        parsedDate || "",        // D
-                        fieldsData[5][r] || "",  // E
-                        fieldsData[6][r] || "",  // F
-                        parsedDate || "",        // G
-                        firstWord,               // H
-                        fieldsData[3][r] || "",  // I
-                        fieldsData[2][r] || "",  // J
-                        "", "", parsedDate || "" // K, L, N
-                    ];
-
-                    text += rowData.join("\t") + "\n";
-                }
-
-                return text;
-            }
-
-
-// في main.js أو script داخل HTML
-const worker = new Worker('worker.js');
-
-worker.onmessage = function(e) {
-    const uniqueText = e.data;
-    console.log("النتيجة بدون تكرار:", uniqueText);
-};
-
-worker.postMessage(document.getElementById("someTextarea").value);
-
-
-function removeDuplicatesBasedOnField1() {
-    const numFields = 7;
-    const fieldsData = [];
-
-    for (let i = 0; i < numFields; i++) {
-        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-    }
-
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-
-    const seenIDCASE = new Set();
-    const rowsAfterIDCaseFilter = [];
-
-    // ✅ المرحلة الأولى: حذف التكرارات في ID CASE
-    for (let r = 0; r < maxRows; r++) {
-        const idCase = fieldsData[1][r] || "";
-        if (!seenIDCASE.has(idCase)) {
-            seenIDCASE.add(idCase);
-            const row = [];
-            for (let c = 0; c < numFields; c++) {
-                row.push(fieldsData[c][r] || "");
-            }
-            rowsAfterIDCaseFilter.push(row);
-        }
-    }
-
-    // ✅ المرحلة الثانية: حذف التكرارات في Accès réseau بشرط نفس التاريخ (Envoyé)
-    const seenAccessPerDate = new Set();
-    const finalUniqueRows = [];
-
-    for (const row of rowsAfterIDCaseFilter) {
-        const rawDate = row[0]; // Envoyé (أول عمود)
-        const accessValue = row[4]; // Accès réseau
-
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate); // تحويل التاريخ لصيغة موحدة
-        const uniqueKey = parsedDate + "::" + accessValue;
-
-        if (!seenAccessPerDate.has(uniqueKey)) {
-            seenAccessPerDate.add(uniqueKey);
-            finalUniqueRows.push(row);
-        }
-    }
-
-    // ✅ تحديث الحقول في الواجهة
-    const newFields = Array.from({ length: numFields }, () => []);
-    finalUniqueRows.forEach(row => {
-        for (let c = 0; c < numFields; c++) {
-            newFields[c].push(row[c]);
-        }
-    });
-
-    for (let i = 0; i < numFields; i++) {
-        document.getElementById("field" + i).value = newFields[i].join("\n");
-        document.getElementById("count" + i).textContent = newFields[i].length + " سطر";
-    }
-}
-
-function removeDuplicatesByAccesReseauAndDate() {
-    const field0 = document.getElementById("field0").value.split("\n"); // Envoyé
-    const field4 = document.getElementById("field4").value.split("\n"); // Accès réseau
-    const numFields = 7;
-    const fields = [];
-
-    for (let i = 0; i < numFields; i++) {
-        fields[i] = document.getElementById("field" + i).value.split("\n");
-    }
-
-    const seen = new Set();
-    const uniqueIndexes = [];
-
-    for (let i = 0; i < field0.length; i++) {
-        const rawDate = field0[i];
-        const reseau = field4[i];
-
-        // 🔎 نأخذ اليوم + الشهر + السنة فقط بدون الساعة
-        const dateKey = extractDateOnly(rawDate); // مثال: 24/07/2025
-        const reseauKey = reseau.trim();
-
-        const combinedKey = `${reseauKey}|${dateKey}`;
-        if (!seen.has(combinedKey)) {
-            seen.add(combinedKey);
-            uniqueIndexes.push(i); // نحتفظ بهذا السطر
-        }
-    }
-
-    // إعادة بناء الحقول بدون التكرارات
-    for (let f = 0; f < numFields; f++) {
-        const newLines = uniqueIndexes.map(i => fields[f][i] || "");
-        document.getElementById("field" + f).value = newLines.join("\n");
-        document.getElementById("count" + f).textContent = newLines.length + " سطر";
-    }
-}
 
 
 function extractDateOnly(dateStr) {
@@ -761,6 +627,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
