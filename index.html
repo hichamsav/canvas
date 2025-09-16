@@ -327,78 +327,71 @@ function mergeFolderTxt() {
                     return null;
                 }
 
+for (let i = 0; i < text.length; i++) {
+    const line = text[i].trim();
 
-                for (let i = 0; i < text.length; i++) {
-                    const line = text[i].trim();
+    // الحقل 0 - Envoyé أو Sent
+    const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent","Reçu le"]);
+    if (envoyKey) {
+        current[0] = cleanValue(line, envoyKey);
+    }
+    // الحقل 1 - ID CASE
+    else if (startsWithAnyStrict(line, ["ID CASE"])) {
+        current[1] = cleanValue(line, "ID CASE");
+    }
+    // الحقل 2 - Client
+    else if (startsWithAnyStrict(line, ["Client"])) {
+        current[2] = cleanValue(line, "Client");
+    }
+    // الحقل 3 - Téléphone
+    else if (startsWithAnyStrict(line, ["T�l�phone", "Téléphone"])) {
+        const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
+        current[3] = normalizePhone(cleanValue(line, telKey));
+    }
+    // الحقل 4 - Accès réseau
+    else if (startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"])) {
+        const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
+        current[4] = normalizePhone(cleanValue(line, reseauKey));
+    }
+    // الحقل 5 - Activités de service
+    else if (startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"])) {
+        const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
+        let rawValue = cleanValue(line, activitesKey);
+        let parts = rawValue.split("|");
+        let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+        lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+        current[5] = lastPart;
+    }
+    // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
+    else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
+        let adresseInstallationValue = cleanValue(line, "Adresse Installation");
 
-                    // الحقل 0 - Envoyé أو Sent
-                    const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent","Reçu le"]);
-                    if (envoyKey) {
-                        current[0] = cleanValue(line, envoyKey);
-                    }
-
-                    // الحقل 1 - ID CASE
-                    else if (startsWithAnyStrict(line, ["ID CASE"])) {
-                        current[1] = cleanValue(line, "ID CASE");
-                    }
-
-                    // الحقل 2 - Client
-                    else if (startsWithAnyStrict(line, ["Client"])) {
-                        current[2] = cleanValue(line, "Client");
-                    }
-
-                    // الحقل 3 - Téléphone
-                    const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
-                    if (telKey) {
-                        current[3] = normalizePhone(cleanValue(line, telKey));
-                    }
-
-                    // الحقل 4 - Accès réseau
-                    const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
-                    if (reseauKey) {
-                        current[4] = normalizePhone(cleanValue(line, reseauKey));
-                    }
-
-                    // الحقل 5 - Activités de service
-                    const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
-                    if (activitesKey) {
-                        let rawValue = cleanValue(line, activitesKey);
-                        let parts = rawValue.split("|");
-                        let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-                        lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-                        current[5] = lastPart;
-                    }
-
-                    // الحقل 6 - Adresse Installation ← السطر الذي يعتبر نهاية السجل
-else if (startsWithAnyStrict(line, ["Adresse Installation"])) {
-    let adresseInstallationValue = cleanValue(line, "Adresse Installation");
-
-    // ننظر للسطر السابق لنرى هل فيه adresse (أي يبدأ بـ adresse أو -adresse)
-    let adresseValue = "";
-    if (i > 0) {
-        let prevLine = text[i - 1].trim().toLowerCase();
-        if (prevLine.match(/^[-]*adresse\s*:/)) {
-            // استخراج القيمة من السطر السابق
-            adresseValue = cleanValue(text[i - 1], "adresse");
+        // ننظر للسطر السابق لنرى هل فيه adresse (أي يبدأ بـ adresse أو -adresse)
+        let adresseValue = "";
+        if (i > 0) {
+            let prevLine = text[i - 1].trim().toLowerCase();
+            if (prevLine.match(/^[-]*adresse\s*:/)) {
+                // استخراج القيمة من السطر السابق
+                adresseValue = cleanValue(text[i - 1], "adresse");
+            }
         }
-    }
 
-    // إذا كان Adresse Installation فارغ، نستخدم adresse إذا وجد
-    if (!adresseInstallationValue && adresseValue) {
-        adresseInstallationValue = adresseValue;
-    }
+        // إذا كان Adresse Installation فارغ، نستخدم adresse إذا وجد
+        if (!adresseInstallationValue && adresseValue) {
+            adresseInstallationValue = adresseValue;
+        }
 
-    current[6] = adresseInstallationValue;
+        current[6] = adresseInstallationValue;
 
-    // نسجّل السطر الحالي في الأعمدة السبعة
-    for (let j = 0; j <= 6; j++) {
-        fields[j].push(current[j] || "");
+        // نسجّل السطر الحالي في الأعمدة السبعة
+        for (let j = 0; j <= 6; j++) {
+            fields[j].push(current[j] || "");
+        }
+        current = {}; // إعادة تعيين السجل
     }
-    current = {}; // إعادة تعيين السجل
 }
-                        
-                    }
-                }
+
+                
 
                 // عرض النتائج في الواجهة
                 for (let i = 0; i <= 6; i++) {
@@ -681,4 +674,5 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
