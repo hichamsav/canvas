@@ -672,7 +672,7 @@ function copyExcelData() {
 
 function getValidLocationFromAddress(address) {
     const validLocations = ["laayoune", "casablanca", "tetouan"];
-    if (!address) return "CASABLANCA";
+    if (!address || address.trim() === "") return "Sans Adresse";
 
     const words = address.trim().toLowerCase().split(/\s+/);
     const firstWord = words[0] || "";
@@ -690,6 +690,7 @@ function getValidLocationFromAddress(address) {
     return "CASABLANCA";
 }
 
+
 function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
@@ -703,6 +704,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
