@@ -298,20 +298,21 @@ function filterAndDistribute() {
         return value;
     }
 
-    function decodeCorruptedCharacters(text) {
-        return text
-            .replace(/�/g, "é")
-            .replace(/Ã©/g, "é")
-            .replace(/Ã¨/g, "è")
-            .replace(/Ã/g, "à")
-            .replace(/Ã´/g, "ô")
-            .replace(/Ãª/g, "ê")
-            .replace(/Ã¢/g, "â")
-            .replace(/Ã¼/g, "ü")
-            .replace(/Ã§/g, "ç")
-            .replace(/Â/g, "")
-            .replace(/[^\x00-\x7F]/g, "");
-    }
+function decodeCorruptedCharacters(text) {
+    return text
+        .replace(/�/g, "é")
+        .replace(/Ã©/g, "é")
+        .replace(/Ã¨/g, "è")
+        .replace(/Ã/g, "à")
+        .replace(/Ã´/g, "ô")
+        .replace(/Ãª/g, "ê")
+        .replace(/Ã¢/g, "â")
+        .replace(/Ã¼/g, "ü")
+        .replace(/Ã§/g, "ç")
+        .replace(/Â/g, "");
+        // تم حذف السطر الذي يحذف الحروف غير ASCII
+}
+
 
     function normalizePhone(phone) {
         return phone.startsWith("0") ? phone.substring(1) : phone;
@@ -627,6 +628,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
