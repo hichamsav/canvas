@@ -284,8 +284,7 @@ function filterAndDistribute() {
     const text = document.getElementById('singleKeywordOutput').value.split("\n");
     const fields = [[], [], [], [], [], [], []];
     let current = {};
-    let adresseInCurrentRecord = "";  // نحتفظ بـ Adresse لهذا السجل
-    let inRecord = false; // هل نحن داخل سجل؟
+    let adresseValue = "";  // لتخزين Adresse للسجل الحالي
 
     function cleanValue(line, keyword) {
         let value = "";
@@ -331,36 +330,41 @@ function filterAndDistribute() {
     for (let i = 0; i < text.length; i++) {
         const line = text[i].trim();
 
-        // نبدأ سجل جديد عندما نلتقط ID CASE
+        // كلما بدأ سجل جديد (ID CASE) نعيد تعيين adresseValue
         if (startsWithAnyStrict(line, ["ID CASE"])) {
-            inRecord = true;
-            adresseInCurrentRecord = "";  // إعادة تعيين العنوان في بداية السجل
+            adresseValue = "";
         }
 
-        // الحقل 0 - Envoyé أو Sent
+        // تخزين قيمة Adresse إذا وجدنا السطر
+        if (startsWithAnyStrict(line, ["Adresse"])) {
+            adresseValue = cleanValue(line, "Adresse");
+            continue;  // نتابع السطر التالي مباشرة
+        }
+
+        // باقي الحقول كما هي
         const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent", "Reçu le"]);
         if (envoyKey) {
             current[0] = cleanValue(line, envoyKey);
+            continue;
         }
-        // الحقل 1 - ID CASE
-        else if (startsWithAnyStrict(line, ["ID CASE"])) {
+        if (startsWithAnyStrict(line, ["ID CASE"])) {
             current[1] = cleanValue(line, "ID CASE");
+            continue;
         }
-        // الحقل 2 - Client
-        else if (startsWithAnyStrict(line, ["Client"])) {
+        if (startsWithAnyStrict(line, ["Client"])) {
             current[2] = cleanValue(line, "Client");
+            continue;
         }
-        // الحقل 3 - Téléphone
         const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
         if (telKey) {
             current[3] = normalizePhone(cleanValue(line, telKey));
+            continue;
         }
-        // الحقل 4 - Accès réseau
         const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
         if (reseauKey) {
             current[4] = normalizePhone(cleanValue(line, reseauKey));
+            continue;
         }
-        // الحقل 5 - Activités de service
         const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
         if (activitesKey) {
             let rawValue = cleanValue(line, activitesKey);
@@ -368,35 +372,29 @@ function filterAndDistribute() {
             let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
             lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
             current[5] = lastPart;
+            continue;
         }
 
-        // تخزين Adresse إذا وجدناها ضمن السجل (بين ID CASE و Adresse Installation)
-        if (startsWithAnyStrict(line, ["Adresse"])) {
-            if (inRecord) {
-                adresseInCurrentRecord = cleanValue(line, "Adresse");
-            }
-        }
-
-        // الحقل 6 - Adresse Installation ← نهاية السجل
+        // عند وصول Adresse Installation ← نهاية السجل
         if (startsWithAnyStrict(line, ["Adresse Installation"])) {
             let adresseInstallationValue = cleanValue(line, "Adresse Installation");
 
-            // إذا كانت Adresse Installation فارغة، نستخدم adresseInCurrentRecord فقط إذا موجودة
-            if (!adresseInstallationValue && adresseInCurrentRecord) {
-                adresseInstallationValue = adresseInCurrentRecord;
+            // إذا كانت Adresse Installation فارغة، نعوض بقيمة adresseValue إذا كانت موجودة
+            if (!adresseInstallationValue && adresseValue) {
+                adresseInstallationValue = adresseValue;
             }
 
             current[6] = adresseInstallationValue;
 
-            // نسجل السجل كاملاً
+            // نسجل السجل كاملًا
             for (let j = 0; j <= 6; j++) {
                 fields[j].push(current[j] || "");
             }
 
-            // إعادة تعيين المتغيرات لنبدأ سجل جديد
+            // إعادة تعيين current للسجل التالي
             current = {};
-            adresseInCurrentRecord = "";
-            inRecord = false;  // انتهى السجل
+            adresseValue = "";
+            continue;
         }
     }
 
@@ -406,6 +404,7 @@ function filterAndDistribute() {
         document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
+
 
 
 
@@ -681,6 +680,7 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
 
