@@ -428,6 +428,7 @@ function exportToExcel() {
     for (let i = 0; i < numFields; i++) {
         fieldsData[i] = document.getElementById("field" + i).value.split("\n");
     }
+
     const maxRows = Math.max(...fieldsData.map(arr => arr.length));
     const wsData = [];
 
@@ -436,19 +437,20 @@ function exportToExcel() {
         const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
 
         wsData[r] = [
-            fieldsData[1][r] || "",
-            fieldsData[4][r] || "",
-            parsedDate || "",
-            parsedDate || "",
-            fieldsData[5][r] || "",
-            fieldsData[6][r] || "",
-            parsedDate || "",
-            getValidLocationFromAddress(fieldsData[6][r]),
-            fieldsData[3][r] || "",
-            fieldsData[2][r] || "",
-            "",
-            "",
-            parsedDate || ""
+            fieldsData[1][r] || "",         // A: ID CASE
+            fieldsData[4][r] || "",         // B: Accès réseau
+            parsedDate || "",              // ✅ C: التاريخ
+            parsedDate || "",              // ✅ D: التاريخ
+            fieldsData[5][r] || "",         // E: Activité
+            fieldsData[6][r] || "",         // F: Adresse
+            parsedDate || "",              // ✅ G: التاريخ
+            getValidLocationFromAddress(fieldsData[6][r]),  // H: Location
+            fieldsData[3][r] || "",         // I: Téléphone
+            fieldsData[2][r] || "",         // J: Client
+            "",                             // K: فارغ
+            "",                             // L: فارغ
+            "",                             // M: فارغ
+            parsedDate || ""               // ✅ N: التاريخ
         ];
     }
 
@@ -463,6 +465,7 @@ function copyExcelData() {
     for (let i = 0; i < numFields; i++) {
         fieldsData[i] = document.getElementById("field" + i).value.split("\n");
     }
+
     const maxRows = Math.max(...fieldsData.map(arr => arr.length));
     let text = "";
 
@@ -473,19 +476,20 @@ function copyExcelData() {
         const location = getValidLocationFromAddress(fieldsData[6][r]);
 
         const rowData = [
-            fieldsData[1][r] || "",
-            fieldsData[4][r] || "",
-            parsedDate || "",
-            parsedDate || "",
-            fieldsData[5][r] || "",
-            fieldsData[6][r] || "",
-            parsedDate || "",
-            location,
-            fieldsData[3][r] || "",
-            fieldsData[2][r] || "",
-            "",
-            "",
-            parsedDate || ""
+            fieldsData[1][r] || "",         // A: ID CASE
+            fieldsData[4][r] || "",         // B: Accès réseau
+            parsedDate || "",              // ✅ C
+            parsedDate || "",              // ✅ D
+            fieldsData[5][r] || "",         // E: Activité
+            fieldsData[6][r] || "",         // F: Adresse
+            parsedDate || "",              // ✅ G
+            location,                      // H: Location
+            fieldsData[3][r] || "",         // I: Téléphone
+            fieldsData[2][r] || "",         // J: Client
+            "",                             // K: فارغ
+            "",                             // L: فارغ
+            "",                             // M: فارغ
+            parsedDate || ""               // ✅ N
         ];
 
         text += rowData.join("\t") + "\n";
@@ -493,6 +497,8 @@ function copyExcelData() {
 
     navigator.clipboard.writeText(text).catch(() => { });
 }
+
+
 
 // دالة لحساب مسافة ليڤنشتاين
 function levenshteinDistance(a, b) {
@@ -615,3 +621,4 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
