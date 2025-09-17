@@ -403,7 +403,7 @@ function filterAndDistribute() {
 }
 
 function parseFrenchDateToDDMMYYYY(str) {
-    if (!str || typeof str !== "string") return "";
+    if (!str || typeof str !== "string") return { full: "", short: "" };
 
     const months = {
         janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
@@ -411,16 +411,42 @@ function parseFrenchDateToDDMMYYYY(str) {
         octobre: "10", novembre: "11", décembre: "12", decembre: "12"
     };
 
-    // محاولة فك التاريخ الفرنسي مثل: Reçu le 17 septembre 2025 15:24
-    const frenchRegex = /(\d{1,2})\s+([a-zéûôî]+)\s+(\d{4})/i;
+    const frenchRegex = /(\d{1,2})\s+([a-zéûôî]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/i;
     const match = str.match(frenchRegex);
 
     if (match) {
         const day = match[1].padStart(2, "0");
         const month = months[match[2].toLowerCase()] || "01";
         const year = match[3];
-        return `${day}/${month}/${year}`;
+        const hour = match[4] ? match[4].padStart(2, "0") : "00";
+        const minute = match[5] ? match[5].padStart(2, "0") : "00";
+        const second = match[6] ? match[6].padStart(2, "0") : "00";
+
+        return {
+            full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+            short: `${day}/${month}/${year}`
+        };
     }
+
+    // استخدام Date Object لأي صيغة أخرى
+    const parsed = new Date(str);
+    if (!isNaN(parsed)) {
+        const day = String(parsed.getDate()).padStart(2, "0");
+        const month = String(parsed.getMonth() + 1).padStart(2, "0");
+        const year = parsed.getFullYear();
+        const hour = String(parsed.getHours()).padStart(2, "0");
+        const minute = String(parsed.getMinutes()).padStart(2, "0");
+        const second = String(parsed.getSeconds()).padStart(2, "0");
+
+        return {
+            full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+            short: `${day}/${month}/${year}`
+        };
+    }
+
+    return { full: "", short: "" };
+}
+
 
     // محاولة باستخدام Date.parse أو new Date
     const parsed = new Date(str);
@@ -484,26 +510,23 @@ function copyExcelData() {
 
     for (let r = 0; r < maxRows; r++) {
         const rawDate = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
 
-        const location = getValidLocationFromAddress(fieldsData[6][r]);
+const rowData = [
+    fieldsData[1][r] || "",         // A
+    fieldsData[4][r] || "",         // B
+    parsedDate.full || "",         // ✅ C: مع الوقت
+    parsedDate.short || "",        // ✅ D: بدون وقت
+    fieldsData[5][r] || "",         // E
+    fieldsData[6][r] || "",         // F
+    parsedDate.short || "",        // ✅ G
+    location,                      // H
+    fieldsData[3][r] || "",         // I
+    fieldsData[2][r] || "",         // J
+    "", "", "",                    // K, L, M
+    parsedDate.short || ""         // ✅ N
+];
 
-        const rowData = [
-            fieldsData[1][r] || "",         // A: ID CASE
-            fieldsData[4][r] || "",         // B: Accès réseau
-            parsedDate || "",              // ✅ C
-            parsedDate || "",              // ✅ D
-            fieldsData[5][r] || "",         // E: Activité
-            fieldsData[6][r] || "",         // F: Adresse
-            parsedDate || "",              // ✅ G
-            location,                      // H: Location
-            fieldsData[3][r] || "",         // I: Téléphone
-            fieldsData[2][r] || "",         // J: Client
-            "",                             // K: فارغ
-            "",                             // L: فارغ
-            "",                             // M: فارغ
-            parsedDate || ""               // ✅ N
-        ];
 
         text += rowData.join("\t") + "\n";
     }
@@ -634,5 +657,6 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
+
 
 
