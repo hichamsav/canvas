@@ -403,15 +403,16 @@ function filterAndDistribute() {
 }
 
 function parseFrenchDateToDDMMYYYY(str) {
+    if (!str || typeof str !== "string") return { full: "", short: "" };
+
     const months = {
         janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
         juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
         octobre: "10", novembre: "11", décembre: "12", decembre: "12"
     };
 
-    // محاولة لاستخلاص التاريخ من نص كامل بصيغة فرنسية مع الوقت
-    const regex = /(\d{1,2})\s+([a-zéû]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/i;
-    const match = str.match(regex);
+    const frenchRegex = /(\d{1,2})\s+([a-zéûôî]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/i;
+    const match = str.match(frenchRegex);
 
     if (match) {
         const day = match[1].padStart(2, "0");
@@ -422,67 +423,10 @@ function parseFrenchDateToDDMMYYYY(str) {
         const second = match[6] ? match[6].padStart(2, "0") : "00";
 
         return {
-            full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,  // تاريخ + وقت
-            short: `${day}/${month}/${year}`                             // تاريخ فقط
-        };
-    }
-
-    // محاولة تحويل أي صيغة تاريخ أخرى عبر Date object
-    const parsed = new Date(str);
-    if (!isNaN(parsed)) {
-        const day = String(parsed.getDate()).padStart(2, "0");
-        const month = String(parsed.getMonth() + 1).padStart(2, "0");
-        const year = parsed.getFullYear();
-        const hour = String(parsed.getHours()).padStart(2, "0");
-        const minute = String(parsed.getMinutes()).padStart(2, "0");
-        const second = String(parsed.getSeconds()).padStart(2, "0");
-
-        return {
             full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
             short: `${day}/${month}/${year}`
         };
     }
-
-    return { full: "", short: "" };
-}
-
-function exportToExcel() {
-    const fieldsData = [], numFields = 7;
-    for (let i = 0; i < numFields; i++) {
-        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-    }
-
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    const wsData = [];
-
-    for (let r = 0; r < maxRows; r++) {
-        const rawDateLine = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
-
-        wsData[r] = [
-            fieldsData[1][r] || "",             // A: ID CASE
-            fieldsData[4][r] || "",             // B: Accès réseau
-            parsedDate.full || "",              // C: تاريخ + وقت
-            parsedDate.short || "",             // D: تاريخ فقط
-            fieldsData[5][r] || "",             // E: Activité
-            fieldsData[6][r] || "",             // F: Adresse
-            parsedDate.short || "",             // G: تاريخ فقط
-            getValidLocationFromAddress(fieldsData[6][r]),  // H: Location
-            fieldsData[3][r] || "",             // I: Téléphone
-            fieldsData[2][r] || "",             // J: Client
-            "",                                // K: فارغ
-            "",                                // L: فارغ
-            "",                                // M: فارغ
-            parsedDate.short || ""              // N: تاريخ فقط
-        ];
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "extracted_data.xlsx");
-}
-
 
     // استخدام Date Object لأي صيغة أخرى
     const parsed = new Date(str);
@@ -554,6 +498,7 @@ function exportToExcel() {
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
     XLSX.writeFile(wb, "extracted_data.xlsx");
 }
+
 function copyExcelData() {
     const fieldsData = [], numFields = 7;
     for (let i = 0; i < numFields; i++) {
@@ -565,31 +510,29 @@ function copyExcelData() {
 
     for (let r = 0; r < maxRows; r++) {
         const rawDate = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
+const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
 
-        const location = getValidLocationFromAddress(fieldsData[6][r]);
+const rowData = [
+    fieldsData[1][r] || "",         // A
+    fieldsData[4][r] || "",         // B
+    parsedDate.full || "",         // ✅ C: مع الوقت
+    parsedDate.short || "",        // ✅ D: بدون وقت
+    fieldsData[5][r] || "",         // E
+    fieldsData[6][r] || "",         // F
+    parsedDate.short || "",        // ✅ G
+    location,                      // H
+    fieldsData[3][r] || "",         // I
+    fieldsData[2][r] || "",         // J
+    "", "", "",                    // K, L, M
+    parsedDate.short || ""         // ✅ N
+];
 
-        const rowData = [
-            fieldsData[1][r] || "",         // A: ID CASE
-            fieldsData[4][r] || "",         // B: Accès réseau
-            parsedDate.full || "",         // ✅ C: مع الوقت
-            parsedDate.short || "",        // ✅ D
-            fieldsData[5][r] || "",         // E
-            fieldsData[6][r] || "",         // F
-            parsedDate.short || "",        // ✅ G
-            location,                      // H
-            fieldsData[3][r] || "",         // I
-            fieldsData[2][r] || "",         // J
-            "", "", "",                    // K, L, M
-            parsedDate.short || ""         // ✅ N
-        ];
 
         text += rowData.join("\t") + "\n";
     }
 
-    navigator.clipboard.writeText(text).catch(() => {});
+    navigator.clipboard.writeText(text).catch(() => { });
 }
-
 
 
 
@@ -714,8 +657,3 @@ function removeDuplicatesAndAutoCopy() {
         </script>
 </body>
 </html>
-
-
-
-
-
