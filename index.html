@@ -9,12 +9,12 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 10px;
-            padding-top: 100px; /* ✅ هذه هي المساحة من الأعلى */
+            padding-top: 100px;
             display: flex;
             gap: 10px;
             height: 100vh;
             font-size: 13px;
-            overflow: hidden; /* يمنع التمرير */
+            overflow: hidden;
             box-sizing: border-box;
         }
 
@@ -29,19 +29,20 @@
             box-shadow: 1px 1px 5px rgba(0,0,0,0.1);
             overflow: hidden;
         }
-.header-logo {
-    position: absolute;
-    top: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    text-align: center;
-}
 
-.header-logo img {
-    height: 60px; /* يمكنك تعديل الحجم حسب شعارك */
-    object-fit: contain;
-}
+        .header-logo {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .header-logo img {
+            height: 60px;
+            object-fit: contain;
+        }
 
         h1, h2, h3 {
             font-size: 16px;
@@ -74,17 +75,17 @@
             transition: background-color 0.3s ease;
         }
 
-            button:hover {
-                background-color: #0056b3;
-            }
+        button:hover {
+            background-color: #0056b3;
+        }
 
         .copy-button {
             background-color: #28a745;
         }
 
-            .copy-button:hover {
-                background-color: #1e7e34;
-            }
+        .copy-button:hover {
+            background-color: #1e7e34;
+        }
 
         .row {
             display: flex;
@@ -112,10 +113,10 @@
             margin-bottom: 4px;
         }
 
-            #keyword,
-            label[for="keyword"] {
-                display: none;
-            }
+        #keyword,
+        label[for="keyword"] {
+            display: none;
+        }
     </style>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
@@ -129,13 +130,13 @@
         <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt,.html" />
         <button onclick="mergeFolderTxt()">دمج الملفات</button>
 
-<textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
+        <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Reçu le,Envoy,Sent,ID CASE,Client :,T�l�phone,Acc�s r�seau,Activit�s de service,Téléphone,Accès réseau,Adresse,-Adresse,ville,Activités de service,Commentaire,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Reçu le,Envoyé,Sent,ID CASE,Client :,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
         <button onclick="extractSingleKeyword()">🔎 استخراج</button>
-<textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
+        <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
         <button onclick="copySingleKeyword()" class="copy-button">📋 نسخ نتائج الاستخراج</button>
     </div>
 
@@ -182,519 +183,499 @@
                 <textarea id="field6" readonly></textarea>
                 <button class="copy-button" onclick="copyField(6)">📋 نسخ Adresse Installation</button>
             </div>
+            <div class="field-container">
+                <div class="line-count" id="count7">0 سطر</div>
+                <textarea id="field7" readonly></textarea>
+                <button class="copy-button" onclick="copyField(7)">📋 نسخ Commentaire</button>
+            </div>
         </div>
 
-<div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-    <button onclick="removeDuplicatesAndAutoCopy()" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
-    <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
-    <span id="countdown" style="font-weight: bold; color: red; font-size: 14px; margin-right: 10px;"></span>
-</div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+            <button onclick="removeDuplicatesBasedOnReseauSmart(); copyExcelData();" style="background-color:#dc3545; color:white;">🧹 Remove & Copy ALL 🧹 </button>
+            <button onclick="exportToExcel()" style="background-color:#ff6600; color:white;">⬇️ تصدير إلى Excel</button>
+            <span id="countdown" style="font-weight: bold; color: red; font-size: 14px; margin-right: 10px;"></span>
+        </div>
+    </div>
 
+    <script>
+        window.alert = function() {};
+        const originalAlert = window.alert;
 
-
-        <script>
-            window.alert = function() {};
-            const originalAlert = window.alert;
-
-window.alert = function(message) {
-  if (typeof message === 'string' && message.includes('hichamsav.github.io')) {
-    // لا تفعل شيء (تمنع ظهور التنبيه إذا كان يحتوي على رابط موقعك)
-    return;
-  }
-  // في الحالات الأخرى، عرض التنبيه كما هو
-  originalAlert(message);
-};
-            document.addEventListener("contextmenu", e => e.preventDefault());
-            document.addEventListener("keydown", e => {
-                if (e.key === "F12" || (e.ctrlKey && ["u", "s"].includes(e.key.toLowerCase())) || (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key))) { e.preventDefault(); return false; }
-            });
-
-            let originalMergedContent = "";
-
-
-
-function mergeFolderTxt() {
-    const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
-    if (!files.length) {
-        alert("يرجى اختيار مجلد يحتوي على ملفات .txt.");
-        return;
-    }
-
-    files.sort((a, b) => a.name.localeCompare(b.name));
-    let merged = "";
-    let processed = 0;
-
-    files.forEach(f => {
-        const reader = new FileReader();
-        reader.onload = e => {
-            merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
-            processed++;
-            if (processed === files.length) {
-                originalMergedContent = merged;
-                document.getElementById("filteredOutput").value = merged;
-                extractSingleKeyword();
-
+        window.alert = function(message) {
+            if (typeof message === 'string' && message.includes('hichamsav.github.io')) {
+                return;
             }
+            originalAlert(message);
         };
-        reader.readAsText(f);
-    });
-}
 
+        document.addEventListener("contextmenu", e => e.preventDefault());
+        document.addEventListener("keydown", e => {
+            if (e.key === "F12" || (e.ctrlKey && ["u", "s"].includes(e.key.toLowerCase())) || (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key))) { 
+                e.preventDefault(); 
+                return false; 
+            }
+        });
 
+        let originalMergedContent = "";
 
-            function extractSingleKeyword() {
-                const keywordText = document.getElementById("singleKeywordInput").value.trim();
-                const startOnly = document.getElementById("startOnlySingleCheckbox").checked;
-                if (!keywordText) { alert("يرجى كتابة كلمة أو أكثر مفصولة بفاصلة للاستخراج."); return; }
-                const keywords = keywordText.split(",").map(k => k.trim()).filter(k => k.length > 0);
-                const lines = document.getElementById("filteredOutput").value.split("\n");
-                const extracted = [];
-                let buffer = [];
-                let skip = false;
-                for (const line of lines) {
-                    const regexSkip = /sans\s+ca[\w\-]*/i; // يتحقق من وجود "sans" يليها كلمة تبدأ بـ ca
-                    if (regexSkip.test(line)) {
-                        buffer = [];
-                        skip = true;
-                        continue;
+        function mergeFolderTxt() {
+            const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
+            if (!files.length) {
+                alert("يرجى اختيار مجلد يحتوي على ملفات .txt.");
+                return;
+            }
+
+            files.sort((a, b) => a.name.localeCompare(b.name));
+            let merged = "";
+            let processed = 0;
+
+            files.forEach(f => {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    merged += `\n===== ${f.name} =====\n` + e.target.result + "\n";
+                    processed++;
+                    if (processed === files.length) {
+                        originalMergedContent = merged;
+                        document.getElementById("filteredOutput").value = merged;
+                        extractSingleKeyword();
                     }
-                    if (skip && line.includes("Adresse Installation")) { skip = false; continue; }
-                    buffer.push(line);
-                    if (keywords.some(k => line.startsWith(k))) {
-                        extracted.push(...buffer);
-                        buffer = [];
+                };
+                reader.readAsText(f);
+            });
+        }
+
+        function extractSingleKeyword() {
+            const lines = document.getElementById("filteredOutput").value.split("\n");
+            const extracted = [];
+            
+            let inTargetBlock = false;
+            let currentBlock = [];
+            let blocksFound = 0;
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                // بداية الكتلة عندما نجد "Sent:"
+                if (line.startsWith("Sent:")) {
+                    if (currentBlock.length > 0) {
+                        extracted.push(...currentBlock);
+                        extracted.push(""); // فاصل بين الكتل
+                        blocksFound++;
                     }
+                    currentBlock = [line];
+                    inTargetBlock = true;
+                    continue;
                 }
-                document.getElementById("singleKeywordOutput").value = extracted.join("\n");
-                filterAndDistribute();
+                
+                // نهاية الكتلة عندما نجد "Adresse Installation"
+                if (inTargetBlock && line.includes("Adresse Installation :")) {
+                    currentBlock.push(line);
+                    extracted.push(...currentBlock);
+                    extracted.push(""); // فاصل بين الكتل
+                    blocksFound++;
+                    currentBlock = [];
+                    inTargetBlock = false;
+                    continue;
+                }
+                
+                // إذا كنا داخل الكتلة المستهدفة، نضيف السطر
+                if (inTargetBlock && line) {
+                    currentBlock.push(line);
+                }
+            }
+            
+            // إضافة آخر كتلة إذا كانت غير مكتملة
+            if (currentBlock.length > 0) {
+                extracted.push(...currentBlock);
+                blocksFound++;
             }
 
-            function copySingleKeyword() { const t = document.getElementById("singleKeywordOutput"); t.select(); document.execCommand("copy"); window.getSelection().removeAllRanges(); }
+            document.getElementById("singleKeywordOutput").value = extracted.join("\n");
+            console.log("تم استخراج " + blocksFound + " كتلة بيانات");
+            filterAndDistribute();
+        }
 
-            function getTextAfterColon(line) {
-                const parts = line.split(":");
-                return parts.length > 1 ? parts.slice(1).join(":").trim() : line.trim();
-            }
+        function copySingleKeyword() { 
+            const t = document.getElementById("singleKeywordOutput"); 
+            t.select(); 
+            document.execCommand("copy"); 
+            window.getSelection().removeAllRanges(); 
+        }
 
-            function startsWithAny(line, keywords) {
-                return keywords.find(keyword => line.toLowerCase().startsWith(keyword.toLowerCase()));
-            }
+        function decodeCorruptedCharacters(text) {
+            return text
+                .replace(/�/g, "é")
+                .replace(/Ã©/g, "é")
+                .replace(/Ã¨/g, "è")
+                .replace(/Ã/g, "à")
+                .replace(/Ã´/g, "ô")
+                .replace(/Ãª/g, "ê")
+                .replace(/Ã¢/g, "â")
+                .replace(/Ã¼/g, "ü")
+                .replace(/Ã§/g, "ç")
+                .replace(/Â/g, "");
+        }
 
-function filterAndDistribute() {
+        function normalizePhone(phone) {
+            return phone.startsWith("0") ? phone.substring(1) : phone;
+        }
+
+        function extractDateFromSent(sentLine) {
+            // استخراج التاريخ من سطر Sent: 09/26/2025 18:13:01
+            const match = sentLine.match(/Sent:\s*(\d{2}\/\d{2}\/\d{4})/);
+            return match ? match[1] : "";
+        }
+
+      function filterAndDistribute() {
     const text = document.getElementById('singleKeywordOutput').value.split("\n");
-    const fields = Array.from({ length: 7 }, () => []);
+    const fields = Array.from({ length: 8 }, () => []);
     let current = {};
-    let adresseValue = "";
-    let villeValue = "";
-
-    function cleanValue(line, keyword) {
-        let value = "";
-        if (line.includes(":")) {
-            value = line.split(":").slice(1).join(":").trim();
-        } else {
-            value = line.replace(new RegExp("^" + keyword, "i"), "").trim();
-        }
-        value = decodeCorruptedCharacters(value);
-        return value;
-    }
-
-    function decodeCorruptedCharacters(text) {
-        return text
-            .replace(/�/g, "é")
-            .replace(/Ã©/g, "é")
-            .replace(/Ã¨/g, "è")
-            .replace(/Ã/g, "à")
-            .replace(/Ã´/g, "ô")
-            .replace(/Ãª/g, "ê")
-            .replace(/Ã¢/g, "â")
-            .replace(/Ã¼/g, "ü")
-            .replace(/Ã§/g, "ç")
-            .replace(/Â/g, "");
-    }
-
-    function normalizePhone(phone) {
-        return phone.startsWith("0") ? phone.substring(1) : phone;
-    }
-
-    function startsWithAnyStrict(line, keywords) {
-        line = line.trimStart();
-        for (let keyword of keywords) {
-            const regex = new RegExp("^" + keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + "\\s*:", "i");
-            if (regex.test(line)) return keyword;
-        }
-        return null;
-    }
-
+    let currentAdresse = "";
+    let currentVille = "";
+    let currentDate = "";
+    let commentaireContent = "";
+    
     for (let i = 0; i < text.length; i++) {
         const line = text[i].trim();
-
-        if (startsWithAnyStrict(line, ["ID CASE"])) {
-            adresseValue = "";
-            villeValue = "";
+        
+        if (!line) continue;
+        
+        // ⬇️ بداية رسالة جديدة - إعادة تعيين كل شيء
+        if (line.match(/^Sent:/i)) {
+            // حفظ السجل السابق إذا كان موجوداً
+            if (Object.keys(current).length > 0) {
+                for (let j = 0; j <= 7; j++) {
+                    fields[j].push(current[j] || "");
+                }
+            }
+            
+            // إعادة تعيين كل المتغيرات لرسالة جديدة
+            current = {};
+            currentDate = extractDateFromSent(line);
+            current[0] = line.replace(/^Sent:\s*/i, "").trim();
+            currentAdresse = "";
+            currentVille = "";
+            commentaireContent = "";
         }
-
-        if (startsWithAnyStrict(line, ["Adresse"])) {
-            adresseValue = cleanValue(line, "Adresse");
-            continue;
+        else if (line.match(/^ID CASE\s*:/i)) {
+            current[1] = line.replace(/^ID CASE\s*:\s*/i, "").trim();
         }
-
-        if (startsWithAnyStrict(line, ["Ville"])) {
-            villeValue = cleanValue(line, "Ville");
-            continue;
+        else if (line.match(/^Client\s*:/i)) {
+            current[2] = line.replace(/^Client\s*:\s*/i, "").trim();
         }
-
-        const envoyKey = startsWithAnyStrict(line, ["Envoyé", "Envoy�", "Sent", "Reçu le"]);
-        if (envoyKey) {
-            current[0] = cleanValue(line, envoyKey);
-            continue;
+        else if (line.match(/^Téléphone\s*:/i) || line.match(/^T�l�phone\s*:/i)) {
+            let phoneValue = line.replace(/^Téléphone\s*:\s*/i, "").replace(/^T�l�phone\s*:\s*/i, "").trim();
+            current[3] = normalizePhone(phoneValue);
         }
-        if (startsWithAnyStrict(line, ["ID CASE"])) {
-            current[1] = cleanValue(line, "ID CASE");
-            continue;
+        else if (line.match(/^Accès réseau\s*:/i) || line.match(/^Acc�s r�seau\s*:/i)) {
+            let reseauValue = line.replace(/^Accès réseau\s*:\s*/i, "").replace(/^Acc�s r�seau\s*:\s*/i, "").trim();
+            current[4] = normalizePhone(reseauValue);
         }
-        if (startsWithAnyStrict(line, ["Client"])) {
-            current[2] = cleanValue(line, "Client");
-            continue;
-        }
-        const telKey = startsWithAnyStrict(line, ["T�l�phone", "Téléphone"]);
-        if (telKey) {
-            current[3] = normalizePhone(cleanValue(line, telKey));
-            continue;
-        }
-        const reseauKey = startsWithAnyStrict(line, ["Acc�s r�seau", "Accès réseau"]);
-        if (reseauKey) {
-            current[4] = normalizePhone(cleanValue(line, reseauKey));
-            continue;
-        }
-        const activitesKey = startsWithAnyStrict(line, ["Activit�s de service", "Activités de service"]);
-        if (activitesKey) {
-            let rawValue = cleanValue(line, activitesKey);
+        else if (line.match(/^Activités de service\s*:/i) || line.match(/^Activit�s de service\s*:/i)) {
+            let rawValue = line.replace(/^Activités de service\s*:\s*/i, "").replace(/^Activit�s de service\s*:\s*/i, "").trim();
             let parts = rawValue.split("|");
             let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-            lastPart = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-            current[5] = lastPart;
-            continue;
+            current[5] = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
         }
-
-        if (startsWithAnyStrict(line, ["Adresse Installation"])) {
-            let adresseInstallationValue = cleanValue(line, "Adresse Installation");
-
-            if (!adresseInstallationValue) {
-                adresseInstallationValue = adresseValue || villeValue || "";
+        else if (line.match(/^Commentaire\s*:/i)) {
+            // ⬇️ Commentaire للرسالة الحالية فقط
+            commentaireContent = line.replace(/^Commentaire\s*:\s*/i, "").trim();
+            current[7] = commentaireContent;
+            
+            // البحث عن Adresse
+            if (commentaireContent.includes("Adresse :") || commentaireContent.includes("adresse :")) {
+                let adresseMatch = commentaireContent.match(/Adresse\s*:\s*(.+)/i) || commentaireContent.match(/adresse\s*:\s*(.+)/i);
+                if (adresseMatch) {
+                    currentAdresse = adresseMatch[1].trim();
+                }
             }
-
-            current[6] = adresseInstallationValue;
-
-            for (let j = 0; j <= 6; j++) {
+        }
+        // ⬇️ البحث عن Adresse في أي سطر
+        else if (line.includes("Adresse :") || line.includes("adresse :")) {
+            let adresseMatch = line.match(/Adresse\s*:\s*(.+)/i) || line.match(/adresse\s*:\s*(.+)/i);
+            if (adresseMatch) {
+                currentAdresse = adresseMatch[1].trim();
+            }
+        }
+        else if (line.match(/^Adresse Installation\s*:/i)) {
+            let adresseValue = line.replace(/^Adresse Installation\s*:\s*/i, "").trim();
+            
+            // ⬇️ إذا كان Adresse Installation فارغاً
+            if (!adresseValue || adresseValue === "") {
+                if (currentAdresse) {
+                    adresseValue = currentAdresse;
+                } else if (currentVille) {
+                    adresseValue = currentVille;
+                }
+            }
+            
+            current[6] = adresseValue || "";
+            current.date = currentDate;
+            current[7] = commentaireContent; // ⬇️ تأكيد حفظ Commentaire الحالي فقط
+            
+            // حفظ السجل
+            for (let j = 0; j <= 7; j++) {
                 fields[j].push(current[j] || "");
             }
-
+            
+            // ⬇️ إعادة تعيين للمرسالة التالية
             current = {};
-            adresseValue = "";
-            villeValue = "";
-            continue;
+            currentAdresse = "";
+            currentVille = "";
+            currentDate = "";
+            commentaireContent = "";
         }
     }
 
-    for (let i = 0; i <= 6; i++) {
-        document.getElementById("field" + i).value = fields[i].join("\n");
+    // معالجة أي سجل متبقي
+    if (Object.keys(current).length > 0) {
+        for (let j = 0; j <= 7; j++) {
+            fields[j].push(current[j] || "");
+        }
+    }
+
+    for (let i = 0; i <= 7; i++) {
+        let fieldValue = fields[i].join("\n");
+        fieldValue = decodeCorruptedCharacters(fieldValue);
+        document.getElementById("field" + i).value = fieldValue;
         document.getElementById("count" + i).textContent = fields[i].length + " سطر";
     }
 }
-
-function parseFrenchDateToDDMMYYYY(str) {
-    const months = {
-        janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
-        juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
-        octobre: "10", novembre: "11", décembre: "12", decembre: "12"
-    };
-
-    const regex = /(\d{1,2})\s+([a-zéû]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/i;
-    const match = str.match(regex);
-
-    if (match) {
-        const day = match[1].padStart(2, "0");
-        const month = months[match[2].toLowerCase()] || "01";
-        const year = match[3];
-        const hour = match[4] ? match[4].padStart(2, "0") : "00";
-        const minute = match[5] ? match[5].padStart(2, "0") : "00";
-        const second = match[6] ? match[6].padStart(2, "0") : "00";
-
-        return {
-            full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-            short: `${day}/${month}/${year}`
-        };
-    }
-
-    const parsed = new Date(str);
-    if (!isNaN(parsed)) {
-        const day = String(parsed.getDate()).padStart(2, "0");
-        const month = String(parsed.getMonth() + 1).padStart(2, "0");
-        const year = parsed.getFullYear();
-        const hour = String(parsed.getHours()).padStart(2, "0");
-        const minute = String(parsed.getMinutes()).padStart(2, "0");
-        const second = String(parsed.getSeconds()).padStart(2, "0");
-
-        return {
-            full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
-            short: `${day}/${month}/${year}`
-        };
-    }
-
-    return { full: "", short: "" };
-}
-
-function exportToExcel() {
-    const fieldsData = [], numFields = 7;
-    for (let i = 0; i < numFields; i++) {
-        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-    }
-
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    const wsData = [];
-
-    for (let r = 0; r < maxRows; r++) {
-        const rawDateLine = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
-
-        wsData[r] = [
-            fieldsData[1][r] || "",              // A: ID CASE
-            fieldsData[4][r] || "",              // B: Accès réseau
-            parsedDate.full || "",               // ✅ C: تاريخ + وقت
-            parsedDate.short || "",              // ✅ D: تاريخ فقط
-            fieldsData[5][r] || "",              // E: Activité
-            fieldsData[6][r] || "",              // F: Adresse
-            parsedDate.short || "",              // ✅ G: تاريخ فقط
-            getValidLocationFromAddress(fieldsData[6][r]), // H
-            fieldsData[3][r] || "",              // I: Téléphone
-            fieldsData[2][r] || "",              // J: Client
-            "",                                  // K
-            "",                                  // L
-            "",                                  // M
-            parsedDate.short || ""               // ✅ N: تاريخ فقط
-        ];
-    }
-
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-    XLSX.writeFile(wb, "extracted_data.xlsx");
-}
-
-function copyExcelData() {
-    const fieldsData = [], numFields = 7;
-    for (let i = 0; i < numFields; i++) {
-        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-    }
-
-    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-    let text = "";
-
-    for (let r = 0; r < maxRows; r++) {
-        const rawDate = fieldsData[0][r] || "";
-        const parsedDate = parseFrenchDateToDDMMYYYY(rawDate);
-
-        const addressLine = fieldsData[6][r] || "";
-const location = getValidLocationFromAddress(addressLine);
-
-const rowData = [
-    fieldsData[1][r] || "",             // A: ID CASE
-    fieldsData[4][r] || "",             // B: Accès réseau
-    parsedDate.full || "",              // ✅ C: تاريخ + وقت
-    parsedDate.short || "",             // ✅ D: تاريخ فقط
-    fieldsData[5][r] || "",             // E: Activité
-    addressLine,                       // F: Adresse
-    parsedDate.short || "",             // ✅ G: تاريخ فقط
-    location,                         // H: Location المعالجة بالكامل للنص
-    fieldsData[3][r] || "",             // I: Téléphone
-    fieldsData[2][r] || "",             // J: Client
-    "",                                // K
-    "",                                // L
-    "",                                // M
-    parsedDate.short || ""             // ✅ N: تاريخ فقط
-];
-
-        text += rowData.join("\t") + "\n";
-    }
-
-    navigator.clipboard.writeText(text).catch(() => {
-        alert("حدث خطأ أثناء النسخ إلى الحافظة.");
-    });
-}
-
-
-
-
-// دالة لحساب مسافة ليڤنشتاين
-function levenshteinDistance(a, b) {
-    const matrix = [];
-
-    for (let i = 0; i <= b.length; i++) {
-        matrix[i] = [i];
-    }
-    for (let j = 0; j <= a.length; j++) {
-        matrix[0][j] = j;
-    }
-
-    for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-            if (b.charAt(i - 1) === a.charAt(j - 1)) {
-                matrix[i][j] = matrix[i - 1][j - 1];
-            } else {
-                matrix[i][j] = Math.min(
-                    matrix[i - 1][j - 1] + 1,
-                    matrix[i][j - 1] + 1,
-                    matrix[i - 1][j] + 1
-                );
-            }
-        }
-    }
-
-    return matrix[b.length][a.length];
-}
-
-function isSimilar(word1, word2, threshold = 2) {
-    return levenshteinDistance(word1.toLowerCase(), word2.toLowerCase()) <= threshold;
-}
-function getValidLocationFromAddress(address) {
-    const validLocations = ["laayoune", "casablanca", "tetouan"];
-    const corrections = {
-        "casabalnca": "Casablanca",
-        "casa": "Casablanca",
-        "casablana": "Casablanca",
-        "casablanc": "Casablanca",
-        "laayoun": "Laayoune",
-        "laayoune": "Laayoune",
-        "tétouan": "Tetouan",
-        "tetouan": "Tetouan"
-    };
-
-    if (!address || address.trim() === "") return "Casablanca";
-
-    const cleanedAddress = address
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z\s]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-
-    const words = cleanedAddress.split(" ");
-
-    for (const loc of validLocations) {
-        for (const word of words) {
-            if (word === loc) return capitalizeFirstLetter(loc);
-            if (isSimilar(word, loc, 2)) return capitalizeFirstLetter(loc);
-        }
-    }
-
-    for (const [wrong, correct] of Object.entries(corrections)) {
-        if (cleanedAddress.includes(wrong)) return correct;
-    }
-
-    return "Casablanca";
-}
-function extractQuartierFromAddress(address) {
-    if (!address || typeof address !== "string") return "";
-
-    const raw = address.toLowerCase();
-
-    // كلمات مفتاحية مثل hay, derb, val... نأخذ الكلمة بعدها أو بعدها بكلمتين
-    const quartierPrefixes = ["hay", "derb", "val", "sidi", "douar", "ouled", "ain"];
-
-    // أسماء أحياء معروفة (بدون أخذ كلمات بعدها)
-    const knownQuartiers = [
-        "maarif", "palmier", "racine", "triangle", "gironde", "cil", "burger", "bour",
-        "borg", "biada", "belvedere", "antaria", "alsace", "arsenal", "assil", "cheminaux",
-        "gauthier", "hopitaux", "horloge", "oudaya", "hassan"
-    ];
-
-    // دالة حساب تشابه (مسافة Levenshtein)
-    function isSimilar(word1, word2, threshold = 2) {
-        return levenshteinDistance(word1, word2) <= threshold;
-    }
-
-    // فك الرموز
-    const clean = decodeCorruptedCharacters(raw).replace(/[^\w\s]/g, " ");
-    const words = clean.split(/\s+/).filter(w => w.length > 1);
-
-    // 1. البحث في known quartiers (بدون شروط إضافية)
-    for (const word of words) {
-        for (const q of knownQuartiers) {
-            if (isSimilar(word, q)) {
-                return capitalizeFirstLetter(q);
-            }
-        }
-    }
-
-    // 2. البحث عن الكلمات المفتاحية ثم الكلمة بعدها (أو بعدها بكلمتين)
-    for (let i = 0; i < words.length; i++) {
-        for (const prefix of quartierPrefixes) {
-            if (isSimilar(words[i], prefix)) {
-                let next = words[i + 1] || "";
-                let next2 = words[i + 2] || "";
-
-                let full = [prefix];
-                if (next) full.push(next);
-                if (next2) full.push(next2);
-
-                return capitalizeFirstLetter(full.join(" "));
-            }
-        }
-
-        // 3. البحث عن الكلمة المفتاحية داخل كلمة واحدة (مثل valfleuri)
-        for (const prefix of quartierPrefixes) {
-            if (words[i].includes(prefix)) {
-                return capitalizeFirstLetter(words[i]);
-            }
-        }
-    }
-
-    return "";
-}
-
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
-
-// دالة إزالة التكرار على الحقل 1 (ID CASE)
-function removeDuplicatesBasedOnField1() {
-    const numFields = 7;
+      function removeDuplicatesBasedOnReseauSmart() {
+    const numFields = 8;
     const fieldsData = [];
-
     for (let i = 0; i < numFields; i++) {
         fieldsData[i] = document.getElementById("field" + i).value.split("\n");
     }
 
-    const seen = new Set();
-    const newFieldsData = Array.from({ length: numFields }, () => []);
-
+    const grouped = new Map();
     const maxRows = Math.max(...fieldsData.map(arr => arr.length));
 
     for (let r = 0; r < maxRows; r++) {
-        const key = fieldsData[1][r] || "";
-        if (key && !seen.has(key)) {
-            seen.add(key);
-            for (let c = 0; c < numFields; c++) {
-                newFieldsData[c].push(fieldsData[c][r] || "");
+        const reseau = fieldsData[4][r] || "";
+        const record = [];
+
+        for (let c = 0; c < numFields; c++) {
+            record.push(fieldsData[c][r] || "");
+        }
+
+        if (!reseau) continue;
+
+        if (!grouped.has(reseau)) {
+            grouped.set(reseau, []);
+        }
+
+        grouped.get(reseau).push(record);
+    }
+
+    const selectedRecords = [];
+
+    for (const [reseau, records] of grouped.entries()) {
+        // اختيار السجل الأكثر اكتمالاً (الذي يحتوي على Commentaire أو Adresse Installation)
+        let best = records[0];
+
+        for (const rec of records) {
+            const hasComment = rec[7] && rec[7].trim().length > 0;
+            const hasAdresse = rec[6] && rec[6].trim().length > 0;
+
+            const bestHasComment = best[7] && best[7].trim().length > 0;
+            const bestHasAdresse = best[6] && best[6].trim().length > 0;
+
+            if ((hasComment && !bestHasComment) || (hasAdresse && !bestHasAdresse)) {
+                best = rec;
             }
         }
+
+        // تعويض Adresse Installation إذا كانت فارغة
+        if (!best[6] || best[6].trim() === "") {
+            const commentaire = best[7] || "";
+            const adresseMatch = commentaire.match(/Adresse\s*:\s*(.+)/i);
+            const villeMatch = commentaire.match(/Ville\s*:\s*(.+)/i);
+
+            if (adresseMatch) best[6] = adresseMatch[1].trim();
+            else if (villeMatch) best[6] = villeMatch[1].trim();
+        }
+
+        selectedRecords.push(best);
     }
 
+    // تفريغ البيانات المختارة في الحقول
     for (let i = 0; i < numFields; i++) {
-        document.getElementById("field" + i).value = newFieldsData[i].join("\n");
-        document.getElementById("count" + i).textContent = newFieldsData[i].length + " سطر";
+        const columnData = selectedRecords.map(rec => decodeCorruptedCharacters(rec[i] || ""));
+        document.getElementById("field" + i).value = columnData.join("\n");
+        document.getElementById("count" + i).textContent = columnData.length + " سطر";
     }
 }
 
-// دالة تنضيف التكرار + نسخ البيانات + إشعار المستخدم
-function removeDuplicatesAndAutoCopy() {
-    removeDuplicatesBasedOnField1();
-    copyExcelData();
-    alert("تم تنظيف البيانات ونسخها بنجاح!");
-}
+        function parseFrenchDateToDDMMYYYY(str) {
+            const months = {
+                janvier: "01", février: "02", fevrier: "02", mars: "03", avril: "04", mai: "05",
+                juin: "06", juillet: "07", août: "08", aout: "08", septembre: "09",
+                octobre: "10", novembre: "11", décembre: "12", decembre: "12"
+            };
 
-        </script>
+            const regex = /(\d{1,2})\s+([a-zéû]+)\s+(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/i;
+            const match = str.match(regex);
+
+            if (match) {
+                const day = match[1].padStart(2, "0");
+                const month = months[match[2].toLowerCase()] || "01";
+                const year = match[3];
+                const hour = match[4] ? match[4].padStart(2, "0") : "00";
+                const minute = match[5] ? match[5].padStart(2, "0") : "00";
+                const second = match[6] ? match[6].padStart(2, "0") : "00";
+
+                return {
+                    full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+                    short: `${day}/${month}/${year}`
+                };
+            }
+
+            const parsed = new Date(str);
+            if (!isNaN(parsed)) {
+                const day = String(parsed.getDate()).padStart(2, "0");
+                const month = String(parsed.getMonth() + 1).padStart(2, "0");
+                const year = parsed.getFullYear();
+                const hour = String(parsed.getHours()).padStart(2, "0");
+                const minute = String(parsed.getMinutes()).padStart(2, "0");
+                const second = String(parsed.getSeconds()).padStart(2, "0");
+
+                return {
+                    full: `${day}/${month}/${year} ${hour}:${minute}:${second}`,
+                    short: `${day}/${month}/${year}`
+                };
+            }
+
+            return { full: "", short: "" };
+        }
+
+        function exportToExcel() {
+            const fieldsData = [], numFields = 8;
+            for (let i = 0; i < numFields; i++) {
+                fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+            }
+
+            const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+            const wsData = [];
+
+            for (let r = 0; r < maxRows; r++) {
+                const rawDateLine = fieldsData[0][r] || "";
+                const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
+
+                wsData[r] = [
+                    fieldsData[1][r] || "",              
+                    fieldsData[4][r] || "",              
+                    parsedDate.full || "",               
+                    parsedDate.short || "",              
+                    fieldsData[5][r] || "",              
+                    fieldsData[6][r] || "",              
+                    fieldsData[7][r] || "",
+                    parsedDate.short || "",              
+                    getValidLocationFromAddress(fieldsData[6][r]), 
+                    fieldsData[3][r] || "",              
+                    fieldsData[2][r] || "",              
+                    "", "", "",                          
+                    parsedDate.short || ""               
+                ];
+            }
+
+            const ws = XLSX.utils.aoa_to_sheet(wsData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Extraction");
+            XLSX.writeFile(wb, "extraction.xlsx");
+        }
+
+        function copyExcelData() {
+            const fieldsData = [], numFields = 8;
+            for (let i = 0; i < numFields; i++) {
+                fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+            }
+
+            const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+            let text = "";
+
+            for (let r = 0; r < maxRows; r++) {
+                const rawDateLine = fieldsData[0][r] || "";
+                const parsedDate = parseFrenchDateToDDMMYYYY(rawDateLine);
+
+                const rowData = [
+                    fieldsData[1][r] || "",
+                    fieldsData[4][r] || "",
+                    parsedDate.full || "",
+                    parsedDate.short || "",
+                    fieldsData[5][r] || "",
+                    fieldsData[6][r] || "",
+                    fieldsData[7][r] || "",
+                    parsedDate.short || "",
+                    getValidLocationFromAddress(fieldsData[6][r]),
+                    fieldsData[3][r] || "",
+                    fieldsData[2][r] || "",
+                    "", "", "",
+                    parsedDate.short || ""
+                ];
+
+                text += rowData.join("\t") + "\n";
+            }
+
+            navigator.clipboard.writeText(text).catch(() => {
+                alert("حدث خطأ أثناء النسخ إلى الحافظة.");
+            });
+        }
+
+        function getValidLocationFromAddress(address) {
+            const validLocations = ["laayoune", "casablanca", "tetouan"];
+            const corrections = {
+                "casabalnca": "Casablanca",
+                "casa": "Casablanca",
+                "casablana": "Casablanca",
+                "casablanc": "Casablanca",
+                "laayoun": "Laayoune",
+                "laayoune": "Laayoune",
+                "tétouan": "Tetouan",
+                "tetouan": "Tetouan"
+            };
+
+            if (!address || address.trim() === "") return "Casablanca";
+
+            const cleanedAddress = address
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .replace(/[^a-z\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+
+            const words = cleanedAddress.split(" ");
+
+            for (const loc of validLocations) {
+                for (const word of words) {
+                    if (word === loc) return capitalizeFirstLetter(loc);
+                }
+            }
+
+            for (const [wrong, correct] of Object.entries(corrections)) {
+                if (cleanedAddress.includes(wrong)) return correct;
+            }
+
+            return "Casablanca";
+        }
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function removeDuplicatesAndAutoCopy() {
+            removeDuplicatesBasedOnReseau();
+            copyExcelData();
+            alert("تم تنظيف البيانات ونسخها بنجاح!");
+        }
+
+        function copyField(index) {
+            const field = document.getElementById("field" + index);
+            field.select();
+            document.execCommand("copy");
+            window.getSelection().removeAllRanges();
+        }
+    </script>
 </body>
 </html>
-
