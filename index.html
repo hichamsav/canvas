@@ -133,7 +133,7 @@
         <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Reçu le,Envoyé,Sent,ID CASE,Client :,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Reçu le,Envoyé,Sent,Date,ID CASE,Client :,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
         <button onclick="extractSingleKeyword()">🔎 استخراج</button>
         <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
@@ -255,8 +255,8 @@
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
                 
-                // بداية الكتلة عندما نجد "Sent:"
-                if (line.startsWith("Sent:")) {
+                // بداية الكتلة عندما نجد "Date:"
+                if (line.startsWith("Date:")) {
                     if (currentBlock.length > 0) {
                         extracted.push(...currentBlock);
                         extracted.push(""); // فاصل بين الكتل
@@ -321,8 +321,8 @@
         }
 
         function extractDateFromSent(sentLine) {
-            // استخراج التاريخ من سطر Sent: 09/26/2025 18:13:01
-            const match = sentLine.match(/Sent:\s*(\d{2}\/\d{2}\/\d{4})/);
+            // استخراج التاريخ من سطر Date: 09/26/2025 18:13:01
+            const match = sentLine.match(/Date:\s*(\d{2}\/\d{2}\/\d{4})/);
             return match ? match[1] : "";
         }
 
@@ -341,7 +341,7 @@
         if (!line) continue;
         
         // ⬇️ بداية رسالة جديدة - إعادة تعيين كل شيء
-        if (line.match(/^Sent:/i)) {
+        if (line.match(/^Date:/i)) {
             // حفظ السجل السابق إذا كان موجوداً
             if (Object.keys(current).length > 0) {
                 for (let j = 0; j <= 7; j++) {
@@ -352,7 +352,7 @@
             // إعادة تعيين كل المتغيرات لرسالة جديدة
             current = {};
             currentDate = extractDateFromSent(line);
-            current[0] = line.replace(/^Sent:\s*/i, "").trim();
+            current[0] = line.replace(/^Date:\s*/i, "").trim();
             currentAdresse = "";
             currentVille = "";
             commentaireContent = "";
@@ -679,3 +679,4 @@
     </script>
 </body>
 </html>
+
