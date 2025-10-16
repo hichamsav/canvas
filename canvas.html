@@ -117,6 +117,34 @@
         label[for="keyword"] {
             display: none;
         }
+
+    .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            z-index: 1000;
+            text-decoration: none;
+        }
+        
+        .home-btn:hover {
+            background: #218838;
+        }
+
+        /* إخفاء الروابط في شريط الحالة */
+        a {
+            position: relative;
+        }
+        
+        a::after {
+            display: none !important;
+        }
     </style>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
