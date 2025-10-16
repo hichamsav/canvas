@@ -92,6 +92,15 @@
         .home-btn:hover {
             background: #218838;
         }
+
+        /* إخفاء الروابط في شريط الحالة */
+        a {
+            position: relative;
+        }
+        
+        a::after {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
@@ -102,30 +111,37 @@
         <h1>🚀 اختر الموقع الذي تريد زيارته</h1>
         
         <div class="site-options">
-            <a href="ztecheck.html" class="site-btn" onmouseover="hideLinkPreview(this)" onclick="disableRightClick(event)">
+            <span class="site-btn" onclick="navigateTo('ztecheck')">
                 📊 ZTE Port Extractor
-            </a>
+            </span>
             
-            <a href="canvas.html" class="site-btn" onmouseover="hideLinkPreview(this)" onclick="disableRightClick(event)">
+            <span class="site-btn" onclick="navigateTo('canvas')">
                 🔧 الموقع الثاني
-            </a>
+            </span>
+            
+        </div>
         
-        <p class="description">
-            اختر أحد المواقع المتاحة من القائمة أعلاه
-        </p>
     </div>
 
     <script>
-        // منع ظهور رابط الموقع في الأسفل
-        function hideLinkPreview(element) {
-            element.removeAttribute('title');
+        // دالة التنقل بدلاً من استخدام روابط <a>
+        function navigateTo(url) {
+            window.location.href = url;
         }
-        
+
+        // منع ظهور رابط في الأسفل
+        document.addEventListener('mousemove', function(e) {
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                link.removeAttribute('title');
+            });
+        });
+
         // منع النقر الأيمن
-        function disableRightClick(event) {
-            event.preventDefault();
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
             return false;
-        }
+        });
         
         // منع فتح أدوات المطورين
         document.addEventListener('keydown', function(e) {
@@ -160,12 +176,6 @@
             }
         });
         
-        // منع النقر الأيمن على الصفحة كاملة
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-        
         // منع سحب الصور والنصوص
         document.addEventListener('dragstart', function(e) {
             e.preventDefault();
@@ -190,7 +200,7 @@
             return false;
         });
         
-        // إخفاء شريط العنوان عند فتح أدوات المطورين (محاولة)
+        // إخفاء شريط العنوان عند فتح أدوات المطورين
         let devToolsOpen = false;
         setInterval(function() {
             if (window.outerHeight - window.innerHeight > 100 || 
@@ -201,10 +211,19 @@
                 }
             }
         }, 1000);
-        
-        // إخفاء الروابط من شريط الحالة
-        document.querySelectorAll('a').forEach(link => {
-            link.setAttribute('onmouseover', 'hideLinkPreview(this)');
+
+        // إخفاء أي روابط تظهر في الأسفل
+        document.addEventListener('DOMContentLoaded', function() {
+            // إزالة أي title من جميع العناصر
+            document.querySelectorAll('*').forEach(element => {
+                element.removeAttribute('title');
+            });
+            
+            // منع ظهور الروابط في شريط الحالة
+            document.querySelectorAll('[href]').forEach(link => {
+                link.setAttribute('data-href', link.getAttribute('href'));
+                link.removeAttribute('href');
+            });
         });
     </script>
 </body>
