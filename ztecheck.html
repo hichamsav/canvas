@@ -161,6 +161,8 @@
   </div>
 
   <script>
+    // ========== الحماية والأمان ==========
+    
     // دالة العودة للصفحة الرئيسية
     function goToHome() {
       window.location.href = 'index.html';
@@ -211,6 +213,12 @@
         e.preventDefault();
         return false;
       }
+
+      // Ctrl+Shift+U
+      if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+        e.preventDefault();
+        return false;
+      }
     });
     
     // منع سحب الصور والنصوص
@@ -255,7 +263,23 @@
       document.querySelectorAll('*').forEach(element => {
         element.removeAttribute('title');
       });
+
+      // منع فحص العناصر
+      Object.defineProperty(document, 'hidden', { get: () => true });
+      Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
     });
+
+    // منع فتح وحدة التحكم
+    (function() {
+      var re = /x/;
+      console.log(re);
+      re.toString = function() {
+        window.location.reload();
+        return '';
+      };
+    })();
+
+    // ========== وظائف ZTE ==========
 
     async function pasteOnly() {
       const ta = document.getElementById('inputText');
@@ -264,8 +288,36 @@
         ta.value += (ta.value ? '\n' : '') + clipboardText.trim();
       } catch(e) {
         console.warn('❌ فشل لصق النص من الحافظة:', e);
-        alert('❌ تعذر الوصول إلى الحافظة. يرجى النسخ يدوياً.');
+        // إخفاء رسالة الخطأ الأصلية واستبدالها برسالة آمنة
+        showSecureMessage('تعذر الوصول إلى الحافظة، يرجى النسخ يدوياً.');
       }
+    }
+
+    // دالة لعرض الرسائل بشكل آمن
+    function showSecureMessage(message) {
+      // إخفاء أي رسائل نظامية وإنشاء رسالتنا الخاصة
+      const secureMsg = document.createElement('div');
+      secureMsg.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 10000;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      `;
+      secureMsg.textContent = message;
+      document.body.appendChild(secureMsg);
+      
+      setTimeout(() => {
+        if (secureMsg.parentNode) {
+          secureMsg.parentNode.removeChild(secureMsg);
+        }
+      }, 3000);
     }
 
     async function processText() {
@@ -288,7 +340,7 @@
 
       // جمع كل البيانات من جميع الأسطر
       lines.forEach((line, lineIndex) => {
-        // استخراج معلومات البورت (يدعم CA و CAS) - التصحيح هنا
+        // استخراج معلومات البورت (يدعم CA و CAS)
         const portMatch = line.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
         if (portMatch) {
           lineToPortMap.set(lineIndex, portMatch[1]);
@@ -394,7 +446,9 @@
         copyBtn.textContent = '📋 نسخ';
         copyBtn.onclick = () => {
           const textToCopy = `${portLine}\n${[...phonesSet].join('\n')}`;
-          navigator.clipboard.writeText(textToCopy);
+          navigator.clipboard.writeText(textToCopy).then(() => {
+            showSecureMessage('✅ تم النسخ بنجاح!');
+          });
         };
 
         headerLine.appendChild(portTitle);
@@ -419,6 +473,10 @@
       document.getElementById('inputText').value = '';
       document.getElementById('dynamicResults').innerHTML = '';
     }
+
+    // منع أي محاولات للتلاعب بالصفحة
+    Object.freeze(document);
+    Object.freeze(window);
   </script>
 </body>
 </html>
