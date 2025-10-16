@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>ZTE Port Extractor</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
+      display: flex; justify-content: center; align-items: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      width: 100%; max-width: 800px;
+      padding: 25px 30px;
+      text-align: center;
+      direction: rtl;
+    }
+    h2 { color: #222; margin-bottom: 15px; font-weight: 700; }
+    p { color: #555; font-size: 1rem; margin-bottom: 10px; }
+    textarea {
+      width: 100%; padding: 12px 15px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px; border: 2px solid #ddd;
+      border-radius: 8px; resize: vertical; min-height: 150px;
+      transition: border-color 0.3s ease; margin-top: 15px;
+    }
+    textarea:focus {
+      border-color: #6b73ff; outline: none;
+      box-shadow: 0 0 8px #6b73ff88;
+    }
+
+    .output-area {
+      margin-top: 30px;
+    }
+
+    .result-box {
+      background-color: #f9f9f9;
+      border: 2px solid #000dff;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      padding: 15px 20px;
+      text-align: right;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .result-box pre {
+      white-space: pre-wrap;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 14px;
+      color: #333;
+      margin: 0;
+    }
+
+    .copy-btn {
+      background-color: #000dff;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .copy-btn:hover {
+      background-color: #4e5cff;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      direction: rtl;
+    }
+
+    button {
+      background-color: #000dff;
+      color: white;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 15px;
+      margin-inline: 10px;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #4e5cff;
+    }
+
+    .summary {
+      background-color: #28a745;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      margin-top: 20px;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ZTE Port Extractor</h2>
+    <textarea id="inputText" rows="10" placeholder="📄 أدخل النص هنا... أو الصقه يدويًا"></textarea>
+
+    <div>
+      <button onclick="pasteOnly()">📥 لصق من الحافظة (بدون تحليل)</button>
+      <button onclick="processText()">📌 تحليل البيانات</button>
+      <button onclick="resetAll()">♻️ إعادة تعيين</button>
+    </div>
+
+    <div class="output-area" id="dynamicResults"></div>
+  </div>
+
+  <script>
+    async function pasteOnly() {
+      const ta = document.getElementById('inputText');
+      try {
+        const clipboardText = await navigator.clipboard.readText();
+        ta.value += (ta.value ? '\n' : '') + clipboardText.trim();
+      } catch(e) {
+        console.warn('❌ فشل لصق النص من الحافظة:', e);
+        alert('❌ تعذر الوصول إلى الحافظة. يرجى النسخ يدوياً.');
+      }
+    }
+
+    async function processText() {
+      const text = document.getElementById('inputText').value.trim();
+      const resultContainer = document.getElementById('dynamicResults');
+      resultContainer.innerHTML = '';
+
+      if (!text) {
+        resultContainer.innerHTML = '<p style="color:red;">⚠️ لا يوجد نص لتحليله.</p>';
+        return;
+      }
+
+      const lines = text.split(/\r?\n/);
+      const valuesInsideParentheses = new Map();
+      const wordsBeforeParentheses = new Map();
+      const lineToPortMap = new Map();
+      const lineToPhoneMap = new Map();
+      const lineToParenthesesMap = new Map();
+      const lineToWordsBeforeMap = new Map();
+
+      // جمع كل البيانات من جميع الأسطر
+      lines.forEach((line, lineIndex) => {
+        // استخراج معلومات البورت (يدعم CA و CAS) - التصحيح هنا
+        const portMatch = line.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
+        if (portMatch) {
+          lineToPortMap.set(lineIndex, portMatch[1]);
+        }
+
+        // استخراج أرقام الهواتف
+        const phoneMatch = line.match(/\b[58]\d{8}\b/);
+        if (phoneMatch) {
+          lineToPhoneMap.set(lineIndex, phoneMatch[0]);
+        }
+
+        // استخراج القيم داخل الأقواس
+        const parenthesesMatches = line.match(/\(([^)]+)\)/g);
+        const parenthesesValues = [];
+        if (parenthesesMatches) {
+          parenthesesMatches.forEach(match => {
+            const value = match.replace(/[()]/g, '');
+            parenthesesValues.push(value);
+            valuesInsideParentheses.set(value, (valuesInsideParentheses.get(value) || 0) + 1);
+          });
+        }
+        lineToParenthesesMap.set(lineIndex, parenthesesValues);
+
+        // استخراج الكلمات قبل الأقواس
+        const wordsBeforeMatches = line.match(/([A-Z0-9]{12,14})\(/g);
+        const wordsBeforeValues = [];
+        if (wordsBeforeMatches) {
+          wordsBeforeMatches.forEach(match => {
+            const word = match.replace('(', '');
+            wordsBeforeValues.push(word);
+            wordsBeforeParentheses.set(word, (wordsBeforeParentheses.get(word) || 0) + 1);
+          });
+        }
+        lineToWordsBeforeMap.set(lineIndex, wordsBeforeValues);
+      });
+
+      // البحث عن التكرار بين الأسطر المختلفة
+      const portResults = new Map();
+      let totalNumbers = 0;
+
+      lines.forEach((currentLine, currentIndex) => {
+        const currentPort = lineToPortMap.get(currentIndex);
+        if (!currentPort) return;
+
+        const currentParentheses = lineToParenthesesMap.get(currentIndex) || [];
+        const currentWordsBefore = lineToWordsBeforeMap.get(currentIndex) || [];
+
+        // البحث في جميع الأسطر الأخرى
+        lines.forEach((otherLine, otherIndex) => {
+          if (currentIndex === otherIndex) return;
+
+          const otherPhone = lineToPhoneMap.get(otherIndex);
+          if (!otherPhone) return;
+
+          const otherParentheses = lineToParenthesesMap.get(otherIndex) || [];
+          const otherWordsBefore = lineToWordsBeforeMap.get(otherIndex) || [];
+
+          let shouldInclude = false;
+
+          // التحقق من تطابق القيم داخل الأقواس
+          currentParentheses.forEach(currentValue => {
+            if (otherParentheses.includes(currentValue)) {
+              shouldInclude = true;
+            }
+          });
+
+          // التحقق من تطابق الكلمات قبل الأقواس
+          currentWordsBefore.forEach(currentWord => {
+            if (otherWordsBefore.includes(currentWord)) {
+              shouldInclude = true;
+            }
+          });
+
+          // إذا وجد تطابق، أضف الرقم إلى النتائج
+          if (shouldInclude) {
+            if (!portResults.has(currentPort)) {
+              portResults.set(currentPort, new Set());
+            }
+            portResults.get(currentPort).add(otherPhone);
+            totalNumbers++;
+          }
+        });
+      });
+
+      // عرض النتائج
+      if (portResults.size === 0) {
+        resultContainer.innerHTML = '<p>❌ لم يتم العثور على نتائج.</p>';
+        return;
+      }
+
+      Array.from(portResults.entries()).forEach(([portLine, phonesSet]) => {
+        const box = document.createElement('div');
+        box.className = 'result-box';
+
+        const headerLine = document.createElement('div');
+        headerLine.className = 'result-header';
+
+        const portTitle = document.createElement('strong');
+        portTitle.textContent = portLine;
+
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = '📋 نسخ';
+        copyBtn.onclick = () => {
+          const textToCopy = `${portLine}\n${[...phonesSet].join('\n')}`;
+          navigator.clipboard.writeText(textToCopy);
+        };
+
+        headerLine.appendChild(portTitle);
+        headerLine.appendChild(copyBtn);
+
+        const content = document.createElement('pre');
+        content.textContent = [...phonesSet].join('\n');
+
+        box.appendChild(headerLine);
+        box.appendChild(content);
+        resultContainer.appendChild(box);
+      });
+
+      // إضافة ملخص بعدد الأرقام المستخرجة
+      const summary = document.createElement('div');
+      summary.className = 'summary';
+      summary.textContent = `✅ تم استخراج ${totalNumbers} رقم بنجاح`;
+      resultContainer.appendChild(summary);
+    }
+
+    function resetAll() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('dynamicResults').innerHTML = '';
+    }
+  </script>
+</body>
+</html>
