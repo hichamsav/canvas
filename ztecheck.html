@@ -11,6 +11,11 @@
       background: linear-gradient(135deg, #6b73ff 0%, #000dff 100%);
       display: flex; justify-content: center; align-items: center;
       padding: 20px;
+      overflow: hidden;
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
     .container {
       background: #fff;
@@ -20,6 +25,7 @@
       padding: 25px 30px;
       text-align: center;
       direction: rtl;
+      position: relative;
     }
     h2 { color: #222; margin-bottom: 15px; font-weight: 700; }
     p { color: #555; font-size: 1rem; margin-bottom: 10px; }
@@ -109,35 +115,38 @@
       font-size: 1.1rem;
     }
     .home-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            z-index: 1000;
-            text-decoration: none;
-        }
-        
-        .home-btn:hover {
-            background: #218838;
-        }
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      z-index: 1000;
+      text-decoration: none;
+    }
+    
+    .home-btn:hover {
+      background: #218838;
+    }
 
-        /* إخفاء الروابط في شريط الحالة */
-        a {
-            position: relative;
-        }
-        
-        a::after {
-            display: none !important;
-        }
+    /* إخفاء الروابط في شريط الحالة */
+    a {
+      position: relative;
+    }
+    
+    a::after {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
+  <!-- زر العودة الرئيسي -->
+  <span class="home-btn" onclick="goToHome()">🏠 Pages</span>
+  
   <div class="container">
     <h2>ZTE Port Extractor</h2>
     <textarea id="inputText" rows="10" placeholder="📄 أدخل النص هنا... أو الصقه يدويًا"></textarea>
@@ -152,8 +161,101 @@
   </div>
 
   <script>
-        <!-- زر العودة الرئيسي -->
-    <a href="index.html" class="home-btn">🏠 Pages </a>
+    // دالة العودة للصفحة الرئيسية
+    function goToHome() {
+      window.location.href = 'index.html';
+    }
+
+    // منع ظهور رابط في الأسفل
+    document.addEventListener('mousemove', function(e) {
+      const elements = document.querySelectorAll('*');
+      elements.forEach(element => {
+        element.removeAttribute('title');
+      });
+    });
+
+    // منع النقر الأيمن
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع فتح أدوات المطورين
+    document.addEventListener('keydown', function(e) {
+      // F12
+      if (e.key === 'F12') {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Ctrl+Shift+I
+      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Ctrl+Shift+J
+      if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Ctrl+Shift+C
+      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        e.preventDefault();
+        return false;
+      }
+      
+      // Ctrl+U
+      if (e.ctrlKey && e.key === 'u') {
+        e.preventDefault();
+        return false;
+      }
+    });
+    
+    // منع سحب الصور والنصوص
+    document.addEventListener('dragstart', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع النسخ
+    document.addEventListener('copy', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع القص
+    document.addEventListener('cut', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع اللصق
+    document.addEventListener('paste', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // إخفاء شريط العنوان عند فتح أدوات المطورين
+    let devToolsOpen = false;
+    setInterval(function() {
+      if (window.outerHeight - window.innerHeight > 100 || 
+          window.outerWidth - window.innerWidth > 100) {
+        if (!devToolsOpen) {
+          devToolsOpen = true;
+          window.location.reload();
+        }
+      }
+    }, 1000);
+
+    // إخفاء أي روابط تظهر في الأسفل
+    document.addEventListener('DOMContentLoaded', function() {
+      // إزالة أي title من جميع العناصر
+      document.querySelectorAll('*').forEach(element => {
+        element.removeAttribute('title');
+      });
+    });
 
     async function pasteOnly() {
       const ta = document.getElementById('inputText');
