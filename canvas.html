@@ -122,25 +122,6 @@
             display: none;
         }
 
-        .home-btn {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            z-index: 1000;
-            text-decoration: none;
-        }
-        
-        .home-btn:hover {
-            background: #218838;
-        }
-
         .bottom-home-btn {
             position: fixed;
             bottom: 20px;
@@ -149,16 +130,20 @@
             background: #28a745;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 0.9rem;
-            z-index: 1000;
+            font-size: 1rem;
+            z-index: 10000;
             text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-weight: bold;
         }
 
         .bottom-home-btn:hover {
             background: #218838;
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
         }
 
         /* إخفاء الروابط في شريط الحالة */
@@ -173,9 +158,6 @@
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <!-- زر العودة الرئيسي في الأعلى -->
-    <button class="home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
-
     <div class="header-logo">
         <img src="https://www.vernegroup.com/wp-content/uploads/2021/08/Image-1-1-1.png" alt="الشعار" />
     </div>
@@ -252,7 +234,7 @@
         </div>
     </div>
 
-    <!-- زر الصفحة الرئيسية في الأسفل -->
+    <!-- زر الصفحة الرئيسية في الأسفل فقط -->
     <button class="bottom-home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
 
     <script>
@@ -271,77 +253,87 @@
             });
         });
 
-        // منع النقر الأيمن
+        // منع النقر الأيمن - إصلاح كامل
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             return false;
-        });
+        }, true);
 
-        // منع فتح أدوات المطورين
+        // منع فتح أدوات المطورين - إصلاح كامل
         document.addEventListener('keydown', function(e) {
             // F12
             if (e.key === 'F12') {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
             
             // Ctrl+Shift+I
             if (e.ctrlKey && e.shiftKey && e.key === 'I') {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
             
             // Ctrl+Shift+J
             if (e.ctrlKey && e.shiftKey && e.key === 'J') {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
             
             // Ctrl+Shift+C
             if (e.ctrlKey && e.shiftKey && e.key === 'C') {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
             
             // Ctrl+U
             if (e.ctrlKey && e.key === 'u') {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
 
             // Ctrl+Shift+U
             if (e.ctrlKey && e.shiftKey && e.key === 'U') {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
-        });
+        }, true);
 
         // منع سحب الصور والنصوص
         document.addEventListener('dragstart', function(e) {
             e.preventDefault();
             return false;
-        });
+        }, true);
 
-        // منع النسخ
+        // منع النسخ - إصلاح كامل
         document.addEventListener('copy', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             return false;
-        });
+        }, true);
 
         // منع القص
         document.addEventListener('cut', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             return false;
-        });
+        }, true);
 
         // منع اللصق (باستثناء الحقول المسموحة)
         document.addEventListener('paste', function(e) {
             const allowedIds = ['filteredOutput', 'singleKeywordOutput', 'singleKeywordInput', 'field0', 'field1', 'field2', 'field3', 'field4', 'field5', 'field6', 'field7'];
             if (!allowedIds.includes(e.target.id)) {
                 e.preventDefault();
+                e.stopPropagation();
                 return false;
             }
-        });
+        }, true);
 
         // إخفاء شريط العنوان عند فتح أدوات المطورين
         let devToolsOpen = false;
@@ -365,6 +357,10 @@
             // منع فحص العناصر
             Object.defineProperty(document, 'hidden', { get: () => true });
             Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
+            
+            // حماية إضافية
+            Object.freeze(document);
+            Object.freeze(window);
         });
 
         // منع فتح وحدة التحكم
@@ -376,6 +372,19 @@
                 return '';
             };
         })();
+
+        // حماية إضافية لمنع التلاعب
+        Object.defineProperty(window, 'console', {
+            get: function() {
+                return {
+                    log: function() {},
+                    warn: function() {},
+                    error: function() {},
+                    info: function() {}
+                };
+            },
+            set: function() {}
+        });
 
         // رسائل الأمان المخصصة
         function showSecureMessage(message) {
@@ -393,6 +402,7 @@
                 font-weight: bold;
                 box-shadow: 0 5px 15px rgba(0,0,0,0.3);
                 text-align: center;
+                font-size: 16px;
             `;
             secureMsg.textContent = message;
             document.body.appendChild(secureMsg);
@@ -404,23 +414,9 @@
             }, 3000);
         }
 
-        // منع أي محاولات للتلاعب بالصفحة
-        Object.freeze(document);
-        Object.freeze(window);
-
         // ========== 🔒 نهاية الحماية ==========
 
         // ========== الكود الأصلي ==========
-        window.alert = function() {};
-        const originalAlert = window.alert;
-
-        window.alert = function(message) {
-            if (typeof message === 'string' && message.includes('hichamsav.github.io')) {
-                return;
-            }
-            originalAlert(message);
-        };
-
         let originalMergedContent = "";
 
         function mergeFolderTxt() {
@@ -496,7 +492,6 @@
             }
 
             document.getElementById("singleKeywordOutput").value = extracted.join("\n");
-            console.log("تم استخراج " + blocksFound + " كتلة بيانات");
             filterAndDistribute();
         }
 
