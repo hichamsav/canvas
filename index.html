@@ -19,6 +19,11 @@
             justify-content: center;
             align-items: center;
             direction: rtl;
+            overflow: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
         
         .container {
@@ -29,6 +34,7 @@
             text-align: center;
             max-width: 500px;
             width: 90%;
+            position: relative;
         }
         
         h1 {
@@ -67,26 +73,139 @@
             color: #666;
             font-size: 0.9rem;
         }
+        
+        .home-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            z-index: 1000;
+            text-decoration: none;
+        }
+        
+        .home-btn:hover {
+            background: #218838;
+        }
     </style>
 </head>
 <body>
+    <!-- زر العودة الرئيسي -->
+    <a href="index.html" class="home-btn">🏠 الرئيسية</a>
+    
     <div class="container">
         <h1>🚀 اختر الموقع الذي تريد زيارته</h1>
         
         <div class="site-options">
-            <a href="ztecheck.html" class="site-btn">
+            <a href="ztecheck.html" class="site-btn" onmouseover="hideLinkPreview(this)" onclick="disableRightClick(event)">
                 📊 ZTE Port Extractor
             </a>
             
-            <a href="canvas.html" class="site-btn">
+            <a href="canvas.html" class="site-btn" onmouseover="hideLinkPreview(this)" onclick="disableRightClick(event)">
                 🔧 الموقع الثاني
             </a>
-      
-        </div>
         
         <p class="description">
             اختر أحد المواقع المتاحة من القائمة أعلاه
         </p>
     </div>
+
+    <script>
+        // منع ظهور رابط الموقع في الأسفل
+        function hideLinkPreview(element) {
+            element.removeAttribute('title');
+        }
+        
+        // منع النقر الأيمن
+        function disableRightClick(event) {
+            event.preventDefault();
+            return false;
+        }
+        
+        // منع فتح أدوات المطورين
+        document.addEventListener('keydown', function(e) {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+Shift+J
+            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+                e.preventDefault();
+                return false;
+            }
+            
+            // Ctrl+U
+            if (e.ctrlKey && e.key === 'u') {
+                e.preventDefault();
+                return false;
+            }
+        });
+        
+        // منع النقر الأيمن على الصفحة كاملة
+        document.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // منع سحب الصور والنصوص
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // منع النسخ
+        document.addEventListener('copy', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // منع القص
+        document.addEventListener('cut', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // منع اللصق
+        document.addEventListener('paste', function(e) {
+            e.preventDefault();
+            return false;
+        });
+        
+        // إخفاء شريط العنوان عند فتح أدوات المطورين (محاولة)
+        let devToolsOpen = false;
+        setInterval(function() {
+            if (window.outerHeight - window.innerHeight > 100 || 
+                window.outerWidth - window.innerWidth > 100) {
+                if (!devToolsOpen) {
+                    devToolsOpen = true;
+                    window.location.reload();
+                }
+            }
+        }, 1000);
+        
+        // إخفاء الروابط من شريط الحالة
+        document.querySelectorAll('a').forEach(link => {
+            link.setAttribute('onmouseover', 'hideLinkPreview(this)');
+        });
+    </script>
 </body>
 </html>
