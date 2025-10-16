@@ -141,6 +141,24 @@
     a::after {
       display: none !important;
     }
+
+    /* زر اللصق الآمن */
+    .secure-paste-btn {
+      background: #ff6b6b;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      margin: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .secure-paste-btn:hover {
+      background: #ff5252;
+      transform: translateY(-2px);
+    }
   </style>
 </head>
 <body>
@@ -152,7 +170,7 @@
     <textarea id="inputText" rows="10" placeholder="📄 أدخل النص هنا... أو الصقه يدويًا"></textarea>
 
     <div>
-      <button onclick="pasteOnly()">📥 لصق من الحافظة (بدون تحليل)</button>
+      <button class="secure-paste-btn" onclick="showPasteInstructions()">📥 لصق آمن من الحافظة</button>
       <button onclick="processText()">📌 تحليل البيانات</button>
       <button onclick="resetAll()">♻️ إعادة تعيين</button>
     </div>
@@ -160,12 +178,37 @@
     <div class="output-area" id="dynamicResults"></div>
   </div>
 
+  <!-- تعليمات اللصق الآمن -->
+  <div id="pasteInstructions" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 10000; text-align: center; max-width: 400px; width: 90%;">
+    <h3 style="color: #333; margin-bottom: 20px;">📋 طريقة اللصق الآمن</h3>
+    <p style="color: #555; margin-bottom: 15px;">1. انسخ النص الذي تريد لصقه</p>
+    <p style="color: #555; margin-bottom: 15px;">2. اضغط على <strong>Ctrl+V</strong> في مربع النص أعلاه</p>
+    <p style="color: #555; margin-bottom: 20px;">3. أو الصق يدوياً باستخدام النقر بزر الماوس الأيمن</p>
+    <button onclick="hidePasteInstructions()" style="background: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 1rem;">فهمت ✔</button>
+  </div>
+
+  <!-- طبقة التعتيم -->
+  <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999;"></div>
+
   <script>
     // ========== الحماية والأمان ==========
     
     // دالة العودة للصفحة الرئيسية
     function goToHome() {
       window.location.href = 'index.html';
+    }
+
+    // تعليمات اللصق الآمن
+    function showPasteInstructions() {
+      document.getElementById('pasteInstructions').style.display = 'block';
+      document.getElementById('overlay').style.display = 'block';
+    }
+
+    function hidePasteInstructions() {
+      document.getElementById('pasteInstructions').style.display = 'none';
+      document.getElementById('overlay').style.display = 'none';
+      // تركيز على Textarea بعد إغلاق التعليمات
+      document.getElementById('inputText').focus();
     }
 
     // منع ظهور رابط في الأسفل
@@ -239,10 +282,12 @@
       return false;
     });
     
-    // منع اللصق
+    // منع اللصق (باستثناء textarea)
     document.addEventListener('paste', function(e) {
-      e.preventDefault();
-      return false;
+      if (e.target.id !== 'inputText') {
+        e.preventDefault();
+        return false;
+      }
     });
     
     // إخفاء شريط العنوان عند فتح أدوات المطورين
@@ -281,21 +326,8 @@
 
     // ========== وظائف ZTE ==========
 
-    async function pasteOnly() {
-      const ta = document.getElementById('inputText');
-      try {
-        const clipboardText = await navigator.clipboard.readText();
-        ta.value += (ta.value ? '\n' : '') + clipboardText.trim();
-      } catch(e) {
-        console.warn('❌ فشل لصق النص من الحافظة:', e);
-        // إخفاء رسالة الخطأ الأصلية واستبدالها برسالة آمنة
-        showSecureMessage('تعذر الوصول إلى الحافظة، يرجى النسخ يدوياً.');
-      }
-    }
-
-    // دالة لعرض الرسائل بشكل آمن
+    // إزالة وظيفة pasteOnly القديمة واستبدالها بالتعليمات
     function showSecureMessage(message) {
-      // إخفاء أي رسائل نظامية وإنشاء رسالتنا الخاصة
       const secureMsg = document.createElement('div');
       secureMsg.style.cssText = `
         position: fixed;
