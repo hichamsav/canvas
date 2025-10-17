@@ -118,33 +118,41 @@
             display: none;
         }
 
-        /* زر الصفحة الرئيسية في الأسفل */
-        .bottom-home-btn {
+    .home-btn {
             position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 20px;
+            left: 20px;
             background: #28a745;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 10px 15px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
             z-index: 1000;
             text-decoration: none;
         }
-
-        .bottom-home-btn:hover {
+        
+        .home-btn:hover {
             background: #218838;
+        }
+
+        /* إخفاء الروابط في شريط الحالة */
+        a {
+            position: relative;
+        }
+        
+        a::after {
+            display: none !important;
         }
     </style>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 </head>
 <body>
-    <div class="header-logo">
-        <img src="https://www.vernegroup.com/wp-content/uploads/2021/08/Image-1-1-1.png" alt="الشعار" />
-    </div>
+<div class="header-logo">
+    <img src="https://www.vernegroup.com/wp-content/uploads/2021/08/Image-1-1-1.png" alt="الشعار" />
+</div>
+
     
     <div class="container" style="max-width: 45%;">
         <h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
@@ -218,38 +226,10 @@
         </div>
     </div>
 
-    <!-- زر الصفحة الرئيسية في الأسفل -->
-    <button class="bottom-home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
-
     <script>
-        // ========== الحمايات فقط ==========
-        
-        // دالة العودة للصفحة الرئيسية
-        function goToHome() {
-            window.location.href = 'index.html';
-        }
+                <!-- زر العودة الرئيسي -->
+    <a href="index.html" class="home-btn">🏠 Pages </a>
 
-        // منع النقر الأيمن
-        document.addEventListener('contextmenu', function(e) {
-            e.preventDefault();
-            return false;
-        });
-
-        // منع فتح أدوات المطورين
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
-                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
-                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
-                (e.ctrlKey && e.key === 'u')) {
-                e.preventDefault();
-                return false;
-            }
-        });
-
-        // ========== نهاية الحمايات ==========
-
-        // ========== الكود الأصلي بدون أي تغيير ==========
         window.alert = function() {};
         const originalAlert = window.alert;
 
@@ -378,187 +358,186 @@
             return match ? match[1] : "";
         }
 
-        function filterAndDistribute() {
-            const text = document.getElementById('singleKeywordOutput').value.split("\n");
-            const fields = Array.from({ length: 8 }, () => []);
-            let current = {};
-            let currentAdresse = "";
-            let currentVille = "";
-            let currentDate = "";
-            let commentaireContent = "";
-            
-            for (let i = 0; i < text.length; i++) {
-                const line = text[i].trim();
-                
-                if (!line) continue;
-                
-                // ⬇️ بداية رسالة جديدة - إعادة تعيين كل شيء
-                if (line.match(/^Date:/i)) {
-                    // حفظ السجل السابق إذا كان موجوداً
-                    if (Object.keys(current).length > 0) {
-                        for (let j = 0; j <= 7; j++) {
-                            fields[j].push(current[j] || "");
-                        }
-                    }
-                    
-                    // إعادة تعيين كل المتغيرات لرسالة جديدة
-                    current = {};
-                    currentDate = extractDateFromSent(line);
-                    current[0] = line.replace(/^Date:\s*/i, "").trim();
-                    currentAdresse = "";
-                    currentVille = "";
-                    commentaireContent = "";
-                }
-                else if (line.match(/^ID CASE\s*:/i)) {
-                    current[1] = line.replace(/^ID CASE\s*:\s*/i, "").trim();
-                }
-                else if (line.match(/^Client\s*:/i)) {
-                    current[2] = line.replace(/^Client\s*:\s*/i, "").trim();
-                }
-                else if (line.match(/^Téléphone\s*:/i) || line.match(/^T�l�phone\s*:/i)) {
-                    let phoneValue = line.replace(/^Téléphone\s*:\s*/i, "").replace(/^T�l�phone\s*:\s*/i, "").trim();
-                    current[3] = normalizePhone(phoneValue);
-                }
-                else if (line.match(/^Accès réseau\s*:/i) || line.match(/^Acc�s r�seau\s*:/i)) {
-                    let reseauValue = line.replace(/^Accès réseau\s*:\s*/i, "").replace(/^Acc�s r�seau\s*:\s*/i, "").trim();
-                    current[4] = normalizePhone(reseauValue);
-                }
-                else if (line.match(/^Activités de service\s*:/i) || line.match(/^Activit�s de service\s*:/i)) {
-                    let rawValue = line.replace(/^Activités de service\s*:\s*/i, "").replace(/^Activit�s de service\s*:\s*/i, "").trim();
-                    let parts = rawValue.split("|");
-                    let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
-                    current[5] = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
-                }
-                else if (line.match(/^Commentaire\s*:/i)) {
-                    // ⬇️ Commentaire للرسالة الحالية فقط
-                    commentaireContent = line.replace(/^Commentaire\s*:\s*/i, "").trim();
-                    current[7] = commentaireContent;
-                    
-                    // البحث عن Adresse
-                    if (commentaireContent.includes("Adresse :") || commentaireContent.includes("adresse :")) {
-                        let adresseMatch = commentaireContent.match(/Adresse\s*:\s*(.+)/i) || commentaireContent.match(/adresse\s*:\s*(.+)/i);
-                        if (adresseMatch) {
-                            currentAdresse = adresseMatch[1].trim();
-                        }
-                    }
-                }
-                // ⬇️ البحث عن Adresse في أي سطر
-                else if (line.includes("Adresse :") || line.includes("adresse :")) {
-                    let adresseMatch = line.match(/Adresse\s*:\s*(.+)/i) || line.match(/adresse\s*:\s*(.+)/i);
-                    if (adresseMatch) {
-                        currentAdresse = adresseMatch[1].trim();
-                    }
-                }
-                else if (line.match(/^Adresse Installation\s*:/i)) {
-                    let adresseValue = line.replace(/^Adresse Installation\s*:\s*/i, "").trim();
-                    
-                    // ⬇️ إذا كان Adresse Installation فارغاً
-                    if (!adresseValue || adresseValue === "") {
-                        if (currentAdresse) {
-                            adresseValue = currentAdresse;
-                        } else if (currentVille) {
-                            adresseValue = currentVille;
-                        }
-                    }
-                    
-                    current[6] = adresseValue || "";
-                    current.date = currentDate;
-                    current[7] = commentaireContent; // ⬇️ تأكيد حفظ Commentaire الحالي فقط
-                    
-                    // حفظ السجل
-                    for (let j = 0; j <= 7; j++) {
-                        fields[j].push(current[j] || "");
-                    }
-                    
-                    // ⬇️ إعادة تعيين للمرسالة التالية
-                    current = {};
-                    currentAdresse = "";
-                    currentVille = "";
-                    currentDate = "";
-                    commentaireContent = "";
-                }
-            }
-
-            // معالجة أي سجل متبقي
+      function filterAndDistribute() {
+    const text = document.getElementById('singleKeywordOutput').value.split("\n");
+    const fields = Array.from({ length: 8 }, () => []);
+    let current = {};
+    let currentAdresse = "";
+    let currentVille = "";
+    let currentDate = "";
+    let commentaireContent = "";
+    
+    for (let i = 0; i < text.length; i++) {
+        const line = text[i].trim();
+        
+        if (!line) continue;
+        
+        // ⬇️ بداية رسالة جديدة - إعادة تعيين كل شيء
+        if (line.match(/^Date:/i)) {
+            // حفظ السجل السابق إذا كان موجوداً
             if (Object.keys(current).length > 0) {
                 for (let j = 0; j <= 7; j++) {
                     fields[j].push(current[j] || "");
                 }
             }
+            
+            // إعادة تعيين كل المتغيرات لرسالة جديدة
+            current = {};
+            currentDate = extractDateFromSent(line);
+            current[0] = line.replace(/^Date:\s*/i, "").trim();
+            currentAdresse = "";
+            currentVille = "";
+            commentaireContent = "";
+        }
+        else if (line.match(/^ID CASE\s*:/i)) {
+            current[1] = line.replace(/^ID CASE\s*:\s*/i, "").trim();
+        }
+        else if (line.match(/^Client\s*:/i)) {
+            current[2] = line.replace(/^Client\s*:\s*/i, "").trim();
+        }
+        else if (line.match(/^Téléphone\s*:/i) || line.match(/^T�l�phone\s*:/i)) {
+            let phoneValue = line.replace(/^Téléphone\s*:\s*/i, "").replace(/^T�l�phone\s*:\s*/i, "").trim();
+            current[3] = normalizePhone(phoneValue);
+        }
+        else if (line.match(/^Accès réseau\s*:/i) || line.match(/^Acc�s r�seau\s*:/i)) {
+            let reseauValue = line.replace(/^Accès réseau\s*:\s*/i, "").replace(/^Acc�s r�seau\s*:\s*/i, "").trim();
+            current[4] = normalizePhone(reseauValue);
+        }
+        else if (line.match(/^Activités de service\s*:/i) || line.match(/^Activit�s de service\s*:/i)) {
+            let rawValue = line.replace(/^Activités de service\s*:\s*/i, "").replace(/^Activit�s de service\s*:\s*/i, "").trim();
+            let parts = rawValue.split("|");
+            let lastPart = parts.length > 1 ? parts[parts.length - 1].trim() : rawValue.trim();
+            current[5] = lastPart.replace(/[^\w\s\u00C0-\u017F]/g, '').trim();
+        }
+        else if (line.match(/^Commentaire\s*:/i)) {
+            // ⬇️ Commentaire للرسالة الحالية فقط
+            commentaireContent = line.replace(/^Commentaire\s*:\s*/i, "").trim();
+            current[7] = commentaireContent;
+            
+            // البحث عن Adresse
+            if (commentaireContent.includes("Adresse :") || commentaireContent.includes("adresse :")) {
+                let adresseMatch = commentaireContent.match(/Adresse\s*:\s*(.+)/i) || commentaireContent.match(/adresse\s*:\s*(.+)/i);
+                if (adresseMatch) {
+                    currentAdresse = adresseMatch[1].trim();
+                }
+            }
+        }
+        // ⬇️ البحث عن Adresse في أي سطر
+        else if (line.includes("Adresse :") || line.includes("adresse :")) {
+            let adresseMatch = line.match(/Adresse\s*:\s*(.+)/i) || line.match(/adresse\s*:\s*(.+)/i);
+            if (adresseMatch) {
+                currentAdresse = adresseMatch[1].trim();
+            }
+        }
+        else if (line.match(/^Adresse Installation\s*:/i)) {
+            let adresseValue = line.replace(/^Adresse Installation\s*:\s*/i, "").trim();
+            
+            // ⬇️ إذا كان Adresse Installation فارغاً
+            if (!adresseValue || adresseValue === "") {
+                if (currentAdresse) {
+                    adresseValue = currentAdresse;
+                } else if (currentVille) {
+                    adresseValue = currentVille;
+                }
+            }
+            
+            current[6] = adresseValue || "";
+            current.date = currentDate;
+            current[7] = commentaireContent; // ⬇️ تأكيد حفظ Commentaire الحالي فقط
+            
+            // حفظ السجل
+            for (let j = 0; j <= 7; j++) {
+                fields[j].push(current[j] || "");
+            }
+            
+            // ⬇️ إعادة تعيين للمرسالة التالية
+            current = {};
+            currentAdresse = "";
+            currentVille = "";
+            currentDate = "";
+            commentaireContent = "";
+        }
+    }
 
-            for (let i = 0; i <= 7; i++) {
-                let fieldValue = fields[i].join("\n");
-                fieldValue = decodeCorruptedCharacters(fieldValue);
-                document.getElementById("field" + i).value = fieldValue;
-                document.getElementById("count" + i).textContent = fields[i].length + " سطر";
+    // معالجة أي سجل متبقي
+    if (Object.keys(current).length > 0) {
+        for (let j = 0; j <= 7; j++) {
+            fields[j].push(current[j] || "");
+        }
+    }
+
+    for (let i = 0; i <= 7; i++) {
+        let fieldValue = fields[i].join("\n");
+        fieldValue = decodeCorruptedCharacters(fieldValue);
+        document.getElementById("field" + i).value = fieldValue;
+        document.getElementById("count" + i).textContent = fields[i].length + " سطر";
+    }
+}
+      function removeDuplicatesBasedOnReseauSmart() {
+    const numFields = 8;
+    const fieldsData = [];
+    for (let i = 0; i < numFields; i++) {
+        fieldsData[i] = document.getElementById("field" + i).value.split("\n");
+    }
+
+    const grouped = new Map();
+    const maxRows = Math.max(...fieldsData.map(arr => arr.length));
+
+    for (let r = 0; r < maxRows; r++) {
+        const reseau = fieldsData[4][r] || "";
+        const record = [];
+
+        for (let c = 0; c < numFields; c++) {
+            record.push(fieldsData[c][r] || "");
+        }
+
+        if (!reseau) continue;
+
+        if (!grouped.has(reseau)) {
+            grouped.set(reseau, []);
+        }
+
+        grouped.get(reseau).push(record);
+    }
+
+    const selectedRecords = [];
+
+    for (const [reseau, records] of grouped.entries()) {
+        // اختيار السجل الأكثر اكتمالاً (الذي يحتوي على Commentaire أو Adresse Installation)
+        let best = records[0];
+
+        for (const rec of records) {
+            const hasComment = rec[7] && rec[7].trim().length > 0;
+            const hasAdresse = rec[6] && rec[6].trim().length > 0;
+
+            const bestHasComment = best[7] && best[7].trim().length > 0;
+            const bestHasAdresse = best[6] && best[6].trim().length > 0;
+
+            if ((hasComment && !bestHasComment) || (hasAdresse && !bestHasAdresse)) {
+                best = rec;
             }
         }
 
-        function removeDuplicatesBasedOnReseauSmart() {
-            const numFields = 8;
-            const fieldsData = [];
-            for (let i = 0; i < numFields; i++) {
-                fieldsData[i] = document.getElementById("field" + i).value.split("\n");
-            }
+        // تعويض Adresse Installation إذا كانت فارغة
+        if (!best[6] || best[6].trim() === "") {
+            const commentaire = best[7] || "";
+            const adresseMatch = commentaire.match(/Adresse\s*:\s*(.+)/i);
+            const villeMatch = commentaire.match(/Ville\s*:\s*(.+)/i);
 
-            const grouped = new Map();
-            const maxRows = Math.max(...fieldsData.map(arr => arr.length));
-
-            for (let r = 0; r < maxRows; r++) {
-                const reseau = fieldsData[4][r] || "";
-                const record = [];
-
-                for (let c = 0; c < numFields; c++) {
-                    record.push(fieldsData[c][r] || "");
-                }
-
-                if (!reseau) continue;
-
-                if (!grouped.has(reseau)) {
-                    grouped.set(reseau, []);
-                }
-
-                grouped.get(reseau).push(record);
-            }
-
-            const selectedRecords = [];
-
-            for (const [reseau, records] of grouped.entries()) {
-                // اختيار السجل الأكثر اكتمالاً (الذي يحتوي على Commentaire أو Adresse Installation)
-                let best = records[0];
-
-                for (const rec of records) {
-                    const hasComment = rec[7] && rec[7].trim().length > 0;
-                    const hasAdresse = rec[6] && rec[6].trim().length > 0;
-
-                    const bestHasComment = best[7] && best[7].trim().length > 0;
-                    const bestHasAdresse = best[6] && best[6].trim().length > 0;
-
-                    if ((hasComment && !bestHasComment) || (hasAdresse && !bestHasAdresse)) {
-                        best = rec;
-                    }
-                }
-
-                // تعويض Adresse Installation إذا كانت فارغة
-                if (!best[6] || best[6].trim() === "") {
-                    const commentaire = best[7] || "";
-                    const adresseMatch = commentaire.match(/Adresse\s*:\s*(.+)/i);
-                    const villeMatch = commentaire.match(/Ville\s*:\s*(.+)/i);
-
-                    if (adresseMatch) best[6] = adresseMatch[1].trim();
-                    else if (villeMatch) best[6] = villeMatch[1].trim();
-                }
-
-                selectedRecords.push(best);
-            }
-
-            // تفريغ البيانات المختارة في الحقول
-            for (let i = 0; i < numFields; i++) {
-                const columnData = selectedRecords.map(rec => decodeCorruptedCharacters(rec[i] || ""));
-                document.getElementById("field" + i).value = columnData.join("\n");
-                document.getElementById("count" + i).textContent = columnData.length + " سطر";
-            }
+            if (adresseMatch) best[6] = adresseMatch[1].trim();
+            else if (villeMatch) best[6] = villeMatch[1].trim();
         }
+
+        selectedRecords.push(best);
+    }
+
+    // تفريغ البيانات المختارة في الحقول
+    for (let i = 0; i < numFields; i++) {
+        const columnData = selectedRecords.map(rec => decodeCorruptedCharacters(rec[i] || ""));
+        document.getElementById("field" + i).value = columnData.join("\n");
+        document.getElementById("count" + i).textContent = columnData.length + " سطر";
+    }
+}
 
         function parseFrenchDateToDDMMYYYY(str) {
             const months = {
