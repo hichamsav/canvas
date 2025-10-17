@@ -16,10 +16,6 @@
             font-size: 13px;
             overflow: hidden;
             box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
         }
 
         .container {
@@ -122,6 +118,7 @@
             display: none;
         }
 
+        /* زر الصفحة الرئيسية في الأسفل */
         .bottom-home-btn {
             position: fixed;
             bottom: 20px;
@@ -130,29 +127,16 @@
             background: #28a745;
             color: white;
             border: none;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
-            z-index: 10000;
+            font-size: 0.9rem;
+            z-index: 1000;
             text-decoration: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            font-weight: bold;
         }
 
         .bottom-home-btn:hover {
             background: #218838;
-            transform: translateX(-50%) translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
-        }
-
-        /* إخفاء الروابط في شريط الحالة */
-        a {
-            position: relative;
-        }
-        
-        a::after {
-            display: none !important;
         }
     </style>
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
@@ -234,195 +218,62 @@
         </div>
     </div>
 
-    <!-- زر الصفحة الرئيسية في الأسفل فقط -->
+    <!-- زر الصفحة الرئيسية في الأسفل -->
     <button class="bottom-home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
 
     <script>
-        // ========== 🔒 الحماية الكاملة ==========
+        // ========== الحمايات فقط ==========
         
         // دالة العودة للصفحة الرئيسية
         function goToHome() {
             window.location.href = 'index.html';
         }
 
-        // منع ظهور رابط في الأسفل
-        document.addEventListener('mousemove', function(e) {
-            const elements = document.querySelectorAll('*');
-            elements.forEach(element => {
-                element.removeAttribute('title');
-            });
-        });
-
-        // منع النقر الأيمن - إصلاح كامل
+        // منع النقر الأيمن
         document.addEventListener('contextmenu', function(e) {
             e.preventDefault();
-            e.stopPropagation();
             return false;
-        }, true);
+        });
 
-        // منع فتح أدوات المطورين - إصلاح كامل
+        // منع فتح أدوات المطورين
         document.addEventListener('keydown', function(e) {
-            // F12
-            if (e.key === 'F12') {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && e.key === 'I') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'J') ||
+                (e.ctrlKey && e.shiftKey && e.key === 'C') ||
+                (e.ctrlKey && e.key === 'u')) {
                 e.preventDefault();
-                e.stopPropagation();
                 return false;
             }
-            
-            // Ctrl+Shift+I
-            if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-            
-            // Ctrl+Shift+J
-            if (e.ctrlKey && e.shiftKey && e.key === 'J') {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-            
-            // Ctrl+Shift+C
-            if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-            
-            // Ctrl+U
-            if (e.ctrlKey && e.key === 'u') {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-
-            // Ctrl+Shift+U
-            if (e.ctrlKey && e.shiftKey && e.key === 'U') {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        }, true);
-
-        // منع سحب الصور والنصوص
-        document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-            return false;
-        }, true);
-
-        // منع النسخ - إصلاح كامل
-        document.addEventListener('copy', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }, true);
-
-        // منع القص
-        document.addEventListener('cut', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }, true);
-
-        // منع اللصق (باستثناء الحقول المسموحة)
-        document.addEventListener('paste', function(e) {
-            const allowedIds = ['filteredOutput', 'singleKeywordOutput', 'singleKeywordInput', 'field0', 'field1', 'field2', 'field3', 'field4', 'field5', 'field6', 'field7'];
-            if (!allowedIds.includes(e.target.id)) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        }, true);
-
-        // إخفاء شريط العنوان عند فتح أدوات المطورين
-        let devToolsOpen = false;
-        setInterval(function() {
-            if (window.outerHeight - window.innerHeight > 100 || 
-                window.outerWidth - window.innerWidth > 100) {
-                if (!devToolsOpen) {
-                    devToolsOpen = true;
-                    window.location.reload();
-                }
-            }
-        }, 1000);
-
-        // إخفاء أي روابط تظهر في الأسفل
-        document.addEventListener('DOMContentLoaded', function() {
-            // إزالة أي title من جميع العناصر
-            document.querySelectorAll('*').forEach(element => {
-                element.removeAttribute('title');
-            });
-
-            // منع فحص العناصر
-            Object.defineProperty(document, 'hidden', { get: () => true });
-            Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
-            
-            // حماية إضافية
-            Object.freeze(document);
-            Object.freeze(window);
         });
 
-        // منع فتح وحدة التحكم
-        (function() {
-            var re = /x/;
-            console.log(re);
-            re.toString = function() {
-                window.location.reload();
-                return '';
-            };
-        })();
+        // ========== نهاية الحمايات ==========
 
-        // حماية إضافية لمنع التلاعب
-        Object.defineProperty(window, 'console', {
-            get: function() {
-                return {
-                    log: function() {},
-                    warn: function() {},
-                    error: function() {},
-                    info: function() {}
-                };
-            },
-            set: function() {}
+        // ========== الكود الأصلي بدون أي تغيير ==========
+        window.alert = function() {};
+        const originalAlert = window.alert;
+
+        window.alert = function(message) {
+            if (typeof message === 'string' && message.includes('hichamsav.github.io')) {
+                return;
+            }
+            originalAlert(message);
+        };
+
+        document.addEventListener("contextmenu", e => e.preventDefault());
+        document.addEventListener("keydown", e => {
+            if (e.key === "F12" || (e.ctrlKey && ["u", "s"].includes(e.key.toLowerCase())) || (e.ctrlKey && e.shiftKey && ["I", "J"].includes(e.key))) { 
+                e.preventDefault(); 
+                return false; 
+            }
         });
 
-        // رسائل الأمان المخصصة
-        function showSecureMessage(message) {
-            const secureMsg = document.createElement('div');
-            secureMsg.style.cssText = `
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background: #28a745;
-                color: white;
-                padding: 20px;
-                border-radius: 10px;
-                z-index: 10000;
-                font-weight: bold;
-                box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-                text-align: center;
-                font-size: 16px;
-            `;
-            secureMsg.textContent = message;
-            document.body.appendChild(secureMsg);
-            
-            setTimeout(() => {
-                if (secureMsg.parentNode) {
-                    secureMsg.parentNode.removeChild(secureMsg);
-                }
-            }, 3000);
-        }
-
-        // ========== 🔒 نهاية الحماية ==========
-
-        // ========== الكود الأصلي ==========
         let originalMergedContent = "";
 
         function mergeFolderTxt() {
             const files = Array.from(document.getElementById("folderInput").files).filter(f => f.name.toLowerCase().endsWith(".txt"));
             if (!files.length) {
-                showSecureMessage("يرجى اختيار مجلد يحتوي على ملفات .txt.");
+                alert("يرجى اختيار مجلد يحتوي على ملفات .txt.");
                 return;
             }
 
@@ -492,6 +343,7 @@
             }
 
             document.getElementById("singleKeywordOutput").value = extracted.join("\n");
+            console.log("تم استخراج " + blocksFound + " كتلة بيانات");
             filterAndDistribute();
         }
 
@@ -500,7 +352,6 @@
             t.select(); 
             document.execCommand("copy"); 
             window.getSelection().removeAllRanges(); 
-            showSecureMessage("✅ تم نسخ نتائج الاستخراج!");
         }
 
         function decodeCorruptedCharacters(text) {
@@ -785,7 +636,6 @@
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, "Extraction");
             XLSX.writeFile(wb, "extraction.xlsx");
-            showSecureMessage("✅ تم تصدير البيانات إلى Excel بنجاح!");
         }
 
         function copyExcelData() {
@@ -820,10 +670,8 @@
                 text += rowData.join("\t") + "\n";
             }
 
-            navigator.clipboard.writeText(text).then(() => {
-                showSecureMessage("✅ تم نسخ جميع البيانات بنجاح!");
-            }).catch(() => {
-                showSecureMessage("❌ حدث خطأ أثناء النسخ إلى الحافظة.");
+            navigator.clipboard.writeText(text).catch(() => {
+                alert("حدث خطأ أثناء النسخ إلى الحافظة.");
             });
         }
 
@@ -869,12 +717,17 @@
             return string.charAt(0).toUpperCase() + string.slice(1);
         }
 
+        function removeDuplicatesAndAutoCopy() {
+            removeDuplicatesBasedOnReseau();
+            copyExcelData();
+            alert("تم تنظيف البيانات ونسخها بنجاح!");
+        }
+
         function copyField(index) {
             const field = document.getElementById("field" + index);
             field.select();
             document.execCommand("copy");
             window.getSelection().removeAllRanges();
-            showSecureMessage("✅ تم نسخ الحقل بنجاح!");
         }
     </script>
 </body>
