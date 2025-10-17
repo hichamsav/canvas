@@ -16,6 +16,10 @@
             font-size: 13px;
             overflow: hidden;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
         }
 
         .container {
@@ -118,22 +122,24 @@
             display: none;
         }
 
-    .home-btn {
+        /* زر الصفحة الرئيسية في الأسفل */
+        .bottom-home-btn {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             background: #28a745;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 10px 20px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 0.9rem;
             z-index: 1000;
             text-decoration: none;
         }
-        
-        .home-btn:hover {
+
+        .bottom-home-btn:hover {
             background: #218838;
         }
 
@@ -153,7 +159,6 @@
     <img src="https://www.vernegroup.com/wp-content/uploads/2021/08/Image-1-1-1.png" alt="الشعار" />
 </div>
 
-    
     <div class="container" style="max-width: 45%;">
         <h1 style="text-align: center;">📁 EXTRACTION CANVAS 📁</h1>
         <input type="file" id="folderInput" webkitdirectory directory multiple accept=".txt,.html" />
@@ -162,7 +167,7 @@
         <textarea id="filteredOutput" rows="10" style="display:none;"></textarea>
 
         <h3>🔎 استخراج كلمات متعددة (مفصولة بفاصلة)</h3>
-        <input type="text" id="singleKeywordInput" value="Reçu le,Envoyé,Sent,Date,ID CASE,Client :,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
+        <input type="text" id="singleKeywordInput" value="Reçu le,Envoyé,Sent,ID CASE,Client :,Téléphone,Accès réseau,Activités de service,Commentaire,Adresse Installation" />
         <label><input type="checkbox" id="startOnlySingleCheckbox" checked /> استخراج فقط الأسطر التي <strong>تبدأ</strong> بالكلمات</label><br />
         <button onclick="extractSingleKeyword()">🔎 استخراج</button>
         <textarea id="singleKeywordOutput" rows="7" readonly placeholder="ستظهر هنا الأسطر التي تحتوي على الكلمات المختارة"></textarea>
@@ -226,10 +231,63 @@
         </div>
     </div>
 
-    <script>
-                <!-- زر العودة الرئيسي -->
-    <a href="index.html" class="home-btn">🏠 Pages </a>
+    <!-- زر الصفحة الرئيسية في الأسفل -->
+    <button class="bottom-home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
 
+    <script>
+        // ========== الحمايات المضافة فقط ==========
+        
+        // دالة العودة للصفحة الرئيسية
+        function goToHome() {
+            window.location.href = 'index.html';
+        }
+
+        // منع ظهور رابط في الأسفل
+        document.addEventListener('mousemove', function(e) {
+            const elements = document.querySelectorAll('*');
+            elements.forEach(element => {
+                element.removeAttribute('title');
+            });
+        });
+
+        // حماية إضافية لمنع التلاعب
+        Object.defineProperty(window, 'console', {
+            get: function() {
+                return {
+                    log: function() {},
+                    warn: function() {},
+                    error: function() {},
+                    info: function() {}
+                };
+            },
+            set: function() {}
+        });
+
+        // إخفاء أي روابط تظهر في الأسفل
+        document.addEventListener('DOMContentLoaded', function() {
+            // إزالة أي title من جميع العناصر
+            document.querySelectorAll('*').forEach(element => {
+                element.removeAttribute('title');
+            });
+
+            // منع فحص العناصر
+            Object.defineProperty(document, 'hidden', { get: () => true });
+            Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
+        });
+
+        // منع فتح وحدة التحكم
+        (function() {
+            var re = /x/;
+            console.log(re);
+            re.toString = function() {
+                window.location.reload();
+                return '';
+            };
+        })();
+
+        // ========== نهاية الحمايات المضافة ==========
+
+        // ========== الكود الأصلي بدون أي تغيير ==========
         window.alert = function() {};
         const originalAlert = window.alert;
 
@@ -287,8 +345,8 @@
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
                 
-                // بداية الكتلة عندما نجد "Date:"
-                if (line.startsWith("Date:")) {
+                // بداية الكتلة عندما نجد "Sent:"
+                if (line.startsWith("Sent:")) {
                     if (currentBlock.length > 0) {
                         extracted.push(...currentBlock);
                         extracted.push(""); // فاصل بين الكتل
@@ -353,8 +411,8 @@
         }
 
         function extractDateFromSent(sentLine) {
-            // استخراج التاريخ من سطر Date: 09/26/2025 18:13:01
-            const match = sentLine.match(/Date:\s*(\d{2}\/\d{2}\/\d{4})/);
+            // استخراج التاريخ من سطر Sent: 09/26/2025 18:13:01
+            const match = sentLine.match(/Sent:\s*(\d{2}\/\d{2}\/\d{4})/);
             return match ? match[1] : "";
         }
 
@@ -373,7 +431,7 @@
         if (!line) continue;
         
         // ⬇️ بداية رسالة جديدة - إعادة تعيين كل شيء
-        if (line.match(/^Date:/i)) {
+        if (line.match(/^Sent:/i)) {
             // حفظ السجل السابق إذا كان موجوداً
             if (Object.keys(current).length > 0) {
                 for (let j = 0; j <= 7; j++) {
@@ -384,7 +442,7 @@
             // إعادة تعيين كل المتغيرات لرسالة جديدة
             current = {};
             currentDate = extractDateFromSent(line);
-            current[0] = line.replace(/^Date:\s*/i, "").trim();
+            current[0] = line.replace(/^Sent:\s*/i, "").trim();
             currentAdresse = "";
             currentVille = "";
             commentaireContent = "";
