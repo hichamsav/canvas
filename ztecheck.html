@@ -132,43 +132,23 @@
     .home-btn:hover {
       background: #218838;
     }
-
-    /* إخفاء الروابط في شريط الحالة */
-    a {
-      position: relative;
-    }
-    
-    a::after {
-      display: none !important;
-    }
-
-    .secure-paste-btn {
-      background: #ff6b6b;
-      color: white;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 1rem;
-      margin: 10px;
-      transition: all 0.3s ease;
-    }
-
-    .secure-paste-btn:hover {
-      background: #ff5252;
-      transform: translateY(-2px);
-    }
   </style>
 </head>
 <body>
-  <!-- زر العودة الرئيسي -->
   <button class="home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
   
   <div class="container">
     <h2>ZTE Port Extractor</h2>
     <p>أدخل البيانات النصية لاستخراج البورتات والأرقام المرتبطة بها</p>
     
-    <textarea id="inputText" rows="10" placeholder="📄 الصق البيانات هنا..."></textarea>
+    <textarea id="inputText" rows="10" placeholder="📄 الصق البيانات هنا...">OFFILNE 52009803 5A544547C476EB91(ZTEGC426EB91)
+OFFILNE A2009803 5A544527C476EB91(ZTEGC476EB91)
+OFFILNE M2009803 5A544547C476EE91(ZTEGC176EB91)
+CAS133_OLT	Frame:0/Slot:5/Port:9	48575443FC77F49A(HWTCFC77F49A)	--	--	--	HWTC	HG8245H	V3R015C10S150	Normal	--	--
+CAS133_OLT	Frame:0/Slot:5/Port:11	5A544547C476EB91(ZTEGC426EB91)	GC476EB91	123456789	123456	ZTEG	ZTEGF680	ZTEGF680610MA	Normal	--	--
+CAS133_OLT	Frame:0/Slot:6/Port:0	5A544547D4E05355(ZTEGD4E05355)	GD4E05355	123456789	123456	ZTEG	ZTEGF6600P	ZTEGF660010MA	Normal	--	--
+CAS133_OLT	Frame:0/Slot:6/Port:10	5A544527C476EB91(ZTEGC476EB91)	GCA96DC9C	123456789	123456	ZTEG	ZTEGF660	ZTEGF660509MA	Normal	--	--
+CAS133_OLT	Frame:0/Slot:6/Port:13	5A544547C476EE91(ZTEGC176EB91)	GC4770501	123456789	123456	ZTEG	ZTEGF680	ZTEGF680610MA	Normal	--	--</textarea>
 
     <div>
       <button onclick="processText()">📥 تحليل البيانات</button>
@@ -179,14 +159,10 @@
   </div>
 
   <script>
-    // ========== الحماية والأمان ==========
-    
-    // دالة العودة للصفحة الرئيسية
     function goToHome() {
       window.location.href = 'index.html';
     }
 
-    // عرض رسالة تأكيد
     function showSecureMessage(message) {
       const secureMsg = document.createElement('div');
       secureMsg.style.cssText = `
@@ -212,8 +188,6 @@
       }, 3000);
     }
 
-    // ========== وظائف ZTE المحدثة ==========
-
     async function processText() {
       const text = document.getElementById('inputText').value.trim();
       const resultContainer = document.getElementById('dynamicResults');
@@ -229,33 +203,33 @@
       const phoneNumbers = new Map();
       let totalNumbers = 0;
 
-      // جمع الأرقام من سطور OFFILNE
+      // المرحلة 1: جمع الأرقام من سطور OFFILNE
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // البحث عن سطور OFFILNE واستخراج الأرقام التي تبدأ بحرف وطولها 9
+        // البحث عن سطور OFFILNE
         if (trimmedLine.startsWith('OFFILNE')) {
-          const matches = trimmedLine.match(/\b([A-Z][A-Z0-9]{8})\b/g);
-          if (matches) {
-            matches.forEach(phone => {
-              if (phone.length === 9 && /^[A-Z]/.test(phone)) {
-                // استخراج القيمة داخل الأقواس للمطابقة
-                const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-                if (parenthesesMatch) {
-                  const key = parenthesesMatch[1];
-                  if (!phoneNumbers.has(key)) {
-                    phoneNumbers.set(key, new Set());
-                  }
-                  phoneNumbers.get(key).add(phone);
-                }
+          // استخراج الرقم الذي يبدأ بحرف وطوله 9
+          const phoneMatch = trimmedLine.match(/\b([A-Z][A-Z0-9]{8})\b/);
+          if (phoneMatch) {
+            const phone = phoneMatch[1];
+            
+            // استخراج القيمة داخل الأقواس للمطابقة
+            const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+            if (parenthesesMatch) {
+              const key = parenthesesMatch[1];
+              if (!phoneNumbers.has(key)) {
+                phoneNumbers.set(key, new Set());
               }
-            });
+              phoneNumbers.get(key).add(phone);
+              console.log(`تم إضافة الرقم ${phone} للمفتاح ${key}`);
+            }
           }
         }
       });
 
-      // جمع البورتات وربطها بالأرقام
+      // المرحلة 2: جمع البورتات وربطها بالأرقام
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
@@ -270,6 +244,8 @@
           if (parenthesesMatch) {
             const key = parenthesesMatch[1];
             
+            console.log(`البحث عن المفتاح: ${key} في البورت: ${port}`);
+            
             // إذا كان هناك أرقام مرتبطة بهذا المفتاح
             if (phoneNumbers.has(key)) {
               if (!portResults.has(port)) {
@@ -280,6 +256,7 @@
               phoneNumbers.get(key).forEach(phone => {
                 portResults.get(port).add(phone);
                 totalNumbers++;
+                console.log(`تم ربط الرقم ${phone} بالبورت ${port}`);
               });
             }
           }
@@ -289,6 +266,9 @@
       // عرض النتائج
       if (portResults.size === 0) {
         resultContainer.innerHTML = '<p>❌ لم يتم العثور على نتائج.</p>';
+        // عرض للأغراض التشخيصية
+        console.log('الأرقام المجمعة:', phoneNumbers);
+        console.log('البورتات المجمعة:', portResults);
         return;
       }
 
@@ -342,76 +322,20 @@
       document.getElementById('dynamicResults').innerHTML = '';
     }
 
-    // ========== الحماية ==========
-    
-    // منع ظهور رابط في الأسفل
-    document.addEventListener('mousemove', function(e) {
-      const elements = document.querySelectorAll('*');
-      elements.forEach(element => {
-        element.removeAttribute('title');
-      });
-    });
-
-    // منع النقر الأيمن
+    // الحماية الأساسية
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
       return false;
     });
     
-    // منع فتح أدوات المطورين
     document.addEventListener('keydown', function(e) {
       if (e.key === 'F12' || 
           (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
-          (e.ctrlKey && e.key === 'u') ||
-          (e.ctrlKey && e.shiftKey && e.key === 'U')) {
+          (e.ctrlKey && e.key === 'u')) {
         e.preventDefault();
         return false;
       }
     });
-    
-    // منع سحب الصور والنصوص
-    document.addEventListener('dragstart', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // منع النسخ (باستثناء الأزرار)
-    document.addEventListener('copy', function(e) {
-      if (!e.target.classList.contains('copy-btn')) {
-        e.preventDefault();
-        return false;
-      }
-    });
-    
-    // منع القص
-    document.addEventListener('cut', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // منع اللصق (باستثناء textarea)
-    document.addEventListener('paste', function(e) {
-      if (e.target.id !== 'inputText') {
-        e.preventDefault();
-        return false;
-      }
-    });
-
-    // إخفاء أي روابط تظهر في الأسفل
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('*').forEach(element => {
-        element.removeAttribute('title');
-      });
-    });
-
-    // منع فتح وحدة التحكم
-    (function() {
-      var re = /x/;
-      console.log(re);
-      re.toString = function() {
-        return '';
-      };
-    })();
   </script>
 </body>
 </html>
