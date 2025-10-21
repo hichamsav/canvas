@@ -344,75 +344,78 @@
       let totalNumbers = 0;
 
       // تخزين جميع البيانات
-      const allData = []; // جميع البيانات مع معلوماتها
+      const portLines = []; // خطوط البورتات فقط
+      const phoneLines = []; // خطوط الأرقام فقط (بدون بورت)
 
-      // جمع البيانات من كل سطر
+      // فصل البيانات: خطوط البورتات وخطوط الأرقام
       lines.forEach((line, index) => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        const data = {
-          line: trimmedLine,
-          port: null,
-          phones: [],
-          parentheses: extractParentheses(trimmedLine),
-          wordsBefore: extractWordsBeforeParentheses(trimmedLine)
-        };
-
-        // البحث عن البورت في أي سطر
+        // البحث عن البورت
         const portMatch = trimmedLine.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
         if (portMatch) {
-          data.port = portMatch[1];
+          // هذا سطر بورت - نخزن معلوماته فقط (لا نأخذ أرقام منه)
+          portLines.push({
+            line: trimmedLine,
+            port: portMatch[1],
+            parentheses: extractParentheses(trimmedLine),
+            wordsBefore: extractWordsBeforeParentheses(trimmedLine)
+          });
+        } 
+        else {
+          // هذا سطر بدون بورت - نبحث عن أرقام فقط
+          const phoneMatches = trimmedLine.match(/\b[A-Z0-9]{9}\b/g);
+          if (phoneMatches) {
+            phoneLines.push({
+              line: trimmedLine,
+              phones: phoneMatches,
+              parentheses: extractParentheses(trimmedLine),
+              wordsBefore: extractWordsBeforeParentheses(trimmedLine)
+            });
+          }
         }
-
-        // البحث عن أرقام الهواتف في أي سطر - أي 9 أحرف/أرقام
-        const phoneMatches = trimmedLine.match(/\b[A-Z0-9]{9}\b/g);
-        if (phoneMatches) {
-          data.phones = phoneMatches;
-        }
-
-        allData.push(data);
       });
 
-      // البحث عن التطابقات بين جميع البيانات
-      allData.forEach(currentData => {
-        if (currentData.port) {
-          const currentPort = currentData.port;
-          const currentParentheses = currentData.parentheses;
-          const currentWordsBefore = currentData.wordsBefore;
+      // البحث عن التطابقات
+      portLines.forEach(portData => {
+        const currentPort = portData.port;
+        const currentParentheses = portData.parentheses;
+        const currentWordsBefore = portData.wordsBefore;
 
-          // البحث في جميع البيانات الأخرى
-          allData.forEach(otherData => {
-            if (otherData.phones.length > 0) {
-              let foundMatch = false;
+        // البحث في جميع خطوط الأرقام (التي ليس فيها بورت)
+        phoneLines.forEach(phoneData => {
+          const phoneNumbers = phoneData.phones;
+          const phoneParentheses = phoneData.parentheses;
+          const phoneWordsBefore = phoneData.wordsBefore;
 
-              // التحقق من تطابق القيم داخل الأقواس
-              currentParentheses.forEach(currentValue => {
-                if (otherData.parentheses.includes(currentValue)) {
-                  foundMatch = true;
-                }
-              });
+          let foundMatch = false;
 
-              // التحقق من تطابق الكلمات قبل الأقواس
-              currentWordsBefore.forEach(currentWord => {
-                if (otherData.wordsBefore.includes(currentWord)) {
-                  foundMatch = true;
-                }
-              });
-
-              // إذا وجد تطابق، أضف الأرقام إلى البورت
-              if (foundMatch) {
-                if (!portResults.has(currentPort)) {
-                  portResults.set(currentPort, new Set());
-                }
-                otherData.phones.forEach(phone => {
-                  portResults.get(currentPort).add(phone);
-                  totalNumbers++;
-                });
-              }
+          // التحقق من تطابق القيم داخل الأقواس
+          currentParentheses.forEach(currentValue => {
+            if (phoneParentheses.includes(currentValue)) {
+              foundMatch = true;
             }
           });
-        }
+
+          // التحقق من تطابق الكلمات قبل الأقواس
+          currentWordsBefore.forEach(currentWord => {
+            if (phoneWordsBefore.includes(currentWord)) {
+              foundMatch = true;
+            }
+          });
+
+          // إذا وجد تطابق، أضف الأرقام إلى البورت
+          if (foundMatch) {
+            if (!portResults.has(currentPort)) {
+              portResults.set(currentPort, new Set());
+            }
+            phoneNumbers.forEach(phone => {
+              portResults.get(currentPort).add(phone);
+              totalNumbers++;
+            });
+          }
+        });
       });
 
       // عرض النتائج
