@@ -178,9 +178,6 @@
     <div class="output-area" id="dynamicResults"></div>
   </div>
 
-  <!-- طبقة التعتيم -->
-  <div id="overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999;"></div>
-
   <script>
     // ========== الحماية والأمان ==========
     
@@ -215,119 +212,7 @@
       }, 3000);
     }
 
-    // منع ظهور رابط في الأسفل
-    document.addEventListener('mousemove', function(e) {
-      const elements = document.querySelectorAll('*');
-      elements.forEach(element => {
-        element.removeAttribute('title');
-      });
-    });
-
-    // منع النقر الأيمن
-    document.addEventListener('contextmenu', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // منع فتح أدوات المطورين
-    document.addEventListener('keydown', function(e) {
-      // F12
-      if (e.key === 'F12') {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Ctrl+Shift+I
-      if (e.ctrlKey && e.shiftKey && e.key === 'I') {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Ctrl+Shift+J
-      if (e.ctrlKey && e.shiftKey && e.key === 'J') {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Ctrl+Shift+C
-      if (e.ctrlKey && e.shiftKey && e.key === 'C') {
-        e.preventDefault();
-        return false;
-      }
-      
-      // Ctrl+U
-      if (e.ctrlKey && e.key === 'u') {
-        e.preventDefault();
-        return false;
-      }
-
-      // Ctrl+Shift+U
-      if (e.ctrlKey && e.shiftKey && e.key === 'U') {
-        e.preventDefault();
-        return false;
-      }
-    });
-    
-    // منع سحب الصور والنصوص
-    document.addEventListener('dragstart', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // منع النسخ
-    document.addEventListener('copy', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // منع القص
-    document.addEventListener('cut', function(e) {
-      e.preventDefault();
-      return false;
-    });
-    
-    // منع اللصق (باستثناء textarea)
-    document.addEventListener('paste', function(e) {
-      if (e.target.id !== 'inputText') {
-        e.preventDefault();
-        return false;
-      }
-    });
-    
-    // إخفاء شريط العنوان عند فتح أدوات المطورين
-    let devToolsOpen = false;
-    setInterval(function() {
-      if (window.outerHeight - window.innerHeight > 100 || 
-          window.outerWidth - window.innerWidth > 100) {
-        if (!devToolsOpen) {
-          devToolsOpen = true;
-          window.location.reload();
-        }
-      }
-    }, 1000);
-
-    // إخفاء أي روابط تظهر في الأسفل
-    document.addEventListener('DOMContentLoaded', function() {
-      document.querySelectorAll('*').forEach(element => {
-        element.removeAttribute('title');
-      });
-
-      // منع فحص العناصر
-      Object.defineProperty(document, 'hidden', { get: () => true });
-      Object.defineProperty(document, 'visibilityState', { get: () => 'hidden' });
-    });
-
-    // منع فتح وحدة التحكم
-    (function() {
-      var re = /x/;
-      console.log(re);
-      re.toString = function() {
-        window.location.reload();
-        return '';
-      };
-    })();
-
-    // ========== وظائف ZTE ==========
+    // ========== وظائف ZTE المحدثة ==========
 
     async function processText() {
       const text = document.getElementById('inputText').value.trim();
@@ -341,84 +226,64 @@
 
       const lines = text.split(/\r?\n/);
       const portResults = new Map();
+      const phoneNumbers = new Map();
       let totalNumbers = 0;
 
-      // تخزين جميع البيانات
-      const portLines = [];
-      const phoneLines = [];
-
-      // فصل البيانات: خطوط البورتات وخطوط الأرقام
-      lines.forEach((line, index) => {
+      // جمع الأرقام من سطور OFFILNE
+      lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // البحث عن البورت
-        const portMatch = trimmedLine.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
-        if (portMatch) {
-          portLines.push({
-            line: trimmedLine,
-            port: portMatch[1],
-            parentheses: extractParentheses(trimmedLine),
-            wordsBefore: extractWordsBeforeParentheses(trimmedLine)
-          });
-        } 
-        else {
-          // البحث عن أرقام الهواتف - لا تأخذ الأرقام التي تبدأ بصفر
-          const phoneMatches = trimmedLine.match(/\b[1-9A-Z][A-Z0-9]{8}\b/g);
-          if (phoneMatches) {
-            phoneLines.push({
-              line: trimmedLine,
-              phones: phoneMatches,
-              parentheses: extractParentheses(trimmedLine),
-              wordsBefore: extractWordsBeforeParentheses(trimmedLine)
+        // البحث عن سطور OFFILNE واستخراج الأرقام التي تبدأ بحرف وطولها 9
+        if (trimmedLine.startsWith('OFFILNE')) {
+          const matches = trimmedLine.match(/\b([A-Z][A-Z0-9]{8})\b/g);
+          if (matches) {
+            matches.forEach(phone => {
+              if (phone.length === 9 && /^[A-Z]/.test(phone)) {
+                // استخراج القيمة داخل الأقواس للمطابقة
+                const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+                if (parenthesesMatch) {
+                  const key = parenthesesMatch[1];
+                  if (!phoneNumbers.has(key)) {
+                    phoneNumbers.set(key, new Set());
+                  }
+                  phoneNumbers.get(key).add(phone);
+                }
+              }
             });
           }
         }
       });
 
-      // البحث عن التطابقات
-      portLines.forEach(portData => {
-        const currentPort = portData.port;
-        const currentParentheses = portData.parentheses;
-        const currentWordsBefore = portData.wordsBefore;
+      // جمع البورتات وربطها بالأرقام
+      lines.forEach(line => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
 
-        // البحث في جميع خطوط الأرقام (التي ليس فيها بورت)
-        phoneLines.forEach(phoneData => {
-          const phoneNumbers = phoneData.phones;
-          const phoneParentheses = phoneData.parentheses;
-          const phoneWordsBefore = phoneData.wordsBefore;
-
-          let foundMatch = false;
-
-          // التحقق من تطابق القيم داخل الأقواس
-          currentParentheses.forEach(currentValue => {
-            phoneParentheses.forEach(phoneValue => {
-              if (currentValue === phoneValue) {
-                foundMatch = true;
+        // البحث عن البورتات
+        const portMatch = trimmedLine.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
+        if (portMatch) {
+          const port = portMatch[1];
+          
+          // استخراج القيمة داخل الأقواس من سطر البورت
+          const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+          if (parenthesesMatch) {
+            const key = parenthesesMatch[1];
+            
+            // إذا كان هناك أرقام مرتبطة بهذا المفتاح
+            if (phoneNumbers.has(key)) {
+              if (!portResults.has(port)) {
+                portResults.set(port, new Set());
               }
-            });
-          });
-
-          // التحقق من تطابق الكلمات قبل الأقواس
-          currentWordsBefore.forEach(currentWord => {
-            phoneWordsBefore.forEach(phoneWord => {
-              if (currentWord === phoneWord) {
-                foundMatch = true;
-              }
-            });
-          });
-
-          // إذا وجد تطابق، أضف الأرقام إلى البورت
-          if (foundMatch) {
-            if (!portResults.has(currentPort)) {
-              portResults.set(currentPort, new Set());
+              
+              // إضافة جميع الأرقام المرتبطة بهذا المفتاح
+              phoneNumbers.get(key).forEach(phone => {
+                portResults.get(port).add(phone);
+                totalNumbers++;
+              });
             }
-            phoneNumbers.forEach(phone => {
-              portResults.get(currentPort).add(phone);
-              totalNumbers++;
-            });
           }
-        });
+        }
       });
 
       // عرض النتائج
@@ -472,40 +337,81 @@
       resultContainer.appendChild(summary);
     }
 
-    // دالة لاستخراج القيم داخل الأقواس
-    function extractParentheses(line) {
-      const parenthesesMatches = line.match(/\(([^)]+)\)/g);
-      const parenthesesValues = [];
-      if (parenthesesMatches) {
-        parenthesesMatches.forEach(match => {
-          const value = match.replace(/[()]/g, '').trim();
-          if (value) parenthesesValues.push(value);
-        });
-      }
-      return parenthesesValues;
-    }
-
-    // دالة لاستخراج الكلمات قبل الأقواس
-    function extractWordsBeforeParentheses(line) {
-      const wordsBeforeMatches = line.match(/([A-Z0-9]{10,16})\(/g);
-      const wordsBeforeValues = [];
-      if (wordsBeforeMatches) {
-        wordsBeforeMatches.forEach(match => {
-          const word = match.replace('(', '').trim();
-          if (word) wordsBeforeValues.push(word);
-        });
-      }
-      return wordsBeforeValues;
-    }
-
     function resetAll() {
       document.getElementById('inputText').value = '';
       document.getElementById('dynamicResults').innerHTML = '';
     }
 
-    // منع أي محاولات للتلاعب بالصفحة
-    Object.freeze(document);
-    Object.freeze(window);
+    // ========== الحماية ==========
+    
+    // منع ظهور رابط في الأسفل
+    document.addEventListener('mousemove', function(e) {
+      const elements = document.querySelectorAll('*');
+      elements.forEach(element => {
+        element.removeAttribute('title');
+      });
+    });
+
+    // منع النقر الأيمن
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع فتح أدوات المطورين
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'F12' || 
+          (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+          (e.ctrlKey && e.key === 'u') ||
+          (e.ctrlKey && e.shiftKey && e.key === 'U')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    
+    // منع سحب الصور والنصوص
+    document.addEventListener('dragstart', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع النسخ (باستثناء الأزرار)
+    document.addEventListener('copy', function(e) {
+      if (!e.target.classList.contains('copy-btn')) {
+        e.preventDefault();
+        return false;
+      }
+    });
+    
+    // منع القص
+    document.addEventListener('cut', function(e) {
+      e.preventDefault();
+      return false;
+    });
+    
+    // منع اللصق (باستثناء textarea)
+    document.addEventListener('paste', function(e) {
+      if (e.target.id !== 'inputText') {
+        e.preventDefault();
+        return false;
+      }
+    });
+
+    // إخفاء أي روابط تظهر في الأسفل
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('*').forEach(element => {
+        element.removeAttribute('title');
+      });
+    });
+
+    // منع فتح وحدة التحكم
+    (function() {
+      var re = /x/;
+      console.log(re);
+      re.toString = function() {
+        return '';
+      };
+    })();
   </script>
 </body>
 </html>
