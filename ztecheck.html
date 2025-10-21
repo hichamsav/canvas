@@ -114,22 +114,21 @@
       font-weight: bold;
       font-size: 1.1rem;
     }
-        /* زر الصفحة الرئيسية في الأسفل */
-        .bottom-home-btn {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            z-index: 1000;
-            text-decoration: none;
-    
+
+    .home-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: #28a745;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      z-index: 1000;
+    }
+
     .home-btn:hover {
       background: #218838;
     }
@@ -143,7 +142,6 @@
       display: none !important;
     }
 
-    /* زر اللصق الآمن */
     .secure-paste-btn {
       background: #ff6b6b;
       color: white;
@@ -164,14 +162,16 @@
 </head>
 <body>
   <!-- زر العودة الرئيسي -->
-  <span class="home-btn" onclick="goToHome()">🏠 Pages</span>
+  <button class="home-btn" onclick="goToHome()">🏠 الصفحة الرئيسية</button>
   
   <div class="container">
     <h2>ZTE Port Extractor</h2>
-    <textarea id="inputText" rows="10" placeholder="📄📄📄📄📄"></textarea>
+    <p>أدخل البيانات النصية لاستخراج البورتات والأرقام المرتبطة بها</p>
+    
+    <textarea id="inputText" rows="10" placeholder="📄 الصق البيانات هنا..."></textarea>
 
     <div>
-      <button  onclick="processText()">📥 تحليل البيانات 📥 </button>
+      <button onclick="processText()">📥 تحليل البيانات</button>
       <button onclick="resetAll()">♻️ إعادة تعيين</button>
     </div>
 
@@ -189,17 +189,30 @@
       window.location.href = 'index.html';
     }
 
-    // تعليمات اللصق الآمن
-    function showPasteInstructions() {
-      document.getElementById('pasteInstructions').style.display = 'block';
-      document.getElementById('overlay').style.display = 'block';
-    }
-
-    function hidePasteInstructions() {
-      document.getElementById('pasteInstructions').style.display = 'none';
-      document.getElementById('overlay').style.display = 'none';
-      // تركيز على Textarea بعد إغلاق التعليمات
-      document.getElementById('inputText').focus();
+    // عرض رسالة تأكيد
+    function showSecureMessage(message) {
+      const secureMsg = document.createElement('div');
+      secureMsg.style.cssText = `
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #28a745;
+        color: white;
+        padding: 20px;
+        border-radius: 10px;
+        z-index: 10000;
+        font-weight: bold;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      `;
+      secureMsg.textContent = message;
+      document.body.appendChild(secureMsg);
+      
+      setTimeout(() => {
+        if (secureMsg.parentNode) {
+          secureMsg.parentNode.removeChild(secureMsg);
+        }
+      }, 3000);
     }
 
     // منع ظهور رابط في الأسفل
@@ -295,7 +308,6 @@
 
     // إخفاء أي روابط تظهر في الأسفل
     document.addEventListener('DOMContentLoaded', function() {
-      // إزالة أي title من جميع العناصر
       document.querySelectorAll('*').forEach(element => {
         element.removeAttribute('title');
       });
@@ -317,32 +329,6 @@
 
     // ========== وظائف ZTE ==========
 
-    // إزالة وظيفة pasteOnly القديمة واستبدالها بالتعليمات
-    function showSecureMessage(message) {
-      const secureMsg = document.createElement('div');
-      secureMsg.style.cssText = `
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        background: #28a745;
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        z-index: 10000;
-        font-weight: bold;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-      `;
-      secureMsg.textContent = message;
-      document.body.appendChild(secureMsg);
-      
-      setTimeout(() => {
-        if (secureMsg.parentNode) {
-          secureMsg.parentNode.removeChild(secureMsg);
-        }
-      }, 3000);
-    }
-
     async function processText() {
       const text = document.getElementById('inputText').value.trim();
       const resultContainer = document.getElementById('dynamicResults');
@@ -354,95 +340,76 @@
       }
 
       const lines = text.split(/\r?\n/);
-      const valuesInsideParentheses = new Map();
-      const wordsBeforeParentheses = new Map();
-      const lineToPortMap = new Map();
-      const lineToPhoneMap = new Map();
-      const lineToParenthesesMap = new Map();
-      const lineToWordsBeforeMap = new Map();
-
-      // جمع كل البيانات من جميع الأسطر
-      lines.forEach((line, lineIndex) => {
-        // استخراج معلومات البورت (يدعم CA و CAS)
-        const portMatch = line.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
-        if (portMatch) {
-          lineToPortMap.set(lineIndex, portMatch[1]);
-        }
-
-        // استخراج أرقام الهواتف
-        const phoneMatch = line.match(/\b[58]\d{8}\b/);
-        if (phoneMatch) {
-          lineToPhoneMap.set(lineIndex, phoneMatch[0]);
-        }
-
-        // استخراج القيم داخل الأقواس
-        const parenthesesMatches = line.match(/\(([^)]+)\)/g);
-        const parenthesesValues = [];
-        if (parenthesesMatches) {
-          parenthesesMatches.forEach(match => {
-            const value = match.replace(/[()]/g, '');
-            parenthesesValues.push(value);
-            valuesInsideParentheses.set(value, (valuesInsideParentheses.get(value) || 0) + 1);
-          });
-        }
-        lineToParenthesesMap.set(lineIndex, parenthesesValues);
-
-        // استخراج الكلمات قبل الأقواس
-        const wordsBeforeMatches = line.match(/([A-Z0-9]{12,14})\(/g);
-        const wordsBeforeValues = [];
-        if (wordsBeforeMatches) {
-          wordsBeforeMatches.forEach(match => {
-            const word = match.replace('(', '');
-            wordsBeforeValues.push(word);
-            wordsBeforeParentheses.set(word, (wordsBeforeParentheses.get(word) || 0) + 1);
-          });
-        }
-        lineToWordsBeforeMap.set(lineIndex, wordsBeforeValues);
-      });
-
-      // البحث عن التكرار بين الأسطر المختلفة
-      const portResults = new Map();
+      const portResults = new Map(); // لتخزين البورتات والأرقام المرتبطة بها
       let totalNumbers = 0;
 
-      lines.forEach((currentLine, currentIndex) => {
-        const currentPort = lineToPortMap.get(currentIndex);
-        if (!currentPort) return;
+      // تخزين جميع البيانات
+      const portLines = []; // خطوط البورتات
+      const phoneLines = []; // خطوط الأرقام
 
-        const currentParentheses = lineToParenthesesMap.get(currentIndex) || [];
-        const currentWordsBefore = lineToWordsBeforeMap.get(currentIndex) || [];
+      // فصل البيانات: خطوط البورتات وخطوط الأرقام
+      lines.forEach((line, index) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return;
 
-        // البحث في جميع الأسطر الأخرى
-        lines.forEach((otherLine, otherIndex) => {
-          if (currentIndex === otherIndex) return;
+        // البحث عن البورت
+        const portMatch = trimmedLine.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
+        if (portMatch) {
+          portLines.push({
+            line: trimmedLine,
+            port: portMatch[1],
+            parentheses: extractParentheses(trimmedLine),
+            wordsBefore: extractWordsBeforeParentheses(trimmedLine)
+          });
+        } 
+        // البحث عن أرقام الهواتف في أي سطر
+        else {
+          const phoneMatch = trimmedLine.match(/\b[58]\d{8}\b/);
+          if (phoneMatch) {
+            phoneLines.push({
+              line: trimmedLine,
+              phone: phoneMatch[0],
+              parentheses: extractParentheses(trimmedLine),
+              wordsBefore: extractWordsBeforeParentheses(trimmedLine)
+            });
+          }
+        }
+      });
 
-          const otherPhone = lineToPhoneMap.get(otherIndex);
-          if (!otherPhone) return;
+      // البحث عن التطابقات
+      portLines.forEach(portData => {
+        const currentPort = portData.port;
+        const currentParentheses = portData.parentheses;
+        const currentWordsBefore = portData.wordsBefore;
 
-          const otherParentheses = lineToParenthesesMap.get(otherIndex) || [];
-          const otherWordsBefore = lineToWordsBeforeMap.get(otherIndex) || [];
+        // البحث في جميع خطوط الأرقام
+        phoneLines.forEach(phoneData => {
+          const phoneNumber = phoneData.phone;
+          const phoneParentheses = phoneData.parentheses;
+          const phoneWordsBefore = phoneData.wordsBefore;
 
-          let shouldInclude = false;
+          let foundMatch = false;
 
           // التحقق من تطابق القيم داخل الأقواس
           currentParentheses.forEach(currentValue => {
-            if (otherParentheses.includes(currentValue)) {
-              shouldInclude = true;
+            if (phoneParentheses.includes(currentValue)) {
+              foundMatch = true;
             }
           });
 
           // التحقق من تطابق الكلمات قبل الأقواس
           currentWordsBefore.forEach(currentWord => {
-            if (otherWordsBefore.includes(currentWord)) {
-              shouldInclude = true;
+            if (phoneWordsBefore.includes(currentWord)) {
+              foundMatch = true;
             }
           });
 
-          // إذا وجد تطابق، أضف الرقم إلى النتائج
-          if (shouldInclude) {
+          // إذا وجد تطابق، أضف الرقم إلى البورت
+          if (foundMatch) {
             if (!portResults.has(currentPort)) {
               portResults.set(currentPort, new Set());
             }
-            portResults.get(currentPort).add(otherPhone);
+            portResults.get(currentPort).add(phoneNumber);
             totalNumbers++;
           }
         });
@@ -454,6 +421,7 @@
         return;
       }
 
+      // عرض كل بورت مع أرقامه
       Array.from(portResults.entries()).forEach(([portLine, phonesSet]) => {
         const box = document.createElement('div');
         box.className = 'result-box';
@@ -463,14 +431,16 @@
 
         const portTitle = document.createElement('strong');
         portTitle.textContent = portLine;
+        portTitle.style.color = '#000dff';
+        portTitle.style.fontSize = '1.1rem';
 
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
         copyBtn.textContent = '📋 نسخ';
         copyBtn.onclick = () => {
-          const textToCopy = `${portLine}\n${[...phonesSet].join('\n')}`;
+          const textToCopy = `${portLine}\n${Array.from(phonesSet).join('\n')}`;
           navigator.clipboard.writeText(textToCopy).then(() => {
-            showSecureMessage('✅ تم النسخ بنجاح!');
+            showSecureMessage('✅ تم نسخ البورت والأرقام بنجاح!');
           });
         };
 
@@ -478,7 +448,11 @@
         headerLine.appendChild(copyBtn);
 
         const content = document.createElement('pre');
-        content.textContent = [...phonesSet].join('\n');
+        content.textContent = Array.from(phonesSet).join('\n');
+        content.style.marginTop = '10px';
+        content.style.padding = '10px';
+        content.style.backgroundColor = '#f0f0f0';
+        content.style.borderRadius = '5px';
 
         box.appendChild(headerLine);
         box.appendChild(content);
@@ -488,8 +462,34 @@
       // إضافة ملخص بعدد الأرقام المستخرجة
       const summary = document.createElement('div');
       summary.className = 'summary';
-      summary.textContent = `✅ تم استخراج ${totalNumbers} رقم بنجاح`;
+      summary.textContent = `✅ تم استخراج ${totalNumbers} رقم مرتبط بـ ${portResults.size} بورت`;
       resultContainer.appendChild(summary);
+    }
+
+    // دالة لاستخراج القيم داخل الأقواس
+    function extractParentheses(line) {
+      const parenthesesMatches = line.match(/\(([^)]+)\)/g);
+      const parenthesesValues = [];
+      if (parenthesesMatches) {
+        parenthesesMatches.forEach(match => {
+          const value = match.replace(/[()]/g, '');
+          parenthesesValues.push(value);
+        });
+      }
+      return parenthesesValues;
+    }
+
+    // دالة لاستخراج الكلمات قبل الأقواس
+    function extractWordsBeforeParentheses(line) {
+      const wordsBeforeMatches = line.match(/([A-Z0-9]{12,14})\(/g);
+      const wordsBeforeValues = [];
+      if (wordsBeforeMatches) {
+        wordsBeforeMatches.forEach(match => {
+          const word = match.replace('(', '');
+          wordsBeforeValues.push(word);
+        });
+      }
+      return wordsBeforeValues;
     }
 
     function resetAll() {
