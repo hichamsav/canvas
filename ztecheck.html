@@ -144,7 +144,6 @@
       background: #218838;
     }
 
-    /* تخصيص شريط التمرير */
     .output-area::-webkit-scrollbar {
       width: 8px;
     }
@@ -229,60 +228,82 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
       }
 
       const lines = text.split(/\r?\n/);
-      const portResults = new Map();
-      const phoneMap = new Map();
+      const portResults = new Map(); // لتخزين البورتات والأرقام المرتبطة
       let totalNumbers = 0;
 
-      // المرحلة 1: جمع الأرقام التي تبدأ بحرف أو رقم 5 وطولها 8 أو 9
+      // تخزين بيانات الأرقام من الأسطر الأولى
+      const numberData = [];
+      
+      // تخزين بيانات البورتات
+      const portData = [];
+
+      // جمع البيانات من جميع الأسطر
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
         // البحث عن الأرقام التي تبدأ بحرف أو رقم 5 وطولها 8 أو 9
-        const phoneMatch = trimmedLine.match(/\b([A-Z5][A-Z0-9]{7,8})\b/);
-        if (phoneMatch) {
-          const phone = phoneMatch[1];
+        const numberMatch = trimmedLine.match(/\b([A-Z][A-Z0-9]{8}|5[A-Z0-9]{8})\b/);
+        if (numberMatch) {
+          const number = numberMatch[1];
           
-          // التحقق من الشروط: يبدأ بحرف أو 5، وطوله 8 أو 9
-          if ((/^[A-Z]/.test(phone) || phone.startsWith('5')) && (phone.length === 8 || phone.length === 9)) {
-            // استخراج القيمة داخل الأقواس للمطابقة
+          // التحقق من الشروط: يبدأ بحرف أو 5، وطوله 9 أحرف
+          if ((/^[A-Z]/.test(number) || number.startsWith('5')) && number.length === 9) {
+            // استخراج القيمة داخل الأقواس وما قبل الأقواس
             const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-            if (parenthesesMatch) {
-              const key = parenthesesMatch[1];
-              phoneMap.set(key, phone);
+            const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
+            
+            if (parenthesesMatch || beforeParenthesesMatch) {
+              numberData.push({
+                number: number,
+                parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+                beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null
+              });
             }
           }
         }
-      });
-
-      // المرحلة 2: معالجة البورتات وربطها بالأرقام
-      lines.forEach(line => {
-        const trimmedLine = line.trim();
-        if (!trimmedLine) return;
 
         // البحث عن البورتات
         const portMatch = trimmedLine.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
         if (portMatch) {
           const port = portMatch[1];
           
-          // استخراج القيمة داخل الأقواس من سطر البورت
+          // استخراج القيمة داخل الأقواس وما قبل الأقواس من البورت
           const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-          if (parenthesesMatch) {
-            const key = parenthesesMatch[1];
-            
-            // إذا كان هناك رقم مرتبط بهذا المفتاح
-            if (phoneMap.has(key)) {
-              const phone = phoneMap.get(key);
-              
-              if (!portResults.has(port)) {
-                portResults.set(port, new Set());
-              }
-              
-              portResults.get(port).add(phone);
-              totalNumbers++;
-            }
-          }
+          const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
+          
+          portData.push({
+            port: port,
+            parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+            beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null
+          });
         }
+      });
+
+      // المقارنة والربط بين البيانات
+      portData.forEach(port => {
+        numberData.forEach(number => {
+          let matchFound = false;
+
+          // التطابق بناءً على القيم داخل الأقواس
+          if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
+            matchFound = true;
+          }
+
+          // التطابق بناءً على القيم قبل الأقواس
+          if (port.beforeParentheses && number.beforeParentheses && port.beforeParentheses === number.beforeParentheses) {
+            matchFound = true;
+          }
+
+          // إذا وجد تطابق، نربط الرقم بالبورت
+          if (matchFound) {
+            if (!portResults.has(port.port)) {
+              portResults.set(port.port, new Set());
+            }
+            portResults.get(port.port).add(number.number);
+            totalNumbers++;
+          }
+        });
       });
 
       // عرض النتائج
