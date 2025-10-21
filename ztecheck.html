@@ -340,14 +340,12 @@
       }
 
       const lines = text.split(/\r?\n/);
-      const portResults = new Map(); // لتخزين البورتات والأرقام المرتبطة بها
+      const portResults = new Map();
       let totalNumbers = 0;
 
       // تخزين جميع البيانات
-      const portLines = []; // خطوط البورتات فقط
-      const phoneLines = []; // خطوط الأرقام فقط (بدون بورت)
-
-      console.log("=== بدء التحليل ===");
+      const portLines = [];
+      const phoneLines = [];
 
       // فصل البيانات: خطوط البورتات وخطوط الأرقام
       lines.forEach((line, index) => {
@@ -357,41 +355,32 @@
         // البحث عن البورت
         const portMatch = trimmedLine.match(/(CAS?\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
         if (portMatch) {
-          // هذا سطر بورت - نخزن معلوماته فقط (لا نأخذ أرقام منه)
-          const portData = {
+          portLines.push({
             line: trimmedLine,
             port: portMatch[1],
             parentheses: extractParentheses(trimmedLine),
             wordsBefore: extractWordsBeforeParentheses(trimmedLine)
-          };
-          portLines.push(portData);
-          console.log("⛵ بورت وجد:", portData.port, "الأقواس:", portData.parentheses, "الكلمات:", portData.wordsBefore);
+          });
         } 
         else {
-          // هذا سطر بدون بورت - نبحث عن أرقام فقط
+          // البحث عن أرقام الهواتف في أي سطر - أي 9 أحرف/أرقام
           const phoneMatches = trimmedLine.match(/\b[A-Z0-9]{9}\b/g);
           if (phoneMatches) {
-            const phoneData = {
+            phoneLines.push({
               line: trimmedLine,
               phones: phoneMatches,
               parentheses: extractParentheses(trimmedLine),
               wordsBefore: extractWordsBeforeParentheses(trimmedLine)
-            };
-            phoneLines.push(phoneData);
-            console.log("📞 أرقام وجدت:", phoneData.phones, "الأقواس:", phoneData.parentheses, "الكلمات:", phoneData.wordsBefore);
+            });
           }
         }
       });
-
-      console.log("=== البحث عن التطابقات ===");
 
       // البحث عن التطابقات
       portLines.forEach(portData => {
         const currentPort = portData.port;
         const currentParentheses = portData.parentheses;
         const currentWordsBefore = portData.wordsBefore;
-
-        console.log("🔍 البحث عن تطابقات للبورت:", currentPort);
 
         // البحث في جميع خطوط الأرقام (التي ليس فيها بورت)
         phoneLines.forEach(phoneData => {
@@ -403,18 +392,20 @@
 
           // التحقق من تطابق القيم داخل الأقواس
           currentParentheses.forEach(currentValue => {
-            if (phoneParentheses.includes(currentValue)) {
-              foundMatch = true;
-              console.log("✅ تطابق في الأقواس:", currentValue);
-            }
+            phoneParentheses.forEach(phoneValue => {
+              if (currentValue === phoneValue) {
+                foundMatch = true;
+              }
+            });
           });
 
           // التحقق من تطابق الكلمات قبل الأقواس
           currentWordsBefore.forEach(currentWord => {
-            if (phoneWordsBefore.includes(currentWord)) {
-              foundMatch = true;
-              console.log("✅ تطابق في الكلمات:", currentWord);
-            }
+            phoneWordsBefore.forEach(phoneWord => {
+              if (currentWord === phoneWord) {
+                foundMatch = true;
+              }
+            });
           });
 
           // إذا وجد تطابق، أضف الأرقام إلى البورت
@@ -425,7 +416,6 @@
             phoneNumbers.forEach(phone => {
               portResults.get(currentPort).add(phone);
               totalNumbers++;
-              console.log("➕ إضافة رقم", phone, "إلى البورت", currentPort);
             });
           }
         });
@@ -434,7 +424,6 @@
       // عرض النتائج
       if (portResults.size === 0) {
         resultContainer.innerHTML = '<p>❌ لم يتم العثور على نتائج.</p>';
-        console.log("❌ لم يتم العثور على تطابقات");
         return;
       }
 
@@ -481,8 +470,6 @@
       summary.className = 'summary';
       summary.textContent = `✅ تم استخراج ${totalNumbers} رقم مرتبط بـ ${portResults.size} بورت`;
       resultContainer.appendChild(summary);
-
-      console.log("🎉 التحليل اكتمل:", portResults);
     }
 
     // دالة لاستخراج القيم داخل الأقواس
@@ -492,7 +479,7 @@
       if (parenthesesMatches) {
         parenthesesMatches.forEach(match => {
           const value = match.replace(/[()]/g, '').trim();
-          parenthesesValues.push(value);
+          if (value) parenthesesValues.push(value);
         });
       }
       return parenthesesValues;
@@ -500,12 +487,12 @@
 
     // دالة لاستخراج الكلمات قبل الأقواس
     function extractWordsBeforeParentheses(line) {
-      const wordsBeforeMatches = line.match(/([A-Z0-9]{12,14})\(/g);
+      const wordsBeforeMatches = line.match(/([A-Z0-9]{10,16})\(/g);
       const wordsBeforeValues = [];
       if (wordsBeforeMatches) {
         wordsBeforeMatches.forEach(match => {
           const word = match.replace('(', '').trim();
-          wordsBeforeValues.push(word);
+          if (word) wordsBeforeValues.push(word);
         });
       }
       return wordsBeforeValues;
