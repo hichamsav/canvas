@@ -26,6 +26,9 @@
       text-align: center;
       direction: rtl;
       position: relative;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
     }
     h2 { color: #222; margin-bottom: 15px; font-weight: 700; }
     p { color: #555; font-size: 1rem; margin-bottom: 10px; }
@@ -42,14 +45,21 @@
     }
 
     .output-area {
-      margin-top: 30px;
+      margin-top: 20px;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 10px;
+      background: #f9f9f9;
     }
 
     .result-box {
-      background-color: #f9f9f9;
+      background-color: #fff;
       border: 2px solid #000dff;
       border-radius: 12px;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       padding: 15px 20px;
       text-align: right;
       position: relative;
@@ -62,6 +72,7 @@
       font-size: 14px;
       color: #333;
       margin: 0;
+      margin-top: 10px;
     }
 
     .copy-btn {
@@ -110,7 +121,7 @@
       color: white;
       padding: 10px 15px;
       border-radius: 8px;
-      margin-top: 20px;
+      margin-top: 15px;
       font-weight: bold;
       font-size: 1.1rem;
     }
@@ -131,6 +142,25 @@
 
     .home-btn:hover {
       background: #218838;
+    }
+
+    /* تخصيص شريط التمرير */
+    .output-area::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .output-area::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .output-area::-webkit-scrollbar-thumb {
+      background: #000dff;
+      border-radius: 4px;
+    }
+    
+    .output-area::-webkit-scrollbar-thumb:hover {
+      background: #4e5cff;
     }
   </style>
 </head>
@@ -200,27 +230,27 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
 
       const lines = text.split(/\r?\n/);
       const portResults = new Map();
-      const phoneMap = new Map(); // خريطة لربط الأقواس بالأرقام
+      const phoneMap = new Map();
       let totalNumbers = 0;
 
-      console.log('=== بدء التحليل ===');
-
-      // المرحلة 1: جمع الأرقام من الأسطر الأولى (التي تحتوي على أقواس)
+      // المرحلة 1: جمع الأرقام التي تبدأ بحرف أو رقم 5 وطولها 8 أو 9
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // البحث عن الأرقام التي تبدأ بحرف وطولها 9 في أي سطر
-        const phoneMatch = trimmedLine.match(/\b([A-Z][A-Z0-9]{8})\b/);
+        // البحث عن الأرقام التي تبدأ بحرف أو رقم 5 وطولها 8 أو 9
+        const phoneMatch = trimmedLine.match(/\b([A-Z5][A-Z0-9]{7,8})\b/);
         if (phoneMatch) {
           const phone = phoneMatch[1];
           
-          // استخراج القيمة داخل الأقواس للمطابقة
-          const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-          if (parenthesesMatch) {
-            const key = parenthesesMatch[1]; // القيمة داخل الأقواس
-            phoneMap.set(key, phone);
-            console.log(`📞 وجد رقم: ${phone} → مفتاح: ${key}`);
+          // التحقق من الشروط: يبدأ بحرف أو 5، وطوله 8 أو 9
+          if ((/^[A-Z]/.test(phone) || phone.startsWith('5')) && (phone.length === 8 || phone.length === 9)) {
+            // استخراج القيمة داخل الأقواس للمطابقة
+            const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+            if (parenthesesMatch) {
+              const key = parenthesesMatch[1];
+              phoneMap.set(key, phone);
+            }
           }
         }
       });
@@ -240,8 +270,6 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
           if (parenthesesMatch) {
             const key = parenthesesMatch[1];
             
-            console.log(`🔍 البحث عن البورت: ${port} → مفتاح: ${key}`);
-            
             // إذا كان هناك رقم مرتبط بهذا المفتاح
             if (phoneMap.has(key)) {
               const phone = phoneMap.get(key);
@@ -252,9 +280,6 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
               
               portResults.get(port).add(phone);
               totalNumbers++;
-              console.log(`✅ تم الربط: ${port} ← ${phone}`);
-            } else {
-              console.log(`❌ لا يوجد رقم للمفتاح: ${key}`);
             }
           }
         }
@@ -262,18 +287,11 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
 
       // عرض النتائج
       if (portResults.size === 0) {
-        // إذا لم توجد نتائج، نعرض تشخيص المشكلة
-        let debugInfo = '<p>❌ لم يتم العثور على نتائج.</p>';
-        debugInfo += '<div style="background:#f8f9fa; padding:10px; border-radius:5px; margin-top:10px; text-align:left; direction:ltr;">';
-        debugInfo += '<strong>التشخيص:</strong><br>';
-        debugInfo += `- الأرقام المجمعة: ${JSON.stringify(Array.from(phoneMap))}<br>`;
-        debugInfo += `- البورتات التي تم العثور عليها: ${Array.from(lines).filter(l => l.includes('CAS')).length}<br>`;
-        debugInfo += '</div>';
-        resultContainer.innerHTML = debugInfo;
+        resultContainer.innerHTML = '<p>❌ لم يتم العثور على نتائج.</p>';
         return;
       }
 
-      // عرض كل بورت مع أرقامه
+      // عرض كل بورت مع أرقامه - بدون تكرار البورت
       Array.from(portResults.entries()).forEach(([portLine, phonesSet]) => {
         const box = document.createElement('div');
         box.className = 'result-box';
