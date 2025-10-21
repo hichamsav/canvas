@@ -363,8 +363,8 @@
           });
         } 
         else {
-          // البحث عن أرقام الهواتف في أي سطر - أي 9 أحرف/أرقام
-          const phoneMatches = trimmedLine.match(/\b[A-Z0-9]{9}\b/g);
+          // البحث عن أرقام الهواتف - لا تأخذ الأرقام التي تبدأ بصفر
+          const phoneMatches = trimmedLine.match(/\b[1-9A-Z][A-Z0-9]{8}\b/g);
           if (phoneMatches) {
             phoneLines.push({
               line: trimmedLine,
