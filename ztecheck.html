@@ -170,14 +170,7 @@
     <h2>ZTE Port Extractor</h2>
     <p>أدخل البيانات النصية لاستخراج البورتات والأرقام المرتبطة بها</p>
     
-    <textarea id="inputText" rows="10" placeholder="📄 الصق البيانات هنا...">52009803 5A544547C476EB91(ZTEGC426EB91)
-A2009803 5A544527C476EB91(ZTEGC476EB91)
-M2009803 5A544547C476EE91(ZTEGC176EB91)
-CAS133_OLT	Frame:0/Slot:5/Port:9	48575443FC77F49A(HWTCFC77F49A)	--	--	--	HWTC	HG8245H	V3R015C10S150	Normal	--	--
-CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EB91(ZTEGC426EB91)	GC476EB91	123456789	123456	ZTEG	ZTEGF680	ZTEGF680610MA	Normal	--	--
-CAS133_OLT	Frame:0/Slot:6/Port:9	5A544547D4E05355(ZTEGD4E05355)	GD4E05355	123456789	123456	ZTEG	ZTEGF6600P	ZTEGF660010MA	Normal	--	--
-CAS133_OLT	Frame:0/Slot:6/Port:10	5A544527C476EB91(ZTEGC476EB91)	GCA96DC9C	123456789	123456	ZTEG	ZTEGF660	ZTEGF660509MA	Normal	--	--
-CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	123456789	123456	ZTEG	ZTEGF680	ZTEGF680610MA	Normal	--	--</textarea>
+    <textarea id="inputText" rows="10" placeholder="📄 الصق البيانات هنا..."></textarea>
 
     <div>
       <button onclick="processText()">📥 تحليل البيانات</button>
@@ -231,57 +224,71 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
       const portResults = new Map();
       let totalNumbers = 0;
 
-      // تخزين البيانات
-      const numberData = []; // الأرقام من الأسطر الأولى
-      const portData = [];   // البورتات من الأسطر الأخرى
+      // تخزين جميع البيانات
+      const allNumbers = []; // جميع الأرقام المستخرجة
+      const allPorts = [];   // جميع البورتات المستخرجة
 
-      // جمع الأرقام من الأسطر الأولى (غير البورتات)
+      // المرحلة 1: استخراج جميع الأرقام التي تلتزم بالشروط
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // إذا لم يكن سطر بورت
-        if (!trimmedLine.includes('CAS_OLT') && !trimmedLine.match(/Frame:\d+\/Slot:\d+\/Port:\d+/)) {
-          // البحث عن أرقام تبدأ بحرف أو رقم 5 وطولها 9
-          const numberMatch = trimmedLine.match(/\b([A-Z][A-Z0-9]{8}|5[A-Z0-9]{8})\b/);
-          if (numberMatch) {
-            const number = numberMatch[1];
-            
-            // التأكد من الطول 9 أحرف
-            if (number.length === 9) {
-              // استخراج القيمة داخل الأقواس
+        // البحث عن أرقام تبدأ بحرف أو رقم 5 وطولها 9 بالضبط
+        const numberMatches = trimmedLine.match(/\b([A-Z][A-Z0-9]{8}|5[A-Z0-9]{8})\b/g);
+        if (numberMatches) {
+          numberMatches.forEach(number => {
+            // التأكد من الشروط: طول 9 بالضبط، ويبدأ بحرف أو 5
+            if (number.length === 9 && (/^[A-Z]/.test(number) || number.startsWith('5'))) {
+              
+              // استخراج القيم للمطابقة (الأقواس وما قبل الأقواس)
               const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-              if (parenthesesMatch) {
-                numberData.push({
-                  number: number,
-                  parenthesesValue: parenthesesMatch[1]
-                });
-              }
+              const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
+              
+              allNumbers.push({
+                number: number,
+                parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+                beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null,
+                originalLine: trimmedLine
+              });
             }
-          }
+          });
         }
 
-        // جمع البورتات
-        const portMatch = trimmedLine.match(/(CAS\d*_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
+        // البحث عن البورتات (أي سطر يحتوي على Frame/Slot/Port)
+        const portMatch = trimmedLine.match(/(\w+_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
         if (portMatch) {
           const port = portMatch[1];
           
-          // استخراج القيمة داخل الأقواس من البورت
+          // استخراج القيم للمطابقة من سطر البورت
           const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-          if (parenthesesMatch) {
-            portData.push({
-              port: port,
-              parenthesesValue: parenthesesMatch[1]
-            });
-          }
+          const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
+          
+          allPorts.push({
+            port: port,
+            parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+            beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null,
+            originalLine: trimmedLine
+          });
         }
       });
 
-      // المقارنة والربط
-      portData.forEach(port => {
-        numberData.forEach(number => {
+      // المرحلة 2: المقارنة والربط بين الأرقام والبورتات
+      allPorts.forEach(port => {
+        allNumbers.forEach(number => {
+          let matchFound = false;
+
           // التطابق بناءً على القيم داخل الأقواس
-          if (port.parenthesesValue === number.parenthesesValue) {
+          if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
+            matchFound = true;
+          }
+
+          // التطابق بناءً على القيم قبل الأقواس
+          if (port.beforeParentheses && number.beforeParentheses && port.beforeParentheses === number.beforeParentheses) {
+            matchFound = true;
+          }
+
+          // إذا وجد تطابق، نربط الرقم بالبورت
+          if (matchFound) {
             if (!portResults.has(port.port)) {
               portResults.set(port.port, new Set());
             }
@@ -291,13 +298,13 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
         });
       });
 
-      // عرض النتائج
+      // المرحلة 3: عرض النتائج
       if (portResults.size === 0) {
         resultContainer.innerHTML = '<p>❌ لم يتم العثور على نتائج.</p>';
         return;
       }
 
-      // عرض كل بورت مع أرقامه
+      // عرض كل بورت مع أرقامه - بدون تكرار البورت
       Array.from(portResults.entries()).forEach(([portLine, phonesSet]) => {
         const box = document.createElement('div');
         box.className = 'result-box';
@@ -335,7 +342,7 @@ CAS133_OLT	Frame:0/Slot:6/Port:11	5A544547C476EE91(ZTEGC176EB91)	GC4770501	12345
         resultContainer.appendChild(box);
       });
 
-      // إضافة ملخص
+      // إضافة ملخص بعدد الأرقام المستخرجة
       const summary = document.createElement('div');
       summary.className = 'summary';
       summary.textContent = `✅ تم استخراج ${totalNumbers} رقم مرتبط بـ ${portResults.size} بورت`;
