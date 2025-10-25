@@ -241,9 +241,13 @@
           // استخراج القيمة بين الأقواس للمطابقة
           const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
           
+          // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر البورت (الخيار 2)
+          const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
+          
           allPorts.push({
             port: port,
             parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+            hex16Values: hex16Values,
             originalLine: trimmedLine
           });
         } 
@@ -262,9 +266,13 @@
                   // استخراج القيمة بين الأقواس للمطابقة
                   const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
                   
+                  // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر الرقم (الخيار 2)
+                  const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
+                  
                   allNumbers.push({
                     number: number,
                     parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+                    hex16Values: hex16Values,
                     originalLine: trimmedLine
                   });
                 }
@@ -290,9 +298,12 @@
               matchFound = true;
             }
 
-            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن أي قيمة مشتركة في السطر
-            if (!matchFound && port.parentheses && number.originalLine.includes(port.parentheses)) {
-              matchFound = true;
+            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن قيم 16 حرف/رقم مشتركة
+            if (!matchFound && port.hex16Values.length > 0 && number.hex16Values.length > 0) {
+              // البحث عن أي قيمة 16 حرف/رقم مشتركة بين البورت والرقم
+              matchFound = port.hex16Values.some(portValue => 
+                number.hex16Values.includes(portValue)
+              );
             }
 
             // إذا وجد تطابق ولم يكن الرقم موجوداً بالفعل، نضيفه
@@ -321,9 +332,12 @@
               matchFound = true;
             }
 
-            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن أي قيمة مشتركة في السطر
-            if (!matchFound && port.parentheses && number.originalLine.includes(port.parentheses)) {
-              matchFound = true;
+            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن قيم 16 حرف/رقم مشتركة
+            if (!matchFound && port.hex16Values.length > 0 && number.hex16Values.length > 0) {
+              // البحث عن أي قيمة 16 حرف/رقم مشتركة بين البورت والرقم
+              matchFound = port.hex16Values.some(portValue => 
+                number.hex16Values.includes(portValue)
+              );
             }
 
             // إذا وجد تطابق، نضيف الرقم
