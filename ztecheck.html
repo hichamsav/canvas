@@ -227,8 +227,7 @@
       // تخزين البيانات
       const allNumbers = [];
       const allPorts = [];
-      const allHex16Values = new Map(); // لتخزين القيم 16 حرف والأرقام المرتبطة بها
-      const allParenthesesValues = new Map(); // لتخزين القيم بين الأقواس
+      const allHex16Values = new Map();
 
       // المرحلة 1: جمع جميع البيانات
       lines.forEach(line => {
@@ -253,15 +252,7 @@
             originalLine: trimmedLine
           });
 
-          // تخزين القيم بين الأقواس للخيار 3
-          if (parenthesesMatch && parenthesesMatch[1]) {
-            const parenthesesValue = parenthesesMatch[1];
-            if (!allParenthesesValues.has(parenthesesValue)) {
-              allParenthesesValues.set(parenthesesValue, []);
-            }
-          }
-
-          // تخزين القيم 16 حرف للخيار 3
+          // تخزين القيم 16 حرف
           hex16Values.forEach(hexValue => {
             if (!allHex16Values.has(hexValue)) {
               allHex16Values.set(hexValue, []);
@@ -292,17 +283,6 @@
                       allHex16Values.get(hexValue).push(number);
                     }
                   });
-
-                  // تخزين القيم بين الأقواس المرتبطة بالرقم
-                  if (parenthesesMatch && parenthesesMatch[1]) {
-                    const parenthesesValue = parenthesesMatch[1];
-                    if (!allParenthesesValues.has(parenthesesValue)) {
-                      allParenthesesValues.set(parenthesesValue, []);
-                    }
-                    if (!allParenthesesValues.get(parenthesesValue).includes(number)) {
-                      allParenthesesValues.get(parenthesesValue).push(number);
-                    }
-                  }
                   
                   allNumbers.push({
                     number: number,
@@ -315,115 +295,72 @@
             });
           }
 
-          // إذا لم توجد أرقام، نخزن القيم 16 حرف وبين الأقواس فقط
+          // إذا لم توجد أرقام، نخزن القيم 16 حرف فقط
           const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
-          const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-
           hex16Values.forEach(hexValue => {
             if (!allHex16Values.has(hexValue)) {
               allHex16Values.set(hexValue, []);
             }
           });
-
-          if (parenthesesMatch && parenthesesMatch[1]) {
-            const parenthesesValue = parenthesesMatch[1];
-            if (!allParenthesesValues.has(parenthesesValue)) {
-              allParenthesesValues.set(parenthesesValue, []);
-            }
-          }
         }
       });
 
       // المرحلة 2: المقارنة والربط بين الأرقام والبورتات (الخيار 1 + 2)
       allPorts.forEach(port => {
-        if (portResults.has(port.port)) {
-          const existingPort = portResults.get(port.port);
-          const existingNumbers = existingPort.numbers;
-          
-          allNumbers.forEach(number => {
-            let matchFound = false;
+        const matchingNumbers = [];
+        
+        // البحث عن الأرقام التي تطابق مع البورت
+        allNumbers.forEach(number => {
+          let matchFound = false;
 
-            // الخيار 1: التطابق بناءً على القيم داخل الأقواس
-            if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
-              matchFound = true;
-            }
+          // الخيار 1: التطابق بناءً على القيم داخل الأقواس
+          if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
+            matchFound = true;
+          }
 
-            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن قيم 16 حرف/رقم مشتركة
-            if (!matchFound && port.hex16Values.length > 0 && number.hex16Values.length > 0) {
-              matchFound = port.hex16Values.some(portValue => 
-                number.hex16Values.includes(portValue)
-              );
-            }
+          // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن قيم 16 حرف/رقم مشتركة
+          if (!matchFound && port.hex16Values.length > 0 && number.hex16Values.length > 0) {
+            matchFound = port.hex16Values.some(portValue => 
+              number.hex16Values.includes(portValue)
+            );
+          }
 
-            if (matchFound && !existingNumbers.includes(number.number)) {
-              existingNumbers.push(number.number);
+          if (matchFound) {
+            matchingNumbers.push(number.number);
+            totalNumbers++;
+          }
+        });
+
+        // الخيار 3: إضافة القيم 16 حرف المتكررة تحت البورت الأصلي
+        port.hex16Values.forEach(hexValue => {
+          if (allHex16Values.has(hexValue)) {
+            const numbersForHex = allHex16Values.get(hexValue);
+            
+            // إضافة القيمة 16 حرف نفسها إذا لم تكن موجودة
+            if (!matchingNumbers.includes(hexValue)) {
+              matchingNumbers.push(hexValue);
               totalNumbers++;
             }
-          });
-
-          portResults.set(port.port, {
-            port: port.port,
-            numbers: existingNumbers
-          });
-        } 
-        else {
-          const matchingNumbers = [];
-          
-          allNumbers.forEach(number => {
-            let matchFound = false;
-
-            if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
-              matchFound = true;
-            }
-
-            if (!matchFound && port.hex16Values.length > 0 && number.hex16Values.length > 0) {
-              matchFound = port.hex16Values.some(portValue => 
-                number.hex16Values.includes(portValue)
-              );
-            }
-
-            if (matchFound) {
-              matchingNumbers.push(number.number);
-              totalNumbers++;
-            }
-          });
-
-          if (matchingNumbers.length > 0) {
-            portResults.set(port.port, {
-              port: port.port,
-              numbers: matchingNumbers
+            
+            // إضافة الأرقام المرتبطة بالقيمة 16 حرف
+            numbersForHex.forEach(number => {
+              if (!matchingNumbers.includes(number)) {
+                matchingNumbers.push(number);
+                totalNumbers++;
+              }
             });
           }
-        }
-      });
+        });
 
-      // المرحلة 3: إضافة البورتات الجديدة للقيم المتكررة (الخيار 3)
-      
-      // للقيم بين الأقواس
-      allParenthesesValues.forEach((numbers, parenthesesValue) => {
-        if (!portResults.has(`PARENTHESES_${parenthesesValue}`)) {
-          const displayValues = numbers.length > 0 ? numbers : [parenthesesValue];
-          portResults.set(`PARENTHESES_${parenthesesValue}`, {
-            port: `PARENTHESES_${parenthesesValue}`,
-            numbers: displayValues
+        if (matchingNumbers.length > 0) {
+          portResults.set(port.port, {
+            port: port.port,
+            numbers: matchingNumbers
           });
-          totalNumbers += displayValues.length;
         }
       });
 
-      // للقيم 16 حرف
-      allHex16Values.forEach((numbers, hexValue) => {
-        if (!portResults.has(`HEX_${hexValue}`)) {
-          const displayValues = numbers.length > 0 ? numbers : [hexValue];
-          portResults.set(`HEX_${hexValue}`, {
-            port: `HEX_${hexValue}`,
-            numbers: displayValues
-          });
-          totalNumbers += displayValues.length;
-        }
-      });
-
-      // المرحلة 4: عرض النتائج
+      // المرحلة 3: عرض النتائج
       if (portResults.size === 0) {
         resultContainer.innerHTML = '<p>❌ لم يتم العثور على نتائج.</p>';
         return;
