@@ -221,19 +221,19 @@
       }
 
       const lines = text.split(/\r?\n/);
-      const portResults = new Map(); // لتخزين البورتات والأرقام المرتبطة بها
+      const portResults = new Map();
       let totalNumbers = 0;
 
       // تخزين البيانات
-      const allNumbers = []; // جميع الأرقام المستخرجة من الأسطر الأخرى
-      const allPorts = [];   // جميع البورتات المستخرجة
+      const allNumbers = [];
+      const allPorts = [];
 
       // المرحلة 1: فصل البورتات عن الأرقام
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
 
-        // البحث عن البورتات (سطر يحتوي على Frame/Slot/Port)
+        // البحث عن البورتات
         const portMatch = trimmedLine.match(/(\w+_OLT\s+Frame:\d+\/Slot:\d+\/Port:\d+)/);
         if (portMatch) {
           const port = portMatch[1];
@@ -241,7 +241,8 @@
           // استخراج القيمة بين الأقواس للمطابقة
           const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
           
-          // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر البورت (الخيار 2)
+          // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر البورت
+          // نبحث عن أي تسلسل من 16 حرف/رقم (بدون شرط أن تكون كلمة منفصلة)
           const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
           
           allPorts.push({
@@ -257,16 +258,13 @@
           const numberMatches = trimmedLine.match(/\b([M58][A-Z0-9]{8})\b/g);
           if (numberMatches) {
             numberMatches.forEach(number => {
-              // التأكد من الشروط: طول 9 بالضبط، ويبدأ بـ M أو 5 أو 8
-              // والتأكد أن باقي الأحرف أرقام فقط
               if (number.length === 9) {
-                // التحقق من أن باقي الأحرف أرقام
                 const restOfChars = number.substring(1);
                 if (/^\d+$/.test(restOfChars)) {
                   // استخراج القيمة بين الأقواس للمطابقة
                   const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
                   
-                  // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر الرقم (الخيار 2)
+                  // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر الرقم
                   const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
                   
                   allNumbers.push({
