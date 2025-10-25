@@ -221,7 +221,7 @@
       }
 
       const lines = text.split(/\r?\n/);
-      const portResults = new Map();
+      const portResults = new Map(); // لتخزين البورتات والأرقام المرتبطة بها
       let totalNumbers = 0;
 
       // تخزين البيانات
@@ -238,12 +238,14 @@
         if (portMatch) {
           const port = portMatch[1];
           
-          // استخراج القيمة بين الأقواس للمطابقة
+          // استخراج القيمة بين الأقواس والقيمة قبل الأقواس للمطابقة
           const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+          const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
           
           allPorts.push({
             port: port,
             parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+            beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null,
             originalLine: trimmedLine
           });
         } 
@@ -259,12 +261,14 @@
                 // التحقق من أن باقي الأحرف أرقام
                 const restOfChars = number.substring(1);
                 if (/^\d+$/.test(restOfChars)) {
-                  // استخراج القيمة بين الأقواس للمطابقة
+                  // استخراج القيمة بين الأقواس والقيمة قبل الأقواس للمطابقة
                   const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+                  const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
                   
                   allNumbers.push({
                     number: number,
                     parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
+                    beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null,
                     originalLine: trimmedLine
                   });
                 }
@@ -276,24 +280,72 @@
 
       // المرحلة 2: المقارنة والربط بين الأرقام والبورتات
       allPorts.forEach(port => {
-        // إذا كان البورت موجوداً بالفعل، نتخطاه
+        // إذا كان البورت موجوداً بالفعل، نضيف الأرقام إليه فقط
         if (portResults.has(port.port)) {
-          return;
-        }
+          const existingPort = portResults.get(port.port);
+          const existingNumbers = existingPort.numbers;
+          
+          // البحث عن أرقام جديدة لإضافتها للبورت الحالي
+          allNumbers.forEach(number => {
+            let matchFound = false;
 
-        const matchingNumbers = [];
-        
-        // البحث عن الأرقام التي تطابق قيمة الأقواس مع البورت
-        allNumbers.forEach(number => {
-          if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
-            matchingNumbers.push(number.number);
-            totalNumbers++;
+            // التطابق بناءً على القيم داخل الأقواس
+            if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
+              matchFound = true;
+            }
+
+            // التطابق بناءً على القيم قبل الأقواس
+            if (!matchFound && port.beforeParentheses && number.beforeParentheses && 
+                port.beforeParentheses === number.beforeParentheses) {
+              matchFound = true;
+            }
+
+            // إذا وجد تطابق ولم يكن الرقم موجوداً بالفعل، نضيفه
+            if (matchFound && !existingNumbers.includes(number.number)) {
+              existingNumbers.push(number.number);
+              totalNumbers++;
+            }
+          });
+
+          // تحديث البورت بالأرقام الجديدة
+          portResults.set(port.port, {
+            port: port.port,
+            numbers: existingNumbers
+          });
+        } 
+        // إذا كان البورت جديداً
+        else {
+          const matchingNumbers = [];
+          
+          // البحث عن الأرقام التي تطابق مع البورت
+          allNumbers.forEach(number => {
+            let matchFound = false;
+
+            // التطابق بناءً على القيم داخل الأقواس
+            if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
+              matchFound = true;
+            }
+
+            // التطابق بناءً على القيم قبل الأقواس
+            if (!matchFound && port.beforeParentheses && number.beforeParentheses && 
+                port.beforeParentheses === number.beforeParentheses) {
+              matchFound = true;
+            }
+
+            // إذا وجد تطابق، نضيف الرقم
+            if (matchFound) {
+              matchingNumbers.push(number.number);
+              totalNumbers++;
+            }
+          });
+
+          // إذا وجدنا أرقام متطابقة، نضيف البورت مع أرقامه
+          if (matchingNumbers.length > 0) {
+            portResults.set(port.port, {
+              port: port.port,
+              numbers: matchingNumbers
+            });
           }
-        });
-
-        // إذا وجدنا أرقام متطابقة، نضيف البورت مع أرقامه
-        if (matchingNumbers.length > 0) {
-          portResults.set(port.port, matchingNumbers);
         }
       });
 
@@ -304,7 +356,7 @@
       }
 
       // عرض كل بورت مع أرقامه
-      Array.from(portResults.entries()).forEach(([portLine, phones]) => {
+      Array.from(portResults.values()).forEach(portData => {
         const box = document.createElement('div');
         box.className = 'result-box';
 
@@ -312,7 +364,7 @@
         headerLine.className = 'result-header';
 
         const portTitle = document.createElement('strong');
-        portTitle.textContent = portLine;
+        portTitle.textContent = portData.port;
         portTitle.style.color = '#000dff';
         portTitle.style.fontSize = '1.1rem';
 
@@ -320,7 +372,7 @@
         copyBtn.className = 'copy-btn';
         copyBtn.textContent = '📋 نسخ';
         copyBtn.onclick = () => {
-          const textToCopy = `${portLine}\n${phones.join('\n')}`;
+          const textToCopy = `${portData.port}\n${portData.numbers.join('\n')}`;
           navigator.clipboard.writeText(textToCopy).then(() => {
             showSecureMessage('✅ تم نسخ البورت والأرقام بنجاح!');
           });
@@ -330,7 +382,7 @@
         headerLine.appendChild(copyBtn);
 
         const content = document.createElement('pre');
-        content.textContent = phones.join('\n');
+        content.textContent = portData.numbers.join('\n');
         content.style.marginTop = '10px';
         content.style.padding = '10px';
         content.style.backgroundColor = '#f0f0f0';
