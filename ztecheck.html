@@ -238,14 +238,12 @@
         if (portMatch) {
           const port = portMatch[1];
           
-          // استخراج القيمة بين الأقواس والقيمة قبل الأقواس للمطابقة
+          // استخراج القيمة بين الأقواس للمطابقة
           const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-          const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
           
           allPorts.push({
             port: port,
             parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
-            beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null,
             originalLine: trimmedLine
           });
         } 
@@ -261,14 +259,12 @@
                 // التحقق من أن باقي الأحرف أرقام
                 const restOfChars = number.substring(1);
                 if (/^\d+$/.test(restOfChars)) {
-                  // استخراج القيمة بين الأقواس والقيمة قبل الأقواس للمطابقة
+                  // استخراج القيمة بين الأقواس للمطابقة
                   const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
-                  const beforeParenthesesMatch = trimmedLine.match(/([A-Z0-9]{10,16})\(/);
                   
                   allNumbers.push({
                     number: number,
                     parentheses: parenthesesMatch ? parenthesesMatch[1] : null,
-                    beforeParentheses: beforeParenthesesMatch ? beforeParenthesesMatch[1] : null,
                     originalLine: trimmedLine
                   });
                 }
@@ -289,14 +285,13 @@
           allNumbers.forEach(number => {
             let matchFound = false;
 
-            // التطابق بناءً على القيم داخل الأقواس
+            // الخيار 1: التطابق بناءً على القيم داخل الأقواس
             if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
               matchFound = true;
             }
 
-            // التطابق بناءً على القيم قبل الأقواس
-            if (!matchFound && port.beforeParentheses && number.beforeParentheses && 
-                port.beforeParentheses === number.beforeParentheses) {
+            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن أي قيمة مشتركة في السطر
+            if (!matchFound && port.parentheses && number.originalLine.includes(port.parentheses)) {
               matchFound = true;
             }
 
@@ -321,14 +316,13 @@
           allNumbers.forEach(number => {
             let matchFound = false;
 
-            // التطابق بناءً على القيم داخل الأقواس
+            // الخيار 1: التطابق بناءً على القيم داخل الأقواس
             if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
               matchFound = true;
             }
 
-            // التطابق بناءً على القيم قبل الأقواس
-            if (!matchFound && port.beforeParentheses && number.beforeParentheses && 
-                port.beforeParentheses === number.beforeParentheses) {
+            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن أي قيمة مشتركة في السطر
+            if (!matchFound && port.parentheses && number.originalLine.includes(port.parentheses)) {
               matchFound = true;
             }
 
