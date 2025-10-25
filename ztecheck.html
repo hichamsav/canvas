@@ -228,8 +228,9 @@
       const allNumbers = [];
       const allPorts = [];
       const allHex16Values = new Map(); // لتخزين القيم 16 حرف والأرقام المرتبطة بها
+      const allParenthesesValues = new Map(); // لتخزين القيم بين الأقواس
 
-      // المرحلة 1: فصل البورتات عن الأرقام
+      // المرحلة 1: جمع جميع البيانات
       lines.forEach(line => {
         const trimmedLine = line.trim();
         if (!trimmedLine) return;
@@ -251,6 +252,21 @@
             hex16Values: hex16Values,
             originalLine: trimmedLine
           });
+
+          // تخزين القيم بين الأقواس للخيار 3
+          if (parenthesesMatch && parenthesesMatch[1]) {
+            const parenthesesValue = parenthesesMatch[1];
+            if (!allParenthesesValues.has(parenthesesValue)) {
+              allParenthesesValues.set(parenthesesValue, []);
+            }
+          }
+
+          // تخزين القيم 16 حرف للخيار 3
+          hex16Values.forEach(hexValue => {
+            if (!allHex16Values.has(hexValue)) {
+              allHex16Values.set(hexValue, []);
+            }
+          });
         } 
         // إذا لم يكن سطر بورت، نبحث عن الأرقام المسموحة فقط
         else {
@@ -267,7 +283,7 @@
                   // استخراج جميع القيم المكونة من 16 حرف/رقم من سطر الرقم
                   const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
                   
-                  // تخزين القيم 16 حرف المرتبطة بالرقم (الخيار 3)
+                  // تخزين القيم 16 حرف المرتبطة بالرقم
                   hex16Values.forEach(hexValue => {
                     if (!allHex16Values.has(hexValue)) {
                       allHex16Values.set(hexValue, []);
@@ -276,6 +292,17 @@
                       allHex16Values.get(hexValue).push(number);
                     }
                   });
+
+                  // تخزين القيم بين الأقواس المرتبطة بالرقم
+                  if (parenthesesMatch && parenthesesMatch[1]) {
+                    const parenthesesValue = parenthesesMatch[1];
+                    if (!allParenthesesValues.has(parenthesesValue)) {
+                      allParenthesesValues.set(parenthesesValue, []);
+                    }
+                    if (!allParenthesesValues.get(parenthesesValue).includes(number)) {
+                      allParenthesesValues.get(parenthesesValue).push(number);
+                    }
+                  }
                   
                   allNumbers.push({
                     number: number,
@@ -287,17 +314,32 @@
               }
             });
           }
+
+          // إذا لم توجد أرقام، نخزن القيم 16 حرف وبين الأقواس فقط
+          const hex16Values = trimmedLine.match(/[A-Za-z0-9]{16}/g) || [];
+          const parenthesesMatch = trimmedLine.match(/\(([^)]+)\)/);
+
+          hex16Values.forEach(hexValue => {
+            if (!allHex16Values.has(hexValue)) {
+              allHex16Values.set(hexValue, []);
+            }
+          });
+
+          if (parenthesesMatch && parenthesesMatch[1]) {
+            const parenthesesValue = parenthesesMatch[1];
+            if (!allParenthesesValues.has(parenthesesValue)) {
+              allParenthesesValues.set(parenthesesValue, []);
+            }
+          }
         }
       });
 
       // المرحلة 2: المقارنة والربط بين الأرقام والبورتات (الخيار 1 + 2)
       allPorts.forEach(port => {
-        // إذا كان البورت موجوداً بالفعل، نضيف الأرقام إليه فقط
         if (portResults.has(port.port)) {
           const existingPort = portResults.get(port.port);
           const existingNumbers = existingPort.numbers;
           
-          // البحث عن أرقام جديدة لإضافتها للبورت الحالي
           allNumbers.forEach(number => {
             let matchFound = false;
 
@@ -313,7 +355,6 @@
               );
             }
 
-            // إذا وجد تطابق ولم يكن الرقم موجوداً بالفعل، نضيفه
             if (matchFound && !existingNumbers.includes(number.number)) {
               existingNumbers.push(number.number);
               totalNumbers++;
@@ -325,19 +366,16 @@
             numbers: existingNumbers
           });
         } 
-        // إذا كان البورت جديداً
         else {
           const matchingNumbers = [];
           
           allNumbers.forEach(number => {
             let matchFound = false;
 
-            // الخيار 1: التطابق بناءً على القيم داخل الأقواس
             if (port.parentheses && number.parentheses && port.parentheses === number.parentheses) {
               matchFound = true;
             }
 
-            // الخيار 2: إذا لم يوجد تطابق بالأقواس، نبحث عن قيم 16 حرف/رقم مشتركة
             if (!matchFound && port.hex16Values.length > 0 && number.hex16Values.length > 0) {
               matchFound = port.hex16Values.some(portValue => 
                 number.hex16Values.includes(portValue)
@@ -359,15 +397,29 @@
         }
       });
 
-      // المرحلة 3: إضافة البورتات الجديدة للقيم 16 حرف المتكررة (الخيار 3)
-      allHex16Values.forEach((numbers, hexValue) => {
-        if (numbers.length > 0) {
-          const portName = `HEX_${hexValue}`;
-          portResults.set(portName, {
-            port: portName,
-            numbers: [hexValue, ...numbers] // نضيف القيمة 16 حرف أولاً ثم الأرقام
+      // المرحلة 3: إضافة البورتات الجديدة للقيم المتكررة (الخيار 3)
+      
+      // للقيم بين الأقواس
+      allParenthesesValues.forEach((numbers, parenthesesValue) => {
+        if (!portResults.has(`PARENTHESES_${parenthesesValue}`)) {
+          const displayValues = numbers.length > 0 ? numbers : [parenthesesValue];
+          portResults.set(`PARENTHESES_${parenthesesValue}`, {
+            port: `PARENTHESES_${parenthesesValue}`,
+            numbers: displayValues
           });
-          totalNumbers += numbers.length;
+          totalNumbers += displayValues.length;
+        }
+      });
+
+      // للقيم 16 حرف
+      allHex16Values.forEach((numbers, hexValue) => {
+        if (!portResults.has(`HEX_${hexValue}`)) {
+          const displayValues = numbers.length > 0 ? numbers : [hexValue];
+          portResults.set(`HEX_${hexValue}`, {
+            port: `HEX_${hexValue}`,
+            numbers: displayValues
+          });
+          totalNumbers += displayValues.length;
         }
       });
 
@@ -377,7 +429,6 @@
         return;
       }
 
-      // عرض كل بورت مع أرقامه
       Array.from(portResults.values()).forEach(portData => {
         const box = document.createElement('div');
         box.className = 'result-box';
@@ -415,7 +466,6 @@
         resultContainer.appendChild(box);
       });
 
-      // إضافة ملخص بعدد الأرقام المستخرجة
       const summary = document.createElement('div');
       summary.className = 'summary';
       summary.textContent = `✅ تم استخراج ${totalNumbers} رقم مرتبط بـ ${portResults.size} بورت`;
@@ -427,7 +477,6 @@
       document.getElementById('dynamicResults').innerHTML = '';
     }
 
-    // الحماية الأساسية
     document.addEventListener('contextmenu', function(e) {
       e.preventDefault();
       return false;
