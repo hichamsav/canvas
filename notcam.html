@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NotCam Emulator</title>
+    <title>NoteCam Emulator</title>
     <style>
         * {
             margin: 0;
@@ -93,6 +93,8 @@
             background: #000000;
             border-top: 1px solid #333333;
             width: 100%;
+            position: relative;
+            min-height: 170px;
         }
 
         .info-line {
@@ -103,14 +105,14 @@
             font-family: 'Courier New', monospace;
         }
 
-        /* الشعار */
+        /* الشعار - Powered by NoteCam */
         .logo {
-            padding: 10px 15px;
-            text-align: center;
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
             font-size: 12px;
             color: #888888;
-            border-top: 1px solid #333333;
-            width: 100%;
+            font-family: 'Courier New', monospace;
         }
 
         /* الأزرار */
@@ -209,7 +211,7 @@
     <div class="app-container">
         <!-- شريط الحالة -->
         <div class="status-bar" id="statusBar">
-            NotCam Emulator - جاهز
+            NoteCam Emulator - جاهز
         </div>
 
         <!-- الكاميرا -->
@@ -220,18 +222,16 @@
             </div>
         </div>
 
-        <!-- معلومات تحت الصورة -->
+        <!-- معلومات تحت الصورة مع الشعار -->
         <div class="info-panel">
             <div class="info-line" id="infoLatitude">Latitude: 33.603039</div>
             <div class="info-line" id="infoLongitude">Longitude: -7.636531</div>
             <div class="info-line" id="infoElevation">Élévation: 10.64±10.9 m</div>
             <div class="info-line" id="infoPrecision">Précision: 77.6 m</div>
             <div class="info-line" id="infoTime">Temps: 31-12-2025 17:49</div>
-        </div>
-
-        <!-- الشعار -->
-        <div class="logo">
-            Powered by NotCam
+            
+            <!-- الشعار Powered by NoteCam -->
+            <div class="logo">Powered by NoteCam</div>
         </div>
 
         <!-- التحكم -->
@@ -287,7 +287,7 @@
                 // 4. تحديث الموقع كل 30 ثانية
                 setInterval(updateLocationInfo, 30000);
                 
-                statusBar.textContent = "NotCam - جاهز للاستخدام";
+                statusBar.textContent = "NoteCam - جاهز للاستخدام";
                 
             } catch (error) {
                 console.error('خطأ في التهيئة:', error);
@@ -495,9 +495,9 @@
             context.fillText(precisionText, 20, infoY + (lineHeight * 3));
             context.fillText(timeText, 20, infoY + (lineHeight * 4));
             
-            // كتابة Powered by NotCam
+            // كتابة Powered by NoteCam بنفس التنسيق
             context.font = '12px "Courier New", monospace';
-            context.fillText('Powered by NotCam', 20, infoY + (lineHeight * 5) + 10);
+            context.fillText('Powered by NoteCam', 20, infoY + (lineHeight * 5) + 10);
             
             // استعادة إعدادات Canvas
             context.restore();
@@ -545,7 +545,7 @@
             }
             
             const now = new Date();
-            const fileName = `NotCam_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.jpg`;
+            const fileName = `NoteCam_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.jpg`;
             
             const link = document.createElement('a');
             link.href = currentImageData.url;
