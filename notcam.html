@@ -91,7 +91,7 @@
             background: #000000;
             width: 100%;
             position: relative;
-            padding: 8px 0; /* حشو علوي فقط */
+            padding: 8px 0;
         }
 
         /* الحاوية الرئيسية */
@@ -103,12 +103,12 @@
             width: 100%;
         }
 
-        /* الخلفية البيضاء فقط للمعلومات */
+        /* الخلفية البيضاء فقط للمعلومات - 80% من العرض */
         .info-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: calc(100% - 150px); /* توقف قبل الشعار */
+            width: 80%; /* تقليل بنسبة 20% من الجانب الأيمن */
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
@@ -124,6 +124,7 @@
             height: 100%;
             z-index: 2;
             position: relative;
+            width: 80%; /* 80% فقط */
         }
 
         .info-line {
@@ -142,7 +143,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 150px;
+            width: 20%; /* 20% المتبقية */
             height: 100%;
             position: relative;
             z-index: 3;
@@ -299,6 +300,7 @@
             }
             
             .info-column {
+                width: 100%;
                 padding: 8px 10px;
                 height: 80px;
             }
@@ -369,16 +371,16 @@
         <!-- معلومات تحت الصورة - بدون فراغات -->
         <div class="info-panel">
             <div class="info-container">
-                <!-- الخلفية البيضاء فقط للمعلومات -->
+                <!-- الخلفية البيضاء فقط للمعلومات - 80% عرض -->
                 <div class="info-background"></div>
                 
                 <!-- العمود الأيسر - المعلومات -->
                 <div class="info-column">
-                    <div class="info-line" id="infoLatitude">Latitude: 33.603167</div>
-                    <div class="info-line" id="infoLongitude">Longitude: -7.636580</div>
-                    <div class="info-line" id="infoElevation">Elevation: 10.44±7.91 m</div>
-                    <div class="info-line" id="infoPrecision">Precision: 19.84 m</div>
-                    <div class="info-line" id="infoTime">Temps: 03-01-2026 18:34</div>
+                    <div class="info-line" id="infoLatitude">Latitude: 33.603016</div>
+                    <div class="info-line" id="infoLongitude">Longitude: -7.636873</div>
+                    <div class="info-line" id="infoElevation">Elevation: 9.34±11.02 m</div>
+                    <div class="info-line" id="infoPrecision">Precision: 13.28 m</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:44</div>
                 </div>
                 
                 <!-- العمود الأيمن - الشعار فوق الخلفية -->
@@ -400,9 +402,8 @@
         </div>
     </div>
 
-    <!-- JavaScript يبقى كما هو بدون تغيير -->
+    <!-- JavaScript يبقى كما هو -->
     <script>
-        // جميع ال JavaScript من الكود السابق يبقى كما هو
         let videoStream = null;
         let isCameraActive = false;
         let currentImageData = null;
@@ -608,9 +609,10 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
+            // تقليل العرض بنسبة 20% على الصورة أيضاً
             const lineHeight = 12;
             const totalHeight = lineHeight * 5 + 4;
-            const boxWidth = 260;
+            const boxWidth = width * 0.8; // 80% من عرض الصورة
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
