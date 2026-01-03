@@ -604,6 +604,34 @@
             display: inline-block;
         }
 
+        /* زر تحميل الكل */
+        .download-all-btn {
+            background: #2ea043;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 20px auto;
+            transition: all 0.3s ease;
+        }
+
+        .download-all-btn:hover {
+            background: #2c974b;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(46, 160, 67, 0.3);
+        }
+
+        .download-all-btn i {
+            font-size: 16px;
+        }
+
         /* تأثيرات */
         .flash-effect {
             position: absolute;
@@ -695,6 +723,8 @@
             }
         }
     </style>
+    <!-- أيقونات Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
@@ -927,6 +957,150 @@
             {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
             {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
         ];
+
+        // ========== دالة تحويل التاريخ إلى الفرنسية ==========
+        function formatDateFrench(dateString) {
+            const date = new Date(dateString);
+            
+            // الأرقام الفرنسية (١٢٣٤٥٦٧٨٩٠)
+            const frenchNumbers = {
+                '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+                '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
+            };
+            
+            // تحويل الأرقام في السلسلة إلى فرنسية
+            function convertToFrenchNumbers(str) {
+                return str.replace(/\d/g, char => frenchNumbers[char] || char);
+            }
+            
+            // تنسيق التاريخ
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            // إنشاء التاريخ بالصيغة الفرنسية
+            const dateStr = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            
+            // تحويل الأرقام إلى فرنسية
+            return convertToFrenchNumbers(dateStr);
+        }
+
+        // ========== دالة تحميل جميع صور التقرير ==========
+        function downloadAllReportImages(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            
+            if (!report || !report.images || report.images.length === 0) {
+                alert("لا توجد صور في هذا التقرير للتحميل");
+                return;
+            }
+            
+            updateStatusBar(`جاري تحميل ${report.images.length} صورة...`);
+            
+            // إنشاء مجلد مضغوط افتراضي
+            let zipCount = 0;
+            const totalImages = report.images.length;
+            
+            // تحميل كل صورة على حدة (في المتصفح لا يمكن إنشاء zip حقيقي بدون مكتبة)
+            // سنقوم بتحميل كل صورة على حدة مع تسمية مناسبة
+            report.images.forEach((img, index) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = img.url;
+                    link.download = `NoteCam_${report.employeeName}_${report.date}_image_${index + 1}.jpg`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    zipCount++;
+                    
+                    if (zipCount === totalImages) {
+                        updateStatusBar(`تم تحميل ${totalImages} صورة`);
+                        alert(`تم تحميل ${totalImages} صورة من تقرير ${report.employeeName}`);
+                    }
+                }, index * 500); // تأخير 500 مللي بين كل تحميل
+            });
+        }
+
+        // ========== دالة تحميل التقرير الكامل (PDF افتراضي) ==========
+        function downloadFullReport(reportId) {
+            const report = reports.find(r => r.id === reportId);
+            
+            if (!report) {
+                alert("التقرير غير موجود");
+                return;
+            }
+            
+            updateStatusBar("جاري إنشاء تقرير PDF...");
+            
+            // في المتصفح، يمكننا إنشاء صفحة HTML ثم تحويلها لـ PDF
+            // هنا سنقوم بإنشاء محتوى النص للتنزيل كملف نصي
+            const reportContent = `
+===========================================
+تقرير NoteCam - ${report.employeeName}
+===========================================
+اسم الموظف: ${report.employeeName}
+اسم المستخدم: ${report.employee}
+الرقم المدخل: ${report.number}
+المنطقة: ${report.area || 'غير محدد'}
+كود المنطقة: ${report.areaCode || 'غير محدد'}
+تاريخ الإرسال: ${formatDateFrench(report.date)}
+خط العرض: ${report.location.lat.toFixed(6)}
+خط الطول: ${report.location.lng.toFixed(6)}
+الارتفاع: ${report.location.elev} م
+الدقة: ${report.location.prec.toFixed(2)} م
+عدد الصور: ${report.images.length}
+===========================================
+معلومات الصور:
+${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
+===========================================
+تم إنشاء التقرير بواسطة نظام NoteCam
+تاريخ الإنشاء: ${formatDateFrench(new Date().toISOString())}
+            `;
+            
+            // إنشاء ملف للتنزيل
+            const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `NoteCam_Report_${report.employeeName}_${report.date}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            updateStatusBar("تم إنشاء تقرير النص");
+        }
+
+        // ========== دالة إنشاء زر تحميل الكل ==========
+        function createDownloadAllButton(reportId) {
+            const container = document.createElement('div');
+            container.style.display = 'flex';
+            container.style.gap = '10px';
+            container.style.justifyContent = 'center';
+            container.style.marginTop = '20px';
+            container.style.flexWrap = 'wrap';
+            
+            // زر تحميل جميع الصور
+            const downloadImagesBtn = document.createElement('button');
+            downloadImagesBtn.className = 'download-all-btn';
+            downloadImagesBtn.innerHTML = '<i class="fas fa-images"></i> تحميل جميع الصور';
+            downloadImagesBtn.onclick = () => downloadAllReportImages(reportId);
+            
+            // زر تحميل التقرير الكامل
+            const downloadReportBtn = document.createElement('button');
+            downloadReportBtn.className = 'download-all-btn';
+            downloadReportBtn.style.background = '#6f42c1';
+            downloadReportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تحميل التقرير الكامل';
+            downloadReportBtn.onclick = () => downloadFullReport(reportId);
+            
+            container.appendChild(downloadImagesBtn);
+            container.appendChild(downloadReportBtn);
+            
+            return container;
+        }
 
         // تهيئة التطبيق
         function initializeApp() {
@@ -1200,7 +1374,7 @@
                 reportCard.innerHTML = `
                     <div class="report-header">
                         <div class="employee-name">${report.employeeName}</div>
-                        <div class="report-date">${new Date(report.date).toLocaleString('ar-SA')}</div>
+                        <div class="report-date">${formatDateFrench(report.date)}</div>
                     </div>
                     <div class="report-details">
                         <div class="detail-item">
@@ -1213,7 +1387,7 @@
                             <strong>عدد الصور:</strong> ${report.images.length}
                         </div>
                         <div class="detail-item">
-                            <strong>التاريخ:</strong> ${new Date(report.date).toLocaleDateString('ar-SA')}
+                            <strong>التاريخ:</strong> ${formatDateFrench(report.date)}
                         </div>
                     </div>
                     <button class="view-report-btn" onclick="viewSingleReport(${report.id}); event.stopPropagation();">
@@ -1287,7 +1461,7 @@
                             </div>
                             <div class="info-item">
                                 <div class="info-label">تاريخ الإرسال</div>
-                                <div class="info-value">${new Date(report.date).toLocaleString('ar-SA')}</div>
+                                <div class="info-value">${formatDateFrench(report.date)}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">خط العرض</div>
@@ -1319,6 +1493,11 @@
                         </div>
                     </div>
                 `;
+                
+                // إضافة زر تحميل الكل
+                const downloadContainer = createDownloadAllButton(report.id);
+                reportCard.appendChild(downloadContainer);
+                
                 reportDetailsContainer.appendChild(reportCard);
             });
         }
@@ -1339,7 +1518,7 @@
                     <div class="report-image-item">
                         <img src="${img.url}" alt="صورة ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">صورة ${imgIndex + 1}</text></svg>';">
                         <div class="image-info">
-                            <div class="image-time">صورة ${imgIndex + 1} - ${new Date(img.timestamp).toLocaleTimeString('ar-SA')}</div>
+                            <div class="image-time">صورة ${imgIndex + 1} - ${formatDateFrench(img.timestamp)}</div>
                         </div>
                     </div>
                 `).join('');
@@ -1376,7 +1555,7 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label">تاريخ الإرسال</div>
-                            <div class="info-value">${new Date(report.date).toLocaleString('ar-SA')}</div>
+                            <div class="info-value">${formatDateFrench(report.date)}</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">خط العرض</div>
@@ -1407,11 +1586,19 @@
                         ${imagesHTML || '<p style="text-align: center; color: #888; grid-column: 1 / -1;">لا توجد صور في هذا التقرير</p>'}
                     </div>
                 </div>
-                
-                <div style="margin-top: 30px; text-align: center;">
-                    <button class="back-btn" onclick="viewAllReports()">عرض جميع التقارير</button>
-                </div>
             `;
+            
+            // إضافة زر تحميل الكل
+            const downloadContainer = createDownloadAllButton(report.id);
+            reportCard.appendChild(downloadContainer);
+            
+            // زر العودة
+            const backButton = document.createElement('div');
+            backButton.style.marginTop = '30px';
+            backButton.style.textAlign = 'center';
+            backButton.innerHTML = `<button class="back-btn" onclick="viewAllReports()">عرض جميع التقارير</button>`;
+            reportCard.appendChild(backButton);
+            
             reportDetailsContainer.appendChild(reportCard);
         }
 
@@ -1451,7 +1638,18 @@
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             
-            infoTime.textContent = `Temps: ${day}-${month}-${year} ${hours}:${minutes}`;
+            // تحويل الأرقام إلى فرنسية
+            const frenchNumbers = {
+                '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+                '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
+            };
+            
+            function convertToFrenchNumbers(str) {
+                return str.replace(/\d/g, char => frenchNumbers[char] || char);
+            }
+            
+            const dateStr = `${day}-${month}-${year} ${hours}:${minutes}`;
+            infoTime.textContent = `Temps: ${convertToFrenchNumbers(dateStr)}`;
         }
 
         function updateStatusBar(message) {
