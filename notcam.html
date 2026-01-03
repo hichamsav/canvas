@@ -214,12 +214,13 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Information de localisation */
+        /* Information de localisation - NOUVEAU STYLE */
         .info-panel {
             background: #000000;
             width: 100%;
             position: relative;
             padding: 8px 0;
+            direction: ltr;
         }
 
         .info-container {
@@ -234,7 +235,7 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 18%;
+            width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
@@ -249,7 +250,7 @@
             height: 100%;
             z-index: 2;
             position: relative;
-            width: 18%;
+            width: 82%;
         }
 
         .info-line {
@@ -263,17 +264,20 @@
             white-space: nowrap;
         }
 
-        .logo-column {
+        .note-column {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 82%;
+            width: 18%;
             height: 100%;
             position: relative;
             z-index: 3;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 5px;
+            box-sizing: border-box;
         }
 
-        .logo-text {
+        .note-text {
             font-size: 16px;
             color: rgba(255, 0, 0, 0.8);
             font-family: 'Arial Black', sans-serif;
@@ -282,11 +286,23 @@
             letter-spacing: 0.3px;
             line-height: 1;
             text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
-            text-transform: uppercase;
             background: none;
             padding: 0;
             margin: 0;
             white-space: nowrap;
+        }
+
+        .note-cam-text {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.9);
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            text-align: center;
+            letter-spacing: 0.1px;
+            line-height: 1.2;
+            background: none;
+            padding: 0;
+            margin: 0;
         }
 
         /* Zone de l'employé */
@@ -765,6 +781,22 @@
             .report-info-grid {
                 grid-template-columns: 1fr;
             }
+            
+            .info-column {
+                width: 70%;
+            }
+            
+            .note-column {
+                width: 30%;
+            }
+            
+            .note-text {
+                font-size: 12px;
+            }
+            
+            .note-cam-text {
+                font-size: 10px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -780,12 +812,24 @@
                 font-size: 10px;
             }
             
-            .logo-text {
-                font-size: 12px;
-            }
-            
             .report-images-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .info-column {
+                width: 65%;
+            }
+            
+            .note-column {
+                width: 35%;
+            }
+            
+            .note-text {
+                font-size: 10px;
+            }
+            
+            .note-cam-text {
+                font-size: 8px;
             }
         }
     </style>
@@ -845,7 +889,7 @@
                         <option value="">Sélectionner un employé</option>
                     </select>
                     <input type="text" id="areaName" class="form-input" placeholder="Nom de la zone">
-                    <input type="text" id="areaCode" class="form-input" placeholder="Code de la zone">
+                    <input type="text" id="areaCode" class="form-input" placeholder="Code de la zone (ex: ZN001)">
                     <button class="action-btn" onclick="assignArea()">Attribuer la zone</button>
                 </div>
                 
@@ -922,21 +966,22 @@
                     <div class="flash-effect" id="flashEffect"></div>
                 </div>
 
-                <!-- Information de localisation -->
+                <!-- Information de localisation - NOUVELLE DISPOSITION -->
                 <div class="info-panel">
                     <div class="info-container">
                         <div class="info-background"></div>
                         <div class="info-column">
                             <div class="info-line" id="infoLatitude">Latitude : 33.603016</div>
                             <div class="info-line" id="infoLongitude">Longitude : -7.636873</div>
-                            <div class="info-line" id="infoElevation">Élevation : 9.34±11.02 m</div>
+                            <div class="info-line" id="infoElevation">Élévation : 9.34±11.02 m</div>
                             <div class="info-line" id="infoPrecision">Précision : 13.28 m</div>
                             <div class="info-line" id="infoTime">Temps : 03/01/2026 15:44</div>
-                            <div class="info-line" id="infoNote">Note : exmple </div>
-
                         </div>
-                        <div class="logo-column">
-                            <div class="logo-text">Powered by NoteCam</div>
+                        <div class="note-column">
+                            <div>
+                                <div class="note-text" id="noteCode">ZN001</div>
+                                <div class="note-cam-text">Powered by NoteCam</div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1042,6 +1087,7 @@
         const infoElevation = document.getElementById('infoElevation');
         const infoPrecision = document.getElementById('infoPrecision');
         const infoTime = document.getElementById('infoTime');
+        const noteCode = document.getElementById('noteCode');
 
         // Données de localisation
         const sampleLocations = [
@@ -1113,6 +1159,15 @@
             const minutes = String(date.getMinutes()).padStart(2, '0');
             
             return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+
+        // ========== Mettre à jour le code Note ==========
+        function updateNoteCode() {
+            if (selectedArea && selectedArea.code) {
+                noteCode.textContent = selectedArea.code;
+            } else {
+                noteCode.textContent = "ZN000";
+            }
         }
 
         // ========== Téléchargement de toutes les images du rapport ==========
@@ -1232,6 +1287,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             updateStatusBar("Prêt à l'utilisation");
             updateLocationInfo();
             updateTimeInfo();
+            updateNoteCode();
             
             setInterval(updateTimeInfo, 60000);
             setInterval(updateLocationInfo, 5000);
@@ -1400,6 +1456,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
         function loadEmployeeAreas() {
             if (!currentUser || !currentUser.assignedAreas) {
                 selectedAreaInfo.style.display = 'none';
+                updateNoteCode();
                 return;
             }
             
@@ -1412,8 +1469,10 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                         selectArea(activeArea);
                     }
                 }
+                updateNoteCode();
             } else {
                 selectedAreaInfo.style.display = 'none';
+                updateNoteCode();
             }
         }
 
@@ -1424,6 +1483,9 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             selectedAreaCode.textContent = area.code;
             areaAssignedDate.textContent = formatSimpleDate(area.date);
             selectedAreaInfo.style.display = 'block';
+            
+            // Mettre à jour le code Note
+            updateNoteCode();
             
             // Mettre à jour la liste des zones
             updateEmployeeAreasList();
@@ -1589,6 +1651,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                 selectedAreaInfo.style.display = 'none';
                 if (areaSelect) areaSelect.value = '';
                 updateEmployeeAreasList();
+                updateNoteCode();
             }
             
             saveToLocalStorage();
@@ -1636,7 +1699,8 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                 images: capturedImages.slice(0, 5),
                 area: selectedArea.name,
                 areaCode: selectedArea.code,
-                areaId: selectedArea.id
+                areaId: selectedArea.id,
+                noteCode: noteCode.textContent
             };
             
             reports.push(report);
@@ -1703,7 +1767,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             <strong>Zone :</strong> ${report.area}
                         </div>
                         <div class="detail-item">
-                            <strong>Images :</strong> ${report.images.length}
+                            <strong>Code Note :</strong> ${report.noteCode || report.areaCode}
                         </div>
                         <div class="detail-item">
                             <strong>Date :</strong> ${formatReportDate(report.date)}
@@ -1777,6 +1841,10 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             <div class="info-item">
                                 <div class="info-label">Code de zone</div>
                                 <div class="info-value">${report.areaCode || 'Non spécifié'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">Code Note</div>
+                                <div class="info-value">${report.noteCode || report.areaCode || 'Non spécifié'}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Date d'envoi</div>
@@ -1873,6 +1941,10 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             <div class="info-value">${report.areaCode || 'Non spécifié'}</div>
                         </div>
                         <div class="info-item">
+                            <div class="info-label">Code Note</div>
+                            <div class="info-value">${report.noteCode || report.areaCode || 'Non spécifié'}</div>
+                        </div>
+                        <div class="info-item">
                             <div class="info-label">Date d'envoi</div>
                             <div class="info-value">${formatReportDate(report.date)}</div>
                         </div>
@@ -1944,14 +2016,16 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
             
+            // Changement de "Altitude" à "Élévation"
             infoLatitude.textContent = `Latitude : ${location.lat.toFixed(6)}`;
             infoLongitude.textContent = `Longitude : ${location.lng.toFixed(6)}`;
-            infoElevation.textContent = `Altitude : ${location.elev} m`;
+            infoElevation.textContent = `Élévation : ${location.elev} m`;
             infoPrecision.textContent = `Précision : ${location.prec.toFixed(2)} m`;
         }
 
         function updateTimeInfo() {
-            infoTime.textContent = `Heure : ${formatTime()}`;
+            // Changement de "Heure" à "Temps"
+            infoTime.textContent = `Temps : ${formatTime()}`;
         }
 
         function updateStatusBar(message) {
@@ -2043,7 +2117,8 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             lng: parseFloat(infoLongitude.textContent.split(': ')[1]),
                             elev: infoElevation.textContent.split(': ')[1],
                             prec: parseFloat(infoPrecision.textContent.split(': ')[1])
-                        }
+                        },
+                        noteCode: noteCode.textContent
                     };
                     
                     addImageToGallery(imageUrl, blob, timestamp);
@@ -2055,7 +2130,8 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                     capturedImages.push({
                         url: imageUrl,
                         timestamp: timestamp.toISOString(),
-                        location: currentImageData.location
+                        location: currentImageData.location,
+                        noteCode: currentImageData.noteCode
                     });
                     
                     updateStatusBar("Image capturée");
@@ -2077,28 +2153,31 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             }
         }
 
-        function drawLogoOnImage(context, x, y) {
+        function drawLogoOnImage(context, x, y, areaCode) {
             context.save();
             
+            // Fond semi-transparent pour le code Note
+            context.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            context.fillRect(x - 80, y - 40, 80, 40);
+            
+            // Code Note en rouge
             context.shadowColor = 'rgba(0, 0, 0, 0.4)';
             context.shadowBlur = 2;
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 20px "Arial Black", sans-serif';
+            context.font = '900 18px "Arial Black", sans-serif';
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
-            context.textBaseline = 'bottom';
+            context.textBaseline = 'middle';
             
-            const text = 'Propulsé par NoteCam';
-            context.fillText(text, x, y);
+            const code = areaCode || 'ZN000';
+            context.fillText(code, x - 10, y - 20);
             
-            context.shadowColor = 'rgba(255, 255, 255, 0.2)';
-            context.shadowBlur = 1;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            context.fillStyle = 'rgba(255, 255, 255, 0.1)';
-            context.fillText(text, x, y);
+            // Powered by NoteCam en blanc
+            context.font = 'bold 12px "Courier New", monospace';
+            context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            context.fillText('Powered by NoteCam', x - 10, y - 5);
             
             context.restore();
         }
@@ -2108,10 +2187,11 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             
             const lineHeight = 16;
             const totalHeight = lineHeight * 5 + 6;
-            const boxWidth = width * 0.18;
+            const boxWidth = width * 0.82; // 82% de la largeur
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
+            // Fond blanc pour les informations
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
@@ -2122,13 +2202,15 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             
             const startY = boxY + 3;
             
+            // Informations de localisation
             context.fillText(infoLatitude.textContent, boxX + 5, startY);
             context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
             context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
             context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
             context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
             
-            drawLogoOnImage(context, width - 2, boxY + totalHeight - 3);
+            // Note + Powered by NoteCam sur la droite
+            drawLogoOnImage(context, width - 2, boxY + totalHeight - 20, noteCode.textContent);
             
             context.restore();
         }
@@ -2241,6 +2323,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             loadEmployeeAreas();
                             populateAreaSelect();
                             updateEmployeeAreasList();
+                            updateNoteCode();
                         }
                         updateStatusBar(`Bienvenue ${currentUser.name}`);
                     }
