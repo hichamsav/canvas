@@ -86,21 +86,23 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة - بدون فراغات */
+        /* معلومات تحت الصورة - التنسيق الجديد */
         .info-panel {
             background: #000000;
             width: 100%;
             position: relative;
-            padding: 0; /* إزالة الحشو */
+            padding: 15px 0;
         }
 
-        /* الحاوية الرئيسية - بدون فراغات */
+        /* الحاوية الرئيسية */
         .info-container {
             display: flex;
-            height: 110px; /* ارتفاع ثابت */
-            background: rgba(255, 255, 255, 0.5); /* الخلفية البيضاء مباشرة */
-            padding: 0; /* بدون حشو */
-            margin: 0; /* بدون هوامش */
+            height: 120px;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 0 20px;
+            border-radius: 3px;
+            padding: 0;
+            position: relative;
         }
 
         /* العمود الأيسر - المعلومات */
@@ -109,7 +111,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 15px; /* حشو داخلي فقط من اليسار */
+            padding-left: 15px;
             height: 100%;
         }
 
@@ -126,22 +128,26 @@
         /* العمود الأيمن - الشعار */
         .logo-column {
             display: flex;
-            align-items: flex-end;
-            justify-content: flex-end;
-            padding-right: 15px; /* حشو داخلي فقط من اليمين */
-            padding-bottom: 8px;
+            align-items: center;
+            justify-content: center;
             min-width: 180px;
             height: 100%;
+            position: relative;
         }
 
         .logo-text {
-            font-size: 14px;
-            color: #ff0000;
-            font-family: 'Arial', sans-serif;
-            font-weight: bold;
-            text-align: right;
+            font-size: 20px;
+            color: rgba(255, 0, 0, 0.8);
+            font-family: 'Arial Black', 'Segoe UI', 'Verdana', sans-serif;
+            font-weight: 900;
+            text-align: center;
             letter-spacing: 0.5px;
             line-height: 1.2;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            background: none;
+            padding: 0;
+            margin: 0;
         }
 
         /* عناصر التحكم */
@@ -245,6 +251,22 @@
             100% { opacity: 0; }
         }
 
+        /* شبكة الكاميرا */
+        .camera-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.3;
+        }
+
         /* تعديلات للجوال */
         @media (max-width: 768px) {
             .camera-container {
@@ -254,7 +276,8 @@
             .info-container {
                 flex-direction: column;
                 height: auto;
-                min-height: 110px;
+                min-height: 130px;
+                margin: 0 10px;
             }
             
             .info-column {
@@ -264,14 +287,13 @@
             }
             
             .logo-column {
-                justify-content: center;
                 padding: 10px 15px;
                 min-width: auto;
-                height: auto;
+                height: 50px;
             }
             
             .logo-text {
-                text-align: center;
+                font-size: 18px;
             }
             
             .btn {
@@ -299,7 +321,7 @@
             }
             
             .logo-text {
-                font-size: 12px;
+                font-size: 16px;
             }
             
             .gallery-grid {
@@ -316,13 +338,14 @@
 
         <div class="camera-container">
             <video id="cameraVideo" autoplay playsinline></video>
+            <div class="camera-grid"></div>
             <div class="capture-button" id="captureBtn">
                 <div class="capture-inner"></div>
             </div>
             <div class="flash-effect" id="flashEffect"></div>
         </div>
 
-        <!-- معلومات تحت الصورة - بدون فراغات -->
+        <!-- معلومات تحت الصورة -->
         <div class="info-panel">
             <div class="info-container">
                 <!-- العمود الأيسر - المعلومات -->
@@ -331,7 +354,7 @@
                     <div class="info-line" id="infoLongitude">Longitude: -7.636560</div>
                     <div class="info-line" id="infoElevation">Elevation: 10.44±7.73 m</div>
                     <div class="info-line" id="infoPrecision">Precision: 56.10 m</div>
-                    <div class="info-line" id="infoTime">Temps: 03-01-2026 14:42</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 14:49</div>
                 </div>
                 
                 <!-- العمود الأيمن - الشعار -->
@@ -385,18 +408,16 @@
 
         async function initializeApp() {
             try {
-                // عرض البيانات الأولى مباشرة
                 updateLocationInfo();
                 updateTimeInfo();
                 updateBatteryStatus();
                 
                 setInterval(updateTimeInfo, 60000);
-                setInterval(updateLocationInfo, 5000); // تحديث كل 5 ثواني
+                setInterval(updateLocationInfo, 5000);
                 setInterval(updateBatteryStatus, 60000);
                 
                 statusBar.textContent = "NoteCam ● جاهز ● 100%";
                 
-                // تحميل الصور الملتقطة من localStorage
                 loadSavedPhotos();
                 
             } catch (error) {
@@ -406,7 +427,6 @@
         }
 
         function updateLocationInfo() {
-            // اختيار موقع عشوائي من العينات
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
             
@@ -491,7 +511,6 @@
             try {
                 statusBar.textContent = "NoteCam ● جاري التقاط الصورة... ●";
                 
-                // تأثير الفلاش
                 triggerFlash();
                 
                 const canvas = document.createElement('canvas');
@@ -519,12 +538,10 @@
                     photoCount++;
                     photoCountElement.textContent = photoCount;
                     
-                    // حفظ في localStorage
                     savePhotoToStorage();
                     
                     statusBar.textContent = "NoteCam ● تم التقاط الصورة ●";
                     
-                    // تأثير الضغط على الزر
                     captureBtn.style.transform = 'translateX(-50%) scale(0.9)';
                     setTimeout(() => {
                         captureBtn.style.transform = 'translateX(-50%) scale(1)';
@@ -538,37 +555,58 @@
             }
         }
 
+        function drawLogoOnImage(context, x, y) {
+            context.save();
+            
+            context.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            context.shadowBlur = 2;
+            context.shadowOffsetX = 1;
+            context.shadowOffsetY = 1;
+            
+            context.font = '900 22px "Arial Black", "Segoe UI", "Verdana", sans-serif';
+            context.fillStyle = 'rgba(255, 0, 0, 0.85)';
+            context.textAlign = 'right';
+            context.textBaseline = 'bottom';
+            
+            const text = 'Powered by NoteCam';
+            context.fillText(text, x, y);
+            
+            context.shadowColor = 'rgba(255, 255, 255, 0.2)';
+            context.shadowBlur = 1;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+            context.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            context.fillText(text, x, y);
+            
+            context.restore();
+        }
+
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // خلفية المعلومات البيضاء الشفافة - بدون فراغات
             const lineHeight = 16;
-            const totalHeight = lineHeight * 5 + 10;
-            const startX = 0; // بداية من أقصى اليسار
-            const startY = height - totalHeight; // تبدأ من الأسفل مباشرة
+            const totalHeight = lineHeight * 5 + 12;
+            const boxWidth = 320;
+            const boxX = 20;
+            const boxY = height - totalHeight - 15;
             
-            // الخلفية البيضاء الشفافة تغطي عرض الصورة بالكامل
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(startX, startY, width, totalHeight);
+            context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            // معلومات الموقع باللون الأسود
             context.font = 'bold 12px "Courier New", monospace';
             context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            // كتابة المعلومات
-            context.fillText(infoLatitude.textContent, startX + 15, startY + 5);
-            context.fillText(infoLongitude.textContent, startX + 15, startY + 5 + lineHeight);
-            context.fillText(infoElevation.textContent, startX + 15, startY + 5 + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, startX + 15, startY + 5 + (lineHeight * 3));
-            context.fillText(infoTime.textContent, startX + 15, startY + 5 + (lineHeight * 4));
+            const startY = boxY + 6;
             
-            // الشعار باللون الأحمر في الجهة اليمنى
-            context.font = 'bold 14px "Arial", sans-serif';
-            context.fillStyle = '#ff0000';
-            context.textAlign = 'right';
-            context.fillText('Powered by NoteCam', width - 15, startY + totalHeight - 8);
+            context.fillText(infoLatitude.textContent, boxX + 8, startY);
+            context.fillText(infoLongitude.textContent, boxX + 8, startY + lineHeight);
+            context.fillText(infoElevation.textContent, boxX + 8, startY + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, boxX + 8, startY + (lineHeight * 3));
+            context.fillText(infoTime.textContent, boxX + 8, startY + (lineHeight * 4));
+            
+            drawLogoOnImage(context, width - 20, boxY + totalHeight - 8);
             
             context.restore();
         }
@@ -597,7 +635,6 @@
                 photoCount = photos.length;
                 photoCountElement.textContent = photoCount;
                 
-                // عرض الصور المحفوظة
                 photos.forEach((photo, index) => {
                     setTimeout(() => {
                         createGalleryItem(index);
@@ -612,17 +649,14 @@
             const galleryItem = document.createElement('div');
             galleryItem.className = 'gallery-item';
             
-            // صورة افتراضية
             const canvas = document.createElement('canvas');
             canvas.width = 100;
             canvas.height = 80;
             const ctx = canvas.getContext('2d');
             
-            // خلفية عشوائية
             ctx.fillStyle = `hsl(${Math.random() * 360}, 50%, 30%)`;
             ctx.fillRect(0, 0, 100, 80);
             
-            // إضافة نص
             ctx.fillStyle = 'white';
             ctx.font = '10px Arial';
             ctx.fillText(`صورة ${index + 1}`, 30, 40);
