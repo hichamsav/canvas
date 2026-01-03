@@ -86,7 +86,7 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة - بدون فراغات */
+        /* معلومات تحت الصورة - بدون أي فراغات */
         .info-panel {
             background: #000000;
             width: 100%;
@@ -94,16 +94,15 @@
             padding: 0;
         }
 
-        /* الحاوية الرئيسية - بدون هوامش */
+        /* الحاوية الرئيسية - تلامس الحواف مباشرة */
         .info-container {
             display: flex;
-            height: 100px;
+            height: 95px;
             background: rgba(255, 255, 255, 0.5);
-            margin: 0; /* بدون هوامش */
-            border-radius: 0; /* بدون زوايا دائرية */
             padding: 0;
             position: relative;
             overflow: hidden;
+            width: 100%; /* تشغل العرض كاملاً */
         }
 
         /* العمود الأيسر - المعلومات */
@@ -112,20 +111,19 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 10px; /* أقل حشو ممكن */
+            padding-left: 8px; /* أقل حشو ممكن */
             height: 100%;
-            min-width: 0; /* السماح بالتقلص */
         }
 
         .info-line {
-            margin: 0.3px 0; /* أقل مسافة ممكنة */
+            margin: 0.2px 0; /* أقل مسافة ممكنة بين الأسطر */
             font-size: 11px;
-            line-height: 1.1;
+            line-height: 1.05; /* تباعد أقل */
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            letter-spacing: 0.2px;
-            white-space: nowrap; /* منع التفاف النص */
+            letter-spacing: 0.1px;
+            white-space: nowrap;
         }
 
         /* العمود الأيمن - الشعار */
@@ -133,26 +131,25 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 150px; /* عرض ثابت صغير */
+            width: 140px; /* عرض مضغوط */
             height: 100%;
             position: relative;
-            padding: 0 5px;
         }
 
         .logo-text {
-            font-size: 14px;
+            font-size: 13px; /* خط أصغر */
             color: rgba(255, 0, 0, 0.8);
             font-family: 'Arial Black', sans-serif;
             font-weight: 900;
             text-align: center;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.1px;
             line-height: 1;
             text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
             text-transform: uppercase;
             background: none;
             padding: 0;
             margin: 0;
-            white-space: nowrap; /* منع التفاف الشعار */
+            white-space: nowrap;
         }
 
         /* عناصر التحكم */
@@ -281,27 +278,26 @@
             .info-container {
                 flex-direction: column;
                 height: auto;
-                min-height: 105px;
+                min-height: 90px;
             }
             
             .info-column {
-                padding: 8px 10px;
+                padding: 6px 8px;
                 height: auto;
-                min-width: auto;
             }
             
             .logo-column {
                 width: 100%;
-                height: 35px;
-                padding: 3px;
+                height: 30px;
             }
             
             .logo-text {
-                font-size: 12px;
+                font-size: 11px;
             }
             
             .info-line {
                 font-size: 10px;
+                margin: 0.1px 0;
             }
             
             .btn {
@@ -329,7 +325,7 @@
             }
             
             .logo-text {
-                font-size: 11px;
+                font-size: 10px;
             }
             
             .gallery-grid {
@@ -362,7 +358,7 @@
                     <div class="info-line" id="infoLongitude">Longitude: -7.636560</div>
                     <div class="info-line" id="infoElevation">Elevation: 10.44±7.73 m</div>
                     <div class="info-line" id="infoPrecision">Precision: 56.10 m</div>
-                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:12</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:19</div>
                 </div>
                 
                 <!-- العمود الأيمن - الشعار -->
@@ -571,7 +567,7 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 18px "Arial Black", sans-serif';
+            context.font = '900 16px "Arial Black", sans-serif';
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
@@ -592,30 +588,30 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // أبعاد مضغوطة جداً - بدون فراغات
-            const lineHeight = 13;
-            const totalHeight = lineHeight * 5 + 6;
-            const boxWidth = 270;
-            const boxX = 5; // من أقصى اليسار مباشرة
-            const boxY = height - totalHeight - 5; // من أقصى الأسفل مباشرة
+            // أبعاد مضغوطة جداً - تلامس الحواف مباشرة
+            const lineHeight = 12;
+            const totalHeight = lineHeight * 5 + 4;
+            const boxWidth = 260;
+            const boxX = 2; // من أقصى اليسار مباشرة (2px فقط)
+            const boxY = height - totalHeight - 2; // من أقصى الأسفل مباشرة (2px فقط)
             
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            context.font = 'bold 11px "Courier New", monospace';
+            context.font = 'bold 10px "Courier New", monospace';
             context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            const startY = boxY + 3;
+            const startY = boxY + 2;
             
-            context.fillText(infoLatitude.textContent, boxX + 5, startY);
-            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
-            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
-            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
+            context.fillText(infoLatitude.textContent, boxX + 3, startY);
+            context.fillText(infoLongitude.textContent, boxX + 3, startY + lineHeight);
+            context.fillText(infoElevation.textContent, boxX + 3, startY + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, boxX + 3, startY + (lineHeight * 3));
+            context.fillText(infoTime.textContent, boxX + 3, startY + (lineHeight * 4));
             
-            drawLogoOnImage(context, width - 5, boxY + totalHeight - 3);
+            drawLogoOnImage(context, width - 2, boxY + totalHeight - 2);
             
             context.restore();
         }
