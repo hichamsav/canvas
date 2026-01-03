@@ -80,24 +80,31 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة - أسود على أبيض شفاف */
+        /* معلومات تحت الصورة */
         .info-panel {
             padding: 0;
             background: #000000;
             border-top: 1px solid #333333;
             width: 100%;
+            position: relative;
+            min-height: 170px;
         }
 
+        /* الحاوية الرئيسية */
         .info-container {
             display: flex;
             justify-content: space-between;
-            background: rgba(255, 255, 255, 0.5); /* أبيض شفاف 50% */
+            padding: 10px 0;
+            height: 100%;
         }
 
-        /* العمود الأيسر - المعلومات */
+        /* العمود الأيسر - المعلومات بخلفية بيضاء شفافة */
         .info-column {
             flex: 1;
+            background: rgba(255, 255, 255, 0.5); /* أبيض شفاف 50% */
             padding: 12px 15px;
+            border-radius: 0 5px 5px 0;
+            margin-right: 10px;
         }
 
         .info-line {
@@ -109,24 +116,24 @@
             font-weight: bold;
         }
 
-        /* العمود الأيمن - الشعار باللون الأحمر */
+        /* العمود الأيمن - الشعار بدون خلفية */
         .logo-column {
             display: flex;
-            align-items: center;
+            align-items: flex-start; /* للأعلى */
             justify-content: center;
-            padding: 12px 15px;
+            padding-top: 5px; /* رفع للأعلى */
             min-width: 180px;
-            background: rgba(255, 255, 255, 0.5); /* نفس الخلفية الشفافة */
         }
 
         .logo-text {
-            font-size: 15px; /* خط كبير */
+            font-size: 15px;
             color: #ff0000; /* أحمر بالضبط */
             font-family: 'Arial Black', 'Arial Bold', Gadget, sans-serif;
             font-weight: 900;
             text-align: center;
             letter-spacing: 0.5px;
             line-height: 1.2;
+            margin-top: 5px; /* رفع للأعلى */
         }
 
         /* بقية العناصر */
@@ -214,8 +221,14 @@
                 flex-direction: column;
             }
             
+            .info-column {
+                margin-right: 0;
+                margin-bottom: 10px;
+                border-radius: 0 0 5px 5px;
+            }
+            
             .logo-column {
-                border-top: 1px solid rgba(0, 0, 0, 0.2);
+                padding-top: 10px;
                 min-width: auto;
             }
         }
@@ -234,19 +247,19 @@
             </div>
         </div>
 
-        <!-- معلومات تحت الصورة مع التنسيق الجديد -->
+        <!-- معلومات تحت الصورة -->
         <div class="info-panel">
             <div class="info-container">
-                <!-- العمود الأيسر - المعلومات باللون الأسود -->
+                <!-- العمود الأيسر - المعلومات بخلفية بيضاء -->
                 <div class="info-column">
-                    <div class="info-line" id="infoLatitude">Latitude: 33.603058</div>
-                    <div class="info-line" id="infoLongitude">Longitude: -7.63656</div>
-                    <div class="info-line" id="infoElevation">Élévation: 10.44±7.73 m</div>
-                    <div class="info-line" id="infoPrecision">Précision: 56.1 m</div>
-                    <div class="info-line" id="infoTime">Temps: 31-12-2025 17:53</div>
+                    <div class="info-line" id="infoLatitude">Latitude: 33.534277</div>
+                    <div class="info-line" id="infoLongitude">Longitude: -7.582820</div>
+                    <div class="info-line" id="infoElevation">Élévation: 9.60±7.75 m</div>
+                    <div class="info-line" id="infoPrecision">Précision: 119.0 m</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 14:22</div>
                 </div>
                 
-                <!-- العمود الأيمن - الشعار باللون الأحمر -->
+                <!-- العمود الأيمن - الشعار بدون خلفية -->
                 <div class="logo-column">
                     <div class="logo-text">Powered by NoteCam</div>
                 </div>
@@ -317,10 +330,10 @@
                     },
                     (error) => {
                         userLocation = {
-                            latitude: 33.603058,
-                            longitude: -7.63656,
-                            accuracy: 56.1,
-                            altitude: 10.44
+                            latitude: 33.534277,
+                            longitude: -7.582820,
+                            accuracy: 119.0,
+                            altitude: 9.60
                         };
                         resolve();
                     },
@@ -339,12 +352,12 @@
                 infoLongitude.textContent = `Longitude: ${userLocation.longitude.toFixed(6)}`;
                 
                 const elevationVariation = (Math.random() * 2 - 1).toFixed(2);
-                const baseElevation = userLocation.altitude || 10.44;
+                const baseElevation = userLocation.altitude || 9.60;
                 const currentElevation = (parseFloat(baseElevation) + parseFloat(elevationVariation)).toFixed(2);
-                const elevationRange = (Math.random() * 3 + 7).toFixed(2); // بين 7 و 10
+                const elevationRange = (Math.random() * 3 + 7).toFixed(2);
                 
                 infoElevation.textContent = `Élévation: ${currentElevation}±${elevationRange} m`;
-                infoPrecision.textContent = `Précision: ${userLocation.accuracy ? userLocation.accuracy.toFixed(1) : 56.1} m`;
+                infoPrecision.textContent = `Précision: ${userLocation.accuracy ? userLocation.accuracy.toFixed(1) : 119.0} m`;
             }
         }
 
@@ -446,37 +459,42 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // خلفية بيضاء شفافة 50% للمعلومات
+            // فقط خلفية لمعلومات الموقع (ليس للشعار)
+            const infoBoxHeight = 120;
+            const infoBoxY = height - infoBoxHeight - 10;
+            
+            // خلفية بيضاء شفافة لمعلومات الموقع فقط
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(0, height - 130, width, 130);
+            context.fillRect(20, infoBoxY, 300, infoBoxHeight);
             
             // معلومات الموقع باللون الأسود
             context.font = 'bold 13px "Courier New", monospace';
-            context.fillStyle = '#000000'; // أسود بالضبط
+            context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            const infoY = height - 120;
             const lineHeight = 20;
+            const startY = infoBoxY + 10;
             
-            const latText = `Latitude: ${userLocation ? userLocation.latitude.toFixed(6) : '33.603058'}`;
-            const lngText = `Longitude: ${userLocation ? userLocation.longitude.toFixed(6) : '-7.63656'}`;
+            const latText = `Latitude: ${userLocation ? userLocation.latitude.toFixed(6) : '33.534277'}`;
+            const lngText = `Longitude: ${userLocation ? userLocation.longitude.toFixed(6) : '-7.582820'}`;
             const elevationText = infoElevation.textContent;
             const precisionText = infoPrecision.textContent;
             const timeText = infoTime.textContent;
             
-            // كتابة المعلومات
-            context.fillText(latText, 20, infoY);
-            context.fillText(lngText, 20, infoY + lineHeight);
-            context.fillText(elevationText, 20, infoY + (lineHeight * 2));
-            context.fillText(precisionText, 20, infoY + (lineHeight * 3));
-            context.fillText(timeText, 20, infoY + (lineHeight * 4));
+            // كتابة معلومات الموقع
+            context.fillText(latText, 30, startY);
+            context.fillText(lngText, 30, startY + lineHeight);
+            context.fillText(elevationText, 30, startY + (lineHeight * 2));
+            context.fillText(precisionText, 30, startY + (lineHeight * 3));
+            context.fillText(timeText, 30, startY + (lineHeight * 4));
             
-            // الشعار باللون الأحمر - سطر واحد فقط
+            // الشعار باللون الأحمر - بدون خلفية
             context.font = 'bold 15px "Arial Black", Gadget, sans-serif';
-            context.fillStyle = '#ff0000'; // أحمر بالضبط
+            context.fillStyle = '#ff0000';
             context.textAlign = 'right';
-            context.fillText('Powered by NoteCam', width - 20, infoY + (lineHeight * 5) + 5);
+            // نرفع الشعار للأعلى قليلاً
+            context.fillText('Powered by NoteCam', width - 30, startY + 5);
             
             context.restore();
         }
