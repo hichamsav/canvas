@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>نظام NoteCam للمشرف والموظفين</title>
+    <title>Système NoteCam - Superviseur et Employés</title>
     <style>
-        /* الأنماط الأساسية */
+        /* Styles de base */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +24,7 @@
             overflow-x: hidden;
         }
 
-        /* حاوية التطبيق */
+        /* Conteneur de l'application */
         .app-container {
             width: 100%;
             max-width: 900px;
@@ -34,7 +34,7 @@
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
-        /* شريط الحالة */
+        /* Barre d'état */
         .status-bar {
             background: #222222;
             padding: 10px 15px;
@@ -45,7 +45,7 @@
             width: 100%;
         }
 
-        /* أنماط تسجيل الدخول */
+        /* Styles de connexion */
         .login-container {
             background: #222222;
             padding: 30px;
@@ -83,7 +83,7 @@
             margin-top: 10px;
         }
 
-        /* أنماط لوحة التحكم */
+        /* Panneaux */
         .admin-panel, .employee-panel, .reports-panel {
             display: none;
         }
@@ -117,7 +117,7 @@
             background: #1a5fb4;
         }
 
-        /* أقسام لوحة التحكم */
+        /* Sections du tableau de bord */
         .dashboard-section {
             padding: 20px;
             margin: 10px;
@@ -133,7 +133,7 @@
             padding-bottom: 5px;
         }
 
-        /* أنماط إدارة الموظفين */
+        /* Gestion des employés */
         .employee-form {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -172,7 +172,7 @@
             border-left: 4px solid #1a5fb4;
         }
 
-        /* أنماط الكاميرا (بنفس تصميم NoteCam) */
+        /* Styles de la caméra */
         .camera-container {
             width: 100%;
             height: 400px;
@@ -214,7 +214,7 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات الموقع (بنفس تصميم NoteCam) */
+        /* Information de localisation */
         .info-panel {
             background: #000000;
             width: 100%;
@@ -289,7 +289,7 @@
             white-space: nowrap;
         }
 
-        /* منطقة الموظف والإدخال */
+        /* Zone de l'employé */
         .employee-area {
             background: #222222;
             padding: 15px;
@@ -303,6 +303,31 @@
             padding: 10px;
             background: #333333;
             border-radius: 5px;
+        }
+
+        .area-selection {
+            margin: 15px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-radius: 5px;
+        }
+
+        .area-selection label {
+            display: block;
+            margin-bottom: 10px;
+            color: #1a5fb4;
+            font-weight: bold;
+        }
+
+        .area-select {
+            width: 100%;
+            padding: 12px;
+            background: #333333;
+            border: 1px solid #444444;
+            border-radius: 5px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
         }
 
         .number-input-container {
@@ -326,7 +351,7 @@
             font-size: 16px;
         }
 
-        /* عناصر التحكم */
+        /* Contrôles */
         .controls {
             padding: 15px;
             display: flex;
@@ -354,7 +379,7 @@
             border-color: #1a5fb4;
         }
 
-        /* المعرض */
+        /* Galerie */
         .gallery {
             width: 100%;
             padding: 15px;
@@ -409,7 +434,7 @@
             font-weight: bold;
         }
 
-        /* صفحة عرض التقارير الكاملة */
+        /* Page des rapports complets */
         .reports-panel {
             background: #111111;
             min-height: 100vh;
@@ -537,7 +562,7 @@
             margin-bottom: 10px;
         }
 
-        /* التقارير المصغرة */
+        /* Rapports miniatures */
         .reports-list {
             margin-top: 20px;
         }
@@ -604,7 +629,7 @@
             display: inline-block;
         }
 
-        /* زر تحميل الكل */
+        /* Bouton de téléchargement complet */
         .download-all-btn {
             background: #2ea043;
             color: white;
@@ -628,11 +653,52 @@
             box-shadow: 0 4px 12px rgba(46, 160, 67, 0.3);
         }
 
-        .download-all-btn i {
-            font-size: 16px;
+        /* Liste des zones assignées */
+        .areas-list {
+            margin-top: 15px;
+            padding: 10px;
+            background: #2a2a2a;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
         }
 
-        /* تأثيرات */
+        .area-item {
+            padding: 8px;
+            margin: 5px 0;
+            background: #333333;
+            border-radius: 3px;
+            border-left: 3px solid #1a5fb4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .area-item.active {
+            border-left-color: #2ea043;
+            background: #3a3a3a;
+        }
+
+        .area-name {
+            font-weight: bold;
+        }
+
+        .area-code {
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+
+        .select-area-btn {
+            padding: 4px 8px;
+            background: #1a5fb4;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+
+        /* Effets */
         .flash-effect {
             position: absolute;
             top: 0;
@@ -666,7 +732,7 @@
             opacity: 0.3;
         }
 
-        /* تعديلات للجوال */
+        /* Responsive */
         @media (max-width: 768px) {
             .employee-form {
                 grid-template-columns: 1fr;
@@ -723,98 +789,117 @@
             }
         }
     </style>
-    <!-- أيقونات Font Awesome -->
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- شريط الحالة -->
+        <!-- Barre d'état -->
         <div class="status-bar" id="statusBar">
-            نظام NoteCam ● جاهز ●
+            Système NoteCam ● Prêt ●
         </div>
 
-        <!-- صفحة تسجيل الدخول -->
+        <!-- Page de connexion -->
         <div class="login-container" id="loginPage">
-            <h2>تسجيل الدخول</h2>
-            <input type="text" id="username" class="login-input" placeholder="اسم المستخدم">
-            <input type="password" id="password" class="login-input" placeholder="كلمة المرور">
-            <button class="login-btn" onclick="login()">تسجيل الدخول</button>
+            <h2>Connexion</h2>
+            <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur">
+            <input type="password" id="password" class="login-input" placeholder="Mot de passe">
+            <button class="login-btn" onclick="login()">Se connecter</button>
             
-            <!-- معلومات تسجيل الدخول الافتراضية -->
+            <!-- Informations de connexion par défaut -->
             <div style="margin-top: 20px; font-size: 12px; color: #888;">
-                <p>للتجربة:</p>
-                <p>المشرف: admin / admin123</p>
-                <p>الموظف: user1 / pass123</p>
+                <p>Pour tester :</p>
+                <p>Superviseur : admin / admin123</p>
+                <p>Employé : user1 / pass123</p>
             </div>
         </div>
 
-        <!-- لوحة تحكم المشرف -->
+        <!-- Panneau du superviseur -->
         <div class="admin-panel" id="adminPanel">
             <div class="panel-header">
-                <div class="panel-title">لوحة تحكم المشرف</div>
+                <div class="panel-title">Panneau de Contrôle du Superviseur</div>
                 <div>
-                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                    <button class="logout-btn" onclick="logout()">Déconnexion</button>
                 </div>
             </div>
 
-            <!-- إدارة الموظفين -->
+            <!-- Gestion des employés -->
             <div class="dashboard-section">
-                <h3>إدارة الموظفين</h3>
+                <h3>Gestion des Employés</h3>
                 <div class="employee-form">
-                    <input type="text" id="empUsername" class="form-input" placeholder="اسم المستخدم">
-                    <input type="password" id="empPassword" class="form-input" placeholder="كلمة المرور">
-                    <input type="text" id="empName" class="form-input" placeholder="اسم الموظف">
-                    <button class="action-btn" onclick="addEmployee()">إضافة موظف</button>
+                    <input type="text" id="empUsername" class="form-input" placeholder="Nom d'utilisateur">
+                    <input type="password" id="empPassword" class="form-input" placeholder="Mot de passe">
+                    <input type="text" id="empName" class="form-input" placeholder="Nom de l'employé">
+                    <button class="action-btn" onclick="addEmployee()">Ajouter un employé</button>
                 </div>
                 <div class="employee-list" id="employeesList">
-                    <!-- قائمة الموظفين ستظهر هنا -->
+                    <!-- Liste des employés apparaîtra ici -->
                 </div>
             </div>
 
-            <!-- تعيين المناطق -->
+            <!-- Attribution des zones géographiques -->
             <div class="dashboard-section">
-                <h3>تعيين المناطق الجغرافية</h3>
+                <h3>Attribution des Zones Géographiques</h3>
                 <div class="employee-form">
                     <select id="employeeSelect" class="form-input">
-                        <option value="">اختر الموظف</option>
+                        <option value="">Sélectionner un employé</option>
                     </select>
-                    <input type="text" id="areaName" class="form-input" placeholder="اسم المنطقة">
-                    <input type="text" id="areaCode" class="form-input" placeholder="كود المنطقة">
-                    <button class="action-btn" onclick="assignArea()">تعيين منطقة</button>
+                    <input type="text" id="areaName" class="form-input" placeholder="Nom de la zone">
+                    <input type="text" id="areaCode" class="form-input" placeholder="Code de la zone">
+                    <button class="action-btn" onclick="assignArea()">Attribuer la zone</button>
+                </div>
+                
+                <!-- Liste des zones attribuées pour chaque employé -->
+                <div class="areas-list" id="assignedAreasList">
+                    <!-- Liste des zones attribuées -->
                 </div>
             </div>
 
-            <!-- التقارير الواردة -->
+            <!-- Rapports reçus -->
             <div class="dashboard-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3 style="margin: 0;">التقارير الواردة</h3>
-                    <button class="view-report-btn" onclick="viewAllReports()">عرض جميع التقارير</button>
+                    <h3 style="margin: 0;">Rapports Reçus</h3>
+                    <button class="view-report-btn" onclick="viewAllReports()">Voir tous les rapports</button>
                 </div>
                 <div class="reports-list" id="reportsListMini">
-                    <!-- التقارير المصغرة ستظهر هنا -->
+                    <!-- Rapports miniatures apparaîtront ici -->
                 </div>
             </div>
         </div>
 
-        <!-- لوحة الموظف -->
+        <!-- Panneau de l'employé -->
         <div class="employee-panel" id="employeePanel">
             <div class="panel-header">
-                <div class="panel-title" id="employeeName">لوحة الموظف</div>
-                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                <div class="panel-title" id="employeeName">Panneau de l'Employé</div>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
             </div>
 
-            <!-- معلومات المنطقة المخصصة -->
+            <!-- Information sur les zones assignées -->
             <div class="employee-area">
-                <div class="area-info" id="assignedAreaInfo">
-                    <h4>المنطقة المخصصة: <span id="assignedAreaName">لا توجد منطقة مخصصة</span></h4>
-                    <p>الكود: <span id="areaCodeDisplay">-</span></p>
+                <div class="area-selection">
+                    <label>Sélectionnez la zone de travail :</label>
+                    <select class="area-select" id="areaSelect">
+                        <option value="">Choisissez une zone</option>
+                    </select>
+                    
+                    <!-- Information de la zone sélectionnée -->
+                    <div class="area-info" id="selectedAreaInfo" style="display: none;">
+                        <h4>Zone sélectionnée : <span id="selectedAreaName">Aucune zone</span></h4>
+                        <p>Code : <span id="selectedAreaCode">-</span></p>
+                        <p>Assignée le : <span id="areaAssignedDate">-</span></p>
+                    </div>
                 </div>
 
-                <!-- إدخال الرقم من 0-8 -->
+                <!-- Liste des zones disponibles -->
+                <div class="areas-list" id="employeeAreasList">
+                    <!-- Zones de l'employé -->
+                </div>
+
+                <!-- Saisie du numéro de 0-8 -->
                 <div class="number-input-container">
-                    <label class="number-label">أدخل رقم من 0 إلى 8:</label>
+                    <label class="number-label">Entrez un nombre de 0 à 8 :</label>
                     <select class="number-select" id="numberInput">
-                        <option value="">اختر رقم</option>
+                        <option value="">Choisissez un nombre</option>
                         <option value="0">0</option>
                         <option value="1">1</option>
                         <option value="2">2</option>
@@ -827,7 +912,7 @@
                     </select>
                 </div>
 
-                <!-- الكاميرا -->
+                <!-- Caméra -->
                 <div class="camera-container">
                     <video id="cameraVideo" autoplay playsinline></video>
                     <div class="camera-grid"></div>
@@ -837,88 +922,89 @@
                     <div class="flash-effect" id="flashEffect"></div>
                 </div>
 
-                <!-- معلومات الموقع -->
+                <!-- Information de localisation -->
                 <div class="info-panel">
                     <div class="info-container">
                         <div class="info-background"></div>
                         <div class="info-column">
-                            <div class="info-line" id="infoLatitude">Latitude: 33.603016</div>
-                            <div class="info-line" id="infoLongitude">Longitude: -7.636873</div>
-                            <div class="info-line" id="infoElevation">Elevation: 9.34±11.02 m</div>
-                            <div class="info-line" id="infoPrecision">Precision: 13.28 m</div>
-                            <div class="info-line" id="infoTime">Temps: 03-01-2026 15:44</div>
+                            <div class="info-line" id="infoLatitude">Latitude : 33.603016</div>
+                            <div class="info-line" id="infoLongitude">Longitude : -7.636873</div>
+                            <div class="info-line" id="infoElevation">Altitude : 9.34±11.02 m</div>
+                            <div class="info-line" id="infoPrecision">Précision : 13.28 m</div>
+                            <div class="info-line" id="infoTime">Temps : 03-01-2026 15:44</div>
                         </div>
                         <div class="logo-column">
-                            <div class="logo-text">Powered by NoteCam</div>
+                            <div class="logo-text">Propulsé par NoteCam</div>
                         </div>
                     </div>
                 </div>
 
-                <!-- عناصر التحكم -->
+                <!-- Contrôles -->
                 <div class="controls">
-                    <button id="toggleCamera" class="btn btn-primary">تشغيل الكاميرا</button>
-                    <button id="downloadBtn" class="btn" disabled>تحميل الصورة</button>
-                    <button id="sendReport" class="btn btn-primary" onclick="sendReport()">إرسال التقرير</button>
-                    <button id="clearGallery" class="btn">مسح المعرض</button>
+                    <button id="toggleCamera" class="btn btn-primary">Activer la caméra</button>
+                    <button id="downloadBtn" class="btn" disabled>Télécharger l'image</button>
+                    <button id="sendReport" class="btn btn-primary" onclick="sendReport()">Envoyer le rapport</button>
+                    <button id="clearGallery" class="btn">Effacer la galerie</button>
                 </div>
 
-                <!-- معرض الصور -->
+                <!-- Galerie d'images -->
                 <div class="gallery">
-                    <div class="gallery-title">الصور الملتقطة (<span id="photoCount">0</span>/5)</div>
+                    <div class="gallery-title">Images capturées (<span id="photoCount">0</span>/5)</div>
                     <div id="galleryContainer" class="gallery-grid"></div>
                 </div>
             </div>
         </div>
 
-        <!-- صفحة عرض التقارير الكاملة -->
+        <!-- Page des rapports complets -->
         <div class="reports-panel" id="reportsPanel">
             <div class="reports-header">
-                <div class="panel-title">جميع التقارير الواردة</div>
+                <div class="panel-title">Tous les Rapports Reçus</div>
                 <div>
-                    <button class="back-btn" onclick="backToAdminPanel()">رجوع</button>
-                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                    <button class="back-btn" onclick="backToAdminPanel()">Retour</button>
+                    <button class="logout-btn" onclick="logout()">Déconnexion</button>
                 </div>
             </div>
 
             <div class="report-details-container" id="reportDetailsContainer">
-                <!-- التقارير الكاملة ستظهر هنا -->
+                <!-- Rapports complets apparaîtront ici -->
             </div>
         </div>
     </div>
 
     <script>
-        // البيانات المخزنة
+        // Données stockées
         let usersData = {
             admin: {
                 password: "admin123",
                 role: "admin",
-                name: "المشرف الرئيسي"
+                name: "Superviseur Principal"
             },
             user1: {
                 password: "pass123",
                 role: "employee",
-                name: "الموظف الأول",
+                name: "Employé Un",
                 assignedAreas: []
             }
         };
 
         let employees = [
-            {username: "user1", name: "الموظف الأول"}
+            {username: "user1", name: "Employé Un"}
         ];
 
         let assignedAreas = [];
 
         let reports = [];
 
-        // متغيرات النظام
+        // Variables système
         let currentUser = null;
         let videoStream = null;
         let isCameraActive = false;
         let currentImageData = null;
         let photoCount = 0;
         let capturedImages = [];
+        let selectedArea = null;
 
-        // عناصر DOM
+        // Éléments DOM
         const statusBar = document.getElementById('statusBar');
         const loginPage = document.getElementById('loginPage');
         const adminPanel = document.getElementById('adminPanel');
@@ -929,12 +1015,16 @@
         const reportsListMini = document.getElementById('reportsListMini');
         const reportDetailsContainer = document.getElementById('reportDetailsContainer');
         const employeeName = document.getElementById('employeeName');
-        const assignedAreaName = document.getElementById('assignedAreaName');
-        const areaCodeDisplay = document.getElementById('areaCodeDisplay');
-        const assignedAreaInfo = document.getElementById('assignedAreaInfo');
+        const selectedAreaInfo = document.getElementById('selectedAreaInfo');
+        const selectedAreaName = document.getElementById('selectedAreaName');
+        const selectedAreaCode = document.getElementById('selectedAreaCode');
+        const areaAssignedDate = document.getElementById('areaAssignedDate');
         const numberInput = document.getElementById('numberInput');
+        const areaSelect = document.getElementById('areaSelect');
+        const employeeAreasList = document.getElementById('employeeAreasList');
+        const assignedAreasList = document.getElementById('assignedAreasList');
 
-        // عناصر الكاميرا
+        // Éléments de caméra
         const videoElement = document.getElementById('cameraVideo');
         const captureBtn = document.getElementById('captureBtn');
         const toggleCameraBtn = document.getElementById('toggleCamera');
@@ -944,36 +1034,36 @@
         const galleryContainer = document.getElementById('galleryContainer');
         const photoCountElement = document.getElementById('photoCount');
 
-        // عناصر المعلومات الجغرافية
+        // Éléments d'information géographique
         const infoLatitude = document.getElementById('infoLatitude');
         const infoLongitude = document.getElementById('infoLongitude');
         const infoElevation = document.getElementById('infoElevation');
         const infoPrecision = document.getElementById('infoPrecision');
         const infoTime = document.getElementById('infoTime');
 
-        // البيانات الجغرافية
+        // Données de localisation
         const sampleLocations = [
             {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
             {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
             {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
         ];
 
-        // ========== دالة تحويل التاريخ إلى الفرنسية ==========
+        // ========== Fonction de formatage de date en français ==========
         function formatDateFrench(dateString) {
             const date = new Date(dateString);
             
-            // الأرقام الفرنسية (١٢٣٤٥٦٧٨٩٠)
+            // Nombres français (٠١٢٣٤٥٦٧٨٩)
             const frenchNumbers = {
                 '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
                 '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
             };
             
-            // تحويل الأرقام في السلسلة إلى فرنسية
+            // Convertir les nombres dans la chaîne en français
             function convertToFrenchNumbers(str) {
                 return str.replace(/\d/g, char => frenchNumbers[char] || char);
             }
             
-            // تنسيق التاريخ
+            // Formater la date
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
@@ -981,30 +1071,51 @@
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
             
-            // إنشاء التاريخ بالصيغة الفرنسية
+            // Créer la date en format français
             const dateStr = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
             
-            // تحويل الأرقام إلى فرنسية
+            // Convertir les nombres en français
             return convertToFrenchNumbers(dateStr);
         }
 
-        // ========== دالة تحميل جميع صور التقرير ==========
+        // ========== Fonction de formatage de date simple ==========
+        function formatSimpleDate(dateString) {
+            const date = new Date(dateString);
+            
+            // Nombres français (٠١٢٣٤٥٦٧٨٩)
+            const frenchNumbers = {
+                '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
+                '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
+            };
+            
+            // Convertir les nombres dans la chaîne en français
+            function convertToFrenchNumbers(str) {
+                return str.replace(/\d/g, char => frenchNumbers[char] || char);
+            }
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            
+            const dateStr = `${day}/${month}/${year}`;
+            return convertToFrenchNumbers(dateStr);
+        }
+
+        // ========== Téléchargement de toutes les images du rapport ==========
         function downloadAllReportImages(reportId) {
             const report = reports.find(r => r.id === reportId);
             
             if (!report || !report.images || report.images.length === 0) {
-                alert("لا توجد صور في هذا التقرير للتحميل");
+                alert("Aucune image dans ce rapport à télécharger");
                 return;
             }
             
-            updateStatusBar(`جاري تحميل ${report.images.length} صورة...`);
+            updateStatusBar(`Téléchargement de ${report.images.length} images...`);
             
-            // إنشاء مجلد مضغوط افتراضي
-            let zipCount = 0;
+            let downloadCount = 0;
             const totalImages = report.images.length;
             
-            // تحميل كل صورة على حدة (في المتصفح لا يمكن إنشاء zip حقيقي بدون مكتبة)
-            // سنقوم بتحميل كل صورة على حدة مع تسمية مناسبة
+            // Télécharger chaque image individuellement
             report.images.forEach((img, index) => {
                 setTimeout(() => {
                     const link = document.createElement('a');
@@ -1014,67 +1125,66 @@
                     link.click();
                     document.body.removeChild(link);
                     
-                    zipCount++;
+                    downloadCount++;
                     
-                    if (zipCount === totalImages) {
-                        updateStatusBar(`تم تحميل ${totalImages} صورة`);
-                        alert(`تم تحميل ${totalImages} صورة من تقرير ${report.employeeName}`);
+                    if (downloadCount === totalImages) {
+                        updateStatusBar(`${totalImages} images téléchargées`);
+                        alert(`${totalImages} images du rapport ${report.employeeName} ont été téléchargées`);
                     }
-                }, index * 500); // تأخير 500 مللي بين كل تحميل
+                }, index * 500);
             });
         }
 
-        // ========== دالة تحميل التقرير الكامل (PDF افتراضي) ==========
+        // ========== Téléchargement du rapport complet ==========
         function downloadFullReport(reportId) {
             const report = reports.find(r => r.id === reportId);
             
             if (!report) {
-                alert("التقرير غير موجود");
+                alert("Rapport non trouvé");
                 return;
             }
             
-            updateStatusBar("جاري إنشاء تقرير PDF...");
+            updateStatusBar("Création du rapport PDF...");
             
-            // في المتصفح، يمكننا إنشاء صفحة HTML ثم تحويلها لـ PDF
-            // هنا سنقوم بإنشاء محتوى النص للتنزيل كملف نصي
+            // Contenu du rapport
             const reportContent = `
 ===========================================
-تقرير NoteCam - ${report.employeeName}
+Rapport NoteCam - ${report.employeeName}
 ===========================================
-اسم الموظف: ${report.employeeName}
-اسم المستخدم: ${report.employee}
-الرقم المدخل: ${report.number}
-المنطقة: ${report.area || 'غير محدد'}
-كود المنطقة: ${report.areaCode || 'غير محدد'}
-تاريخ الإرسال: ${formatDateFrench(report.date)}
-خط العرض: ${report.location.lat.toFixed(6)}
-خط الطول: ${report.location.lng.toFixed(6)}
-الارتفاع: ${report.location.elev} م
-الدقة: ${report.location.prec.toFixed(2)} م
-عدد الصور: ${report.images.length}
+Nom de l'employé : ${report.employeeName}
+Nom d'utilisateur : ${report.employee}
+Nombre saisi : ${report.number}
+Zone : ${report.area || 'Non spécifiée'}
+Code de zone : ${report.areaCode || 'Non spécifié'}
+Date d'envoi : ${formatDateFrench(report.date)}
+Latitude : ${report.location.lat.toFixed(6)}
+Longitude : ${report.location.lng.toFixed(6)}
+Altitude : ${report.location.elev} m
+Précision : ${report.location.prec.toFixed(2)} m
+Nombre d'images : ${report.images.length}
 ===========================================
-معلومات الصور:
-${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
+Informations des images :
+${report.images.map((img, idx) => `Image ${idx + 1} : ${img.url}`).join('\n')}
 ===========================================
-تم إنشاء التقرير بواسطة نظام NoteCam
-تاريخ الإنشاء: ${formatDateFrench(new Date().toISOString())}
+Rapport généré par le système NoteCam
+Date de création : ${formatDateFrench(new Date().toISOString())}
             `;
             
-            // إنشاء ملف للتنزيل
+            // Créer le fichier à télécharger
             const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
             link.href = url;
-            link.download = `NoteCam_Report_${report.employeeName}_${report.date}.txt`;
+            link.download = `Rapport_NoteCam_${report.employeeName}_${report.date}.txt`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
             
-            updateStatusBar("تم إنشاء تقرير النص");
+            updateStatusBar("Rapport texte créé");
         }
 
-        // ========== دالة إنشاء زر تحميل الكل ==========
+        // ========== Création du bouton de téléchargement complet ==========
         function createDownloadAllButton(reportId) {
             const container = document.createElement('div');
             container.style.display = 'flex';
@@ -1083,17 +1193,17 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             container.style.marginTop = '20px';
             container.style.flexWrap = 'wrap';
             
-            // زر تحميل جميع الصور
+            // Bouton de téléchargement de toutes les images
             const downloadImagesBtn = document.createElement('button');
             downloadImagesBtn.className = 'download-all-btn';
-            downloadImagesBtn.innerHTML = '<i class="fas fa-images"></i> تحميل جميع الصور';
+            downloadImagesBtn.innerHTML = '<i class="fas fa-images"></i> Télécharger toutes les images';
             downloadImagesBtn.onclick = () => downloadAllReportImages(reportId);
             
-            // زر تحميل التقرير الكامل
+            // Bouton de téléchargement du rapport complet
             const downloadReportBtn = document.createElement('button');
             downloadReportBtn.className = 'download-all-btn';
             downloadReportBtn.style.background = '#6f42c1';
-            downloadReportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> تحميل التقرير الكامل';
+            downloadReportBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Télécharger le rapport complet';
             downloadReportBtn.onclick = () => downloadFullReport(reportId);
             
             container.appendChild(downloadImagesBtn);
@@ -1102,34 +1212,35 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             return container;
         }
 
-        // تهيئة التطبيق
+        // Initialisation de l'application
         function initializeApp() {
             loadFromLocalStorage();
-            updateStatusBar("جاهز للاستخدام");
+            updateStatusBar("Prêt à l'utilisation");
             updateLocationInfo();
             updateTimeInfo();
             
             setInterval(updateTimeInfo, 60000);
             setInterval(updateLocationInfo, 5000);
             
-            // تحميل قائمة الموظفين
+            // Charger la liste des employés
             updateEmployeeSelect();
             displayEmployees();
             displayMiniReports();
+            displayAssignedAreasList();
             
-            // إعداد مستخدم افتراضي
+            // Configuration par défaut
             if (!localStorage.getItem('usersData')) {
                 saveToLocalStorage();
             }
         }
 
-        // تسجيل الدخول
+        // Connexion
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
             
             if (!username || !password) {
-                alert("يرجى إدخال اسم المستخدم وكلمة المرور");
+                alert("Veuillez saisir le nom d'utilisateur et le mot de passe");
                 return;
             }
             
@@ -1137,7 +1248,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             
             if (user && user.password === password) {
                 currentUser = {username, ...user};
-                updateStatusBar(`مرحباً ${user.name}`);
+                updateStatusBar(`Bienvenue ${user.name}`);
                 
                 loginPage.style.display = 'none';
                 
@@ -1150,19 +1261,21 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                     adminPanel.style.display = 'none';
                     employeePanel.style.display = 'block';
                     reportsPanel.style.display = 'none';
-                    employeeName.textContent = `موظف: ${user.name}`;
+                    employeeName.textContent = `Employé : ${user.name}`;
                     loadEmployeeAreas();
+                    populateAreaSelect();
                 }
                 
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
             } else {
-                alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+                alert("Nom d'utilisateur ou mot de passe incorrect");
             }
         }
 
-        // تسجيل الخروج
+        // Déconnexion
         function logout() {
             currentUser = null;
+            selectedArea = null;
             loginPage.style.display = 'block';
             adminPanel.style.display = 'none';
             employeePanel.style.display = 'none';
@@ -1173,39 +1286,39 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                 videoStream = null;
                 videoElement.srcObject = null;
                 isCameraActive = false;
-                toggleCameraBtn.textContent = "تشغيل الكاميرا";
+                toggleCameraBtn.textContent = "Activer la caméra";
             }
             
             localStorage.removeItem('currentUser');
-            updateStatusBar("تم تسجيل الخروج");
+            updateStatusBar("Déconnexion réussie");
         }
 
-        // الرجوع للوحة التحكم
+        // Retour au panneau d'administration
         function backToAdminPanel() {
             adminPanel.style.display = 'block';
             reportsPanel.style.display = 'none';
         }
 
-        // عرض جميع التقارير
+        // Voir tous les rapports
         function viewAllReports() {
             adminPanel.style.display = 'none';
             reportsPanel.style.display = 'block';
             displayFullReports();
         }
 
-        // إضافة موظف جديد
+        // Ajouter un nouvel employé
         function addEmployee() {
             const username = document.getElementById('empUsername').value;
             const password = document.getElementById('empPassword').value;
             const name = document.getElementById('empName').value;
             
             if (!username || !password || !name) {
-                alert("يرجى ملء جميع الحقول");
+                alert("Veuillez remplir tous les champs");
                 return;
             }
             
             if (usersData[username]) {
-                alert("اسم المستخدم موجود بالفعل");
+                alert("Le nom d'utilisateur existe déjà");
                 return;
             }
             
@@ -1226,25 +1339,27 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             document.getElementById('empPassword').value = '';
             document.getElementById('empName').value = '';
             
-            alert("تمت إضافة الموظف بنجاح");
+            alert("Employé ajouté avec succès");
         }
 
-        // تعيين منطقة لموظف
+        // Assigner une zone à un employé
         function assignArea() {
             const employeeUsername = employeeSelect.value;
             const areaName = document.getElementById('areaName').value;
             const areaCode = document.getElementById('areaCode').value;
             
             if (!employeeUsername || !areaName || !areaCode) {
-                alert("يرجى ملء جميع الحقول");
+                alert("Veuillez remplir tous les champs");
                 return;
             }
             
             const area = {
+                id: Date.now(),
                 employee: employeeUsername,
                 name: areaName,
                 code: areaCode,
-                date: new Date().toISOString()
+                date: new Date().toISOString(),
+                isActive: true
             };
             
             assignedAreas.push(area);
@@ -1258,50 +1373,237 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             
             saveToLocalStorage();
             
+            // Mettre à jour l'affichage
+            displayAssignedAreasList();
+            
             document.getElementById('areaName').value = '';
             document.getElementById('areaCode').value = '';
             
-            alert("تم تعيين المنطقة بنجاح");
+            alert("Zone attribuée avec succès");
         }
 
-        // تحميل مناطق الموظف
+        // Charger les zones de l'employé
         function loadEmployeeAreas() {
             if (!currentUser || !currentUser.assignedAreas) {
-                assignedAreaName.textContent = "لا توجد منطقة مخصصة";
-                areaCodeDisplay.textContent = "-";
-                assignedAreaInfo.style.display = 'block';
+                selectedAreaInfo.style.display = 'none';
                 return;
             }
             
             const areas = currentUser.assignedAreas;
             if (areas.length > 0) {
-                const latestArea = areas[areas.length - 1];
-                assignedAreaName.textContent = latestArea.name;
-                areaCodeDisplay.textContent = latestArea.code;
-                assignedAreaInfo.style.display = 'block';
+                // Si aucune zone n'est sélectionnée, sélectionner la première zone active
+                if (!selectedArea) {
+                    const activeArea = areas.find(area => area.isActive) || areas[0];
+                    if (activeArea) {
+                        selectArea(activeArea);
+                    }
+                }
             } else {
-                assignedAreaName.textContent = "لا توجد منطقة مخصصة";
-                areaCodeDisplay.textContent = "-";
-                assignedAreaInfo.style.display = 'block';
+                selectedAreaInfo.style.display = 'none';
             }
         }
 
-        // إرسال التقرير
+        // Sélectionner une zone
+        function selectArea(area) {
+            selectedArea = area;
+            selectedAreaName.textContent = area.name;
+            selectedAreaCode.textContent = area.code;
+            areaAssignedDate.textContent = formatSimpleDate(area.date);
+            selectedAreaInfo.style.display = 'block';
+            
+            // Mettre à jour la liste des zones
+            updateEmployeeAreasList();
+            
+            // Mettre à jour le menu déroulant
+            if (areaSelect) {
+                areaSelect.value = area.id;
+            }
+            
+            updateStatusBar(`Zone sélectionnée : ${area.name}`);
+        }
+
+        // Remplir le menu déroulant des zones
+        function populateAreaSelect() {
+            if (!currentUser || !currentUser.assignedAreas) {
+                areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
+                return;
+            }
+            
+            areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
+            
+            const areas = currentUser.assignedAreas;
+            areas.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area.id;
+                option.textContent = `${area.name} (${area.code})`;
+                areaSelect.appendChild(option);
+            });
+            
+            // Écouter les changements de sélection
+            areaSelect.onchange = function() {
+                const areaId = parseInt(this.value);
+                if (areaId) {
+                    const area = currentUser.assignedAreas.find(a => a.id === areaId);
+                    if (area) {
+                        selectArea(area);
+                    }
+                }
+            };
+        }
+
+        // Mettre à jour la liste des zones de l'employé
+        function updateEmployeeAreasList() {
+            if (!currentUser || !currentUser.assignedAreas) {
+                employeeAreasList.innerHTML = '<p style="color: #888; text-align: center;">Aucune zone attribuée</p>';
+                return;
+            }
+            
+            const areas = currentUser.assignedAreas;
+            if (areas.length === 0) {
+                employeeAreasList.innerHTML = '<p style="color: #888; text-align: center;">Aucune zone attribuée</p>';
+                return;
+            }
+            
+            employeeAreasList.innerHTML = '';
+            areas.forEach(area => {
+                const areaItem = document.createElement('div');
+                areaItem.className = 'area-item';
+                if (selectedArea && area.id === selectedArea.id) {
+                    areaItem.classList.add('active');
+                }
+                
+                areaItem.innerHTML = `
+                    <div>
+                        <div class="area-name">${area.name}</div>
+                        <div class="area-code">Code : ${area.code}</div>
+                        <div style="font-size: 10px; color: #aaa;">Assignée le : ${formatSimpleDate(area.date)}</div>
+                    </div>
+                    <button class="select-area-btn" onclick="selectAreaById(${area.id})">
+                        ${selectedArea && area.id === selectedArea.id ? '✓ Sélectionnée' : 'Sélectionner'}
+                    </button>
+                `;
+                
+                employeeAreasList.appendChild(areaItem);
+            });
+        }
+
+        // Sélectionner une zone par ID
+        function selectAreaById(areaId) {
+            if (!currentUser || !currentUser.assignedAreas) return;
+            
+            const area = currentUser.assignedAreas.find(a => a.id === areaId);
+            if (area) {
+                selectArea(area);
+            }
+        }
+
+        // Afficher la liste des zones attribuées (pour l'admin)
+        function displayAssignedAreasList() {
+            if (assignedAreas.length === 0) {
+                assignedAreasList.innerHTML = '<p style="color: #888; text-align: center;">Aucune zone attribuée</p>';
+                return;
+            }
+            
+            // Grouper les zones par employé
+            const areasByEmployee = {};
+            assignedAreas.forEach(area => {
+                if (!areasByEmployee[area.employee]) {
+                    areasByEmployee[area.employee] = [];
+                }
+                areasByEmployee[area.employee].push(area);
+            });
+            
+            assignedAreasList.innerHTML = '';
+            
+            Object.keys(areasByEmployee).forEach(employeeUsername => {
+                const employee = usersData[employeeUsername];
+                if (!employee) return;
+                
+                const employeeSection = document.createElement('div');
+                employeeSection.style.marginBottom = '15px';
+                employeeSection.innerHTML = `<div style="color: #1a5fb4; font-weight: bold; margin-bottom: 5px;">${employee.name} (${employeeUsername})</div>`;
+                
+                const areasList = document.createElement('div');
+                
+                areasByEmployee[employeeUsername].forEach(area => {
+                    const areaItem = document.createElement('div');
+                    areaItem.className = 'area-item';
+                    areaItem.innerHTML = `
+                        <div>
+                            <div class="area-name">${area.name}</div>
+                            <div class="area-code">Code : ${area.code}</div>
+                            <div style="font-size: 10px; color: #aaa;">Assignée le : ${formatSimpleDate(area.date)}</div>
+                        </div>
+                        <button class="select-area-btn" style="background: #b41a1a; font-size: 10px;" onclick="removeArea(${area.id})">
+                            Supprimer
+                        </button>
+                    `;
+                    areasList.appendChild(areaItem);
+                });
+                
+                employeeSection.appendChild(areasList);
+                assignedAreasList.appendChild(employeeSection);
+            });
+        }
+
+        // Supprimer une zone
+        function removeArea(areaId) {
+            if (!confirm("Voulez-vous vraiment supprimer cette zone ?")) {
+                return;
+            }
+            
+            // Trouver la zone
+            const areaIndex = assignedAreas.findIndex(a => a.id === areaId);
+            if (areaIndex === -1) return;
+            
+            const area = assignedAreas[areaIndex];
+            
+            // Supprimer de la liste générale
+            assignedAreas.splice(areaIndex, 1);
+            
+            // Supprimer de la liste de l'utilisateur
+            if (usersData[area.employee] && usersData[area.employee].assignedAreas) {
+                const userAreaIndex = usersData[area.employee].assignedAreas.findIndex(a => a.id === areaId);
+                if (userAreaIndex !== -1) {
+                    usersData[area.employee].assignedAreas.splice(userAreaIndex, 1);
+                }
+            }
+            
+            // Si l'employé actuel a cette zone sélectionnée, la désélectionner
+            if (currentUser && currentUser.username === area.employee && selectedArea && selectedArea.id === areaId) {
+                selectedArea = null;
+                selectedAreaInfo.style.display = 'none';
+                if (areaSelect) areaSelect.value = '';
+                updateEmployeeAreasList();
+            }
+            
+            saveToLocalStorage();
+            displayAssignedAreasList();
+            
+            alert("Zone supprimée avec succès");
+        }
+
+        // Envoyer le rapport
         function sendReport() {
             const selectedNumber = numberInput.value;
             
             if (!selectedNumber) {
-                alert("يرجى اختيار رقم من 0 إلى 8");
+                alert("Veuillez choisir un nombre de 0 à 8");
                 return;
             }
             
             if (photoCount < 5) {
-                alert("يرجى التقاط 5 صور قبل إرسال التقرير");
+                alert("Veuillez capturer 5 images avant d'envoyer le rapport");
                 return;
             }
             
             if (capturedImages.length < 5) {
-                alert("يجب أن تكون لديك 5 صور على الأقل");
+                alert("Vous devez avoir au moins 5 images");
+                return;
+            }
+            
+            if (!selectedArea) {
+                alert("Veuillez sélectionner une zone de travail");
                 return;
             }
             
@@ -1318,13 +1620,15 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                     prec: parseFloat(infoPrecision.textContent.split(': ')[1])
                 },
                 images: capturedImages.slice(0, 5),
-                area: assignedAreaName.textContent,
-                areaCode: areaCodeDisplay.textContent
+                area: selectedArea.name,
+                areaCode: selectedArea.code,
+                areaId: selectedArea.id
             };
             
             reports.push(report);
             saveToLocalStorage();
             
+            // Réinitialiser
             numberInput.value = "";
             photoCount = 0;
             capturedImages = [];
@@ -1333,34 +1637,35 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             
             displayMiniReports();
             
-            alert("تم إرسال التقرير بنجاح إلى المشرف");
-            updateStatusBar("تم إرسال التقرير بنجاح");
+            alert("Rapport envoyé avec succès au superviseur");
+            updateStatusBar("Rapport envoyé avec succès");
         }
 
-        // عرض الموظفين
+        // Afficher les employés
         function displayEmployees() {
             employeesList.innerHTML = '';
             employees.forEach(emp => {
                 const employeeCard = document.createElement('div');
                 employeeCard.className = 'employee-card';
+                const areasCount = (usersData[emp.username]?.assignedAreas || []).length;
                 employeeCard.innerHTML = `
                     <strong>${emp.name}</strong><br>
-                    <small>اسم المستخدم: ${emp.username}</small><br>
-                    <small>عدد المناطق: ${(usersData[emp.username]?.assignedAreas || []).length}</small>
+                    <small>Nom d'utilisateur : ${emp.username}</small><br>
+                    <small>Nombre de zones : ${areasCount}</small>
                 `;
                 employeesList.appendChild(employeeCard);
             });
         }
 
-        // عرض التقارير المصغرة
+        // Afficher les rapports miniatures
         function displayMiniReports() {
             reportsListMini.innerHTML = '';
             
             if (reports.length === 0) {
                 reportsListMini.innerHTML = `
                     <div class="no-reports-message">
-                        <h3>لا توجد تقارير</h3>
-                        <p>لم يتم استلام أي تقارير حتى الآن</p>
+                        <h3>Aucun rapport</h3>
+                        <p>Aucun rapport reçu pour le moment</p>
                     </div>
                 `;
                 return;
@@ -1378,36 +1683,36 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                     </div>
                     <div class="report-details">
                         <div class="detail-item">
-                            <strong>الرقم:</strong> ${report.number}
+                            <strong>Nombre :</strong> ${report.number}
                         </div>
                         <div class="detail-item">
-                            <strong>المنطقة:</strong> ${report.area}
+                            <strong>Zone :</strong> ${report.area}
                         </div>
                         <div class="detail-item">
-                            <strong>عدد الصور:</strong> ${report.images.length}
+                            <strong>Images :</strong> ${report.images.length}
                         </div>
                         <div class="detail-item">
-                            <strong>التاريخ:</strong> ${formatDateFrench(report.date)}
+                            <strong>Date :</strong> ${formatDateFrench(report.date)}
                         </div>
                     </div>
                     <button class="view-report-btn" onclick="viewSingleReport(${report.id}); event.stopPropagation();">
-                        عرض التقرير الكامل
+                        Voir le rapport complet
                     </button>
                 `;
                 reportsListMini.appendChild(reportCard);
             });
         }
 
-        // عرض التقارير الكاملة
+        // Afficher les rapports complets
         function displayFullReports() {
             reportDetailsContainer.innerHTML = '';
             
             if (reports.length === 0) {
                 reportDetailsContainer.innerHTML = `
                     <div class="no-reports-message">
-                        <h3>لا توجد تقارير</h3>
-                        <p>لم يتم استلام أي تقارير حتى الآن</p>
-                        <p>سيتلقى النظام تقارير جديدة عندما يقوم الموظفون بإرسالها</p>
+                        <h3>Aucun rapport</h3>
+                        <p>Aucun rapport reçu pour le moment</p>
+                        <p>Le système recevra de nouveaux rapports lorsque les employés les enverront</p>
                     </div>
                 `;
                 return;
@@ -1418,83 +1723,83 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                 reportCard.className = 'full-report-card';
                 reportCard.id = `report-${report.id}`;
                 
-                // إنشاء HTML للصور
+                // Créer le HTML pour les images
                 let imagesHTML = '';
                 if (report.images && report.images.length > 0) {
                     imagesHTML = report.images.map((img, imgIndex) => `
                         <div class="report-image-item">
-                            <img src="${img.url}" alt="صورة ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">صورة ${imgIndex + 1}</text></svg>';">
+                            <img src="${img.url}" alt="Image ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">Image ${imgIndex + 1}</text></svg>';">
                             <div class="image-info">
-                                <div class="image-time">صورة ${imgIndex + 1}</div>
+                                <div class="image-time">Image ${imgIndex + 1}</div>
                             </div>
                         </div>
                     `).join('');
                 } else {
-                    imagesHTML = '<p style="text-align: center; color: #888; grid-column: 1 / -1;">لا توجد صور في هذا التقرير</p>';
+                    imagesHTML = '<p style="text-align: center; color: #888; grid-column: 1 / -1;">Aucune image dans ce rapport</p>';
                 }
                 
                 reportCard.innerHTML = `
                     <div class="report-main-info">
                         <h3 style="color: #1a5fb4; margin-bottom: 15px;">
-                            تقرير #${index + 1} - ${report.employeeName}
+                            Rapport #${index + 1} - ${report.employeeName}
                         </h3>
                         <div class="report-info-grid">
                             <div class="info-item">
-                                <div class="info-label">اسم الموظف</div>
+                                <div class="info-label">Nom de l'employé</div>
                                 <div class="info-value">${report.employeeName}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">اسم المستخدم</div>
+                                <div class="info-label">Nom d'utilisateur</div>
                                 <div class="info-value">${report.employee}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">الرقم المدخل</div>
+                                <div class="info-label">Nombre saisi</div>
                                 <div class="info-value">${report.number}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">المنطقة</div>
-                                <div class="info-value">${report.area || 'غير محدد'}</div>
+                                <div class="info-label">Zone</div>
+                                <div class="info-value">${report.area || 'Non spécifiée'}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">كود المنطقة</div>
-                                <div class="info-value">${report.areaCode || 'غير محدد'}</div>
+                                <div class="info-label">Code de zone</div>
+                                <div class="info-value">${report.areaCode || 'Non spécifié'}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">تاريخ الإرسال</div>
+                                <div class="info-label">Date d'envoi</div>
                                 <div class="info-value">${formatDateFrench(report.date)}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">خط العرض</div>
+                                <div class="info-label">Latitude</div>
                                 <div class="info-value">${report.location.lat.toFixed(6)}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">خط الطول</div>
+                                <div class="info-label">Longitude</div>
                                 <div class="info-value">${report.location.lng.toFixed(6)}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">الارتفاع</div>
+                                <div class="info-label">Altitude</div>
                                 <div class="info-value">${report.location.elev}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">الدقة</div>
-                                <div class="info-value">${report.location.prec.toFixed(2)} م</div>
+                                <div class="info-label">Précision</div>
+                                <div class="info-value">${report.location.prec.toFixed(2)} m</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">عدد الصور</div>
-                                <div class="info-value">${report.images.length} صورة</div>
+                                <div class="info-label">Nombre d'images</div>
+                                <div class="info-value">${report.images.length} images</div>
                             </div>
                         </div>
                     </div>
                     
                     <div class="report-images-section">
-                        <div class="images-title">الصور الملتقطة</div>
+                        <div class="images-title">Images capturées</div>
                         <div class="report-images-grid">
                             ${imagesHTML}
                         </div>
                     </div>
                 `;
                 
-                // إضافة زر تحميل الكل
+                // Ajouter le bouton de téléchargement complet
                 const downloadContainer = createDownloadAllButton(report.id);
                 reportCard.appendChild(downloadContainer);
                 
@@ -1502,7 +1807,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             });
         }
 
-        // عرض تقرير مفرد
+        // Voir un rapport individuel
         function viewSingleReport(reportId) {
             adminPanel.style.display = 'none';
             reportsPanel.style.display = 'block';
@@ -1516,9 +1821,9 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             if (report.images && report.images.length > 0) {
                 imagesHTML = report.images.map((img, imgIndex) => `
                     <div class="report-image-item">
-                        <img src="${img.url}" alt="صورة ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">صورة ${imgIndex + 1}</text></svg>';">
+                        <img src="${img.url}" alt="Image ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">Image ${imgIndex + 1}</text></svg>';">
                         <div class="image-info">
-                            <div class="image-time">صورة ${imgIndex + 1} - ${formatDateFrench(img.timestamp)}</div>
+                            <div class="image-time">Image ${imgIndex + 1} - ${formatDateFrench(img.timestamp)}</div>
                         </div>
                     </div>
                 `).join('');
@@ -1530,81 +1835,81 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             reportCard.innerHTML = `
                 <div class="report-main-info">
                     <h3 style="color: #1a5fb4; margin-bottom: 15px;">
-                        تقرير مفصل - ${report.employeeName}
+                        Rapport détaillé - ${report.employeeName}
                     </h3>
                     <div class="report-info-grid">
                         <div class="info-item">
-                            <div class="info-label">اسم الموظف</div>
+                            <div class="info-label">Nom de l'employé</div>
                             <div class="info-value">${report.employeeName}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">اسم المستخدم</div>
+                            <div class="info-label">Nom d'utilisateur</div>
                             <div class="info-value">${report.employee}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">الرقم المدخل</div>
+                            <div class="info-label">Nombre saisi</div>
                             <div class="info-value">${report.number}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">المنطقة</div>
-                            <div class="info-value">${report.area || 'غير محدد'}</div>
+                            <div class="info-label">Zone</div>
+                            <div class="info-value">${report.area || 'Non spécifiée'}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">كود المنطقة</div>
-                            <div class="info-value">${report.areaCode || 'غير محدد'}</div>
+                            <div class="info-label">Code de zone</div>
+                            <div class="info-value">${report.areaCode || 'Non spécifié'}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">تاريخ الإرسال</div>
-                            <div class="info-value">${formatDateFrench(report.date)}</div>
+                            <div class="info-label">Date d'envoi</div>
+                                <div class="info-value">${formatDateFrench(report.date)}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">خط العرض</div>
+                            <div class="info-label">Latitude</div>
                             <div class="info-value">${report.location.lat.toFixed(6)}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">خط الطول</div>
+                            <div class="info-label">Longitude</div>
                             <div class="info-value">${report.location.lng.toFixed(6)}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">الارتفاع</div>
+                            <div class="info-label">Altitude</div>
                             <div class="info-value">${report.location.elev}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">الدقة</div>
-                            <div class="info-value">${report.location.prec.toFixed(2)} م</div>
+                            <div class="info-label">Précision</div>
+                            <div class="info-value">${report.location.prec.toFixed(2)} m</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">عدد الصور</div>
-                            <div class="info-value">${report.images.length} صورة</div>
+                            <div class="info-label">Nombre d'images</div>
+                            <div class="info-value">${report.images.length} images</div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="report-images-section">
-                    <div class="images-title">الصور الملتقطة (${report.images.length} صورة)</div>
+                    <div class="images-title">Images capturées (${report.images.length} images)</div>
                     <div class="report-images-grid">
-                        ${imagesHTML || '<p style="text-align: center; color: #888; grid-column: 1 / -1;">لا توجد صور في هذا التقرير</p>'}
+                        ${imagesHTML || '<p style="text-align: center; color: #888; grid-column: 1 / -1;">Aucune image dans ce rapport</p>'}
                     </div>
                 </div>
             `;
             
-            // إضافة زر تحميل الكل
+            // Ajouter le bouton de téléchargement complet
             const downloadContainer = createDownloadAllButton(report.id);
             reportCard.appendChild(downloadContainer);
             
-            // زر العودة
+            // Bouton de retour
             const backButton = document.createElement('div');
             backButton.style.marginTop = '30px';
             backButton.style.textAlign = 'center';
-            backButton.innerHTML = `<button class="back-btn" onclick="viewAllReports()">عرض جميع التقارير</button>`;
+            backButton.innerHTML = `<button class="back-btn" onclick="viewAllReports()">Voir tous les rapports</button>`;
             reportCard.appendChild(backButton);
             
             reportDetailsContainer.appendChild(reportCard);
         }
 
-        // تحديث قائمة الموظفين في التحديد
+        // Mettre à jour la liste des employés dans la sélection
         function updateEmployeeSelect() {
-            employeeSelect.innerHTML = '<option value="">اختر الموظف</option>';
+            employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
             employees.forEach(emp => {
                 const option = document.createElement('option');
                 option.value = emp.username;
@@ -1613,21 +1918,22 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             });
         }
 
-        // تحديث لوحة المشرف
+        // Mettre à jour le tableau de bord du superviseur
         function updateAdminDashboard() {
             displayEmployees();
             displayMiniReports();
+            displayAssignedAreasList();
         }
 
-        // وظائف الكاميرا
+        // Fonctions de la caméra
         function updateLocationInfo() {
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
             
-            infoLatitude.textContent = `Latitude: ${location.lat.toFixed(6)}`;
-            infoLongitude.textContent = `Longitude: ${location.lng.toFixed(6)}`;
-            infoElevation.textContent = `Elevation: ${location.elev} m`;
-            infoPrecision.textContent = `Precision: ${location.prec.toFixed(2)} m`;
+            infoLatitude.textContent = `Latitude : ${location.lat.toFixed(6)}`;
+            infoLongitude.textContent = `Longitude : ${location.lng.toFixed(6)}`;
+            infoElevation.textContent = `Altitude : ${location.elev} m`;
+            infoPrecision.textContent = `Précision : ${location.prec.toFixed(2)} m`;
         }
 
         function updateTimeInfo() {
@@ -1638,7 +1944,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             
-            // تحويل الأرقام إلى فرنسية
+            // Convertir les nombres en français
             const frenchNumbers = {
                 '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
                 '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
@@ -1649,18 +1955,18 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             }
             
             const dateStr = `${day}-${month}-${year} ${hours}:${minutes}`;
-            infoTime.textContent = `Temps: ${convertToFrenchNumbers(dateStr)}`;
+            infoTime.textContent = `Temps : ${convertToFrenchNumbers(dateStr)}`;
         }
 
         function updateStatusBar(message) {
-            statusBar.textContent = `نظام NoteCam ● ${message} ●`;
+            statusBar.textContent = `Système NoteCam ● ${message} ●`;
         }
 
-        // وظائف الكاميرا الأساسية
+        // Fonctions de base de la caméra
         async function toggleCamera() {
             if (!isCameraActive) {
                 try {
-                    updateStatusBar("جاري تشغيل الكاميرا...");
+                    updateStatusBar("Activation de la caméra...");
                     
                     videoStream = await navigator.mediaDevices.getUserMedia({
                         video: {
@@ -1674,14 +1980,14 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                     videoElement.srcObject = videoStream;
                     isCameraActive = true;
                     
-                    toggleCameraBtn.textContent = "إيقاف الكاميرا";
+                    toggleCameraBtn.textContent = "Désactiver la caméra";
                     captureBtn.style.display = 'flex';
-                    updateStatusBar("جاهز للتصوير");
+                    updateStatusBar("Prêt à capturer");
                     
                 } catch (error) {
-                    console.error('خطأ في تشغيل الكاميرا:', error);
-                    updateStatusBar("خطأ في الكاميرا");
-                    alert('تعذر تشغيل الكاميرا. تأكد من منح الصلاحية.');
+                    console.error('Erreur de caméra :', error);
+                    updateStatusBar("Erreur de caméra");
+                    alert('Impossible d\'activer la caméra. Vérifiez les autorisations.');
                 }
             } else {
                 if (videoStream) {
@@ -1692,8 +1998,8 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                 videoElement.srcObject = null;
                 isCameraActive = false;
                 
-                toggleCameraBtn.textContent = "تشغيل الكاميرا";
-                updateStatusBar("الكاميرا متوقفة");
+                toggleCameraBtn.textContent = "Activer la caméra";
+                updateStatusBar("Caméra désactivée");
             }
         }
 
@@ -1705,17 +2011,17 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
 
         async function captureImageWithInfo() {
             if (!isCameraActive || !videoStream) {
-                alert("يجب تشغيل الكاميرا أولاً!");
+                alert("Vous devez activer la caméra d'abord !");
                 return;
             }
             
             if (photoCount >= 5) {
-                alert("لقد وصلت للحد الأقصى من الصور (5 صور)");
+                alert("Vous avez atteint le nombre maximum d'images (5 images)");
                 return;
             }
             
             try {
-                updateStatusBar("جاري التقاط الصورة...");
+                updateStatusBar("Capture d'image...");
                 
                 triggerFlash();
                 
@@ -1756,7 +2062,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                         location: currentImageData.location
                     });
                     
-                    updateStatusBar("تم التقاط الصورة");
+                    updateStatusBar("Image capturée");
                     
                     captureBtn.style.transform = 'translateX(-50%) scale(0.9)';
                     setTimeout(() => {
@@ -1764,14 +2070,14 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                     }, 100);
                     
                     if (photoCount === 5) {
-                        updateStatusBar("تم التقاط 5 صور - جاهز للإرسال");
+                        updateStatusBar("5 images capturées - Prêt à envoyer");
                     }
                     
                 }, 'image/jpeg', 0.85);
                 
             } catch (error) {
-                console.error('خطأ في التقاط الصورة:', error);
-                updateStatusBar("خطأ في التقاط الصورة");
+                console.error('Erreur de capture :', error);
+                updateStatusBar("Erreur de capture");
             }
         }
 
@@ -1788,7 +2094,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
             
-            const text = 'Powered by NoteCam';
+            const text = 'Propulsé par NoteCam';
             context.fillText(text, x, y);
             
             context.shadowColor = 'rgba(255, 255, 255, 0.2)';
@@ -1837,14 +2143,14 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             
             const imgElement = document.createElement('img');
             imgElement.src = imageUrl;
-            imgElement.alt = 'صورة ملتقطة';
+            imgElement.alt = 'Image capturée';
             
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
             deleteBtn.textContent = '×';
             deleteBtn.onclick = (e) => {
                 e.stopPropagation();
-                if (confirm('هل تريد حذف هذه الصورة؟')) {
+                if (confirm('Voulez-vous supprimer cette image ?')) {
                     galleryItem.remove();
                     photoCount--;
                     photoCountElement.textContent = photoCount;
@@ -1854,7 +2160,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                         capturedImages.splice(index, 1);
                     }
                     
-                    updateStatusBar('تم حذف الصورة');
+                    updateStatusBar('Image supprimée');
                 }
             };
             
@@ -1864,7 +2170,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             galleryItem.onclick = () => {
                 currentImageData = { url: imageUrl, blob: blob };
                 downloadBtn.disabled = false;
-                updateStatusBar('تم تحديد الصورة');
+                updateStatusBar('Image sélectionnée');
             };
             
             galleryContainer.prepend(galleryItem);
@@ -1872,7 +2178,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
 
         function downloadCurrentImage() {
             if (!currentImageData) {
-                alert('لا توجد صورة للتحميل');
+                alert('Aucune image à télécharger');
                 return;
             }
             
@@ -1886,20 +2192,20 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
             link.click();
             document.body.removeChild(link);
             
-            updateStatusBar(`تم التحميل: ${fileName}`);
+            updateStatusBar(`Téléchargé : ${fileName}`);
         }
 
         function clearGallery() {
-            if (confirm('هل تريد مسح جميع الصور من المعرض؟')) {
+            if (confirm('Voulez-vous supprimer toutes les images de la galerie ?')) {
                 galleryContainer.innerHTML = '';
                 photoCount = 0;
                 photoCountElement.textContent = '0';
                 capturedImages = [];
-                updateStatusBar('تم مسح المعرض');
+                updateStatusBar('Galerie effacée');
             }
         }
 
-        // حفظ البيانات
+        // Sauvegarde des données
         function saveToLocalStorage() {
             const data = {
                 usersData,
@@ -1920,7 +2226,7 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                     assignedAreas = data.assignedAreas || assignedAreas;
                     reports = data.reports || reports;
                 } catch (error) {
-                    console.error('خطأ في تحميل البيانات:', error);
+                    console.error('Erreur de chargement des données :', error);
                 }
             }
             
@@ -1935,18 +2241,20 @@ ${report.images.map((img, idx) => `صورة ${idx + 1}: ${img.url}`).join('\n')}
                             updateAdminDashboard();
                         } else {
                             employeePanel.style.display = 'block';
-                            employeeName.textContent = `موظف: ${currentUser.name}`;
+                            employeeName.textContent = `Employé : ${currentUser.name}`;
                             loadEmployeeAreas();
+                            populateAreaSelect();
+                            updateEmployeeAreasList();
                         }
-                        updateStatusBar(`مرحباً ${currentUser.name}`);
+                        updateStatusBar(`Bienvenue ${currentUser.name}`);
                     }
                 } catch (error) {
-                    console.error('خطأ في تحميل حالة المستخدم:', error);
+                    console.error('Erreur de chargement de l\'utilisateur :', error);
                 }
             }
         }
 
-        // إعداد الأحداث
+        // Configuration des événements
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
             
