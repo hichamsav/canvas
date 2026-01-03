@@ -103,12 +103,12 @@
             width: 100%;
         }
 
-        /* الخلفية البيضاء فقط للمعلومات - 15% من العرض (تقليل 85% من اليمين) */
+        /* الخلفية البيضاء فقط للمعلومات - 15% من العرض (85% تقليل) */
         .info-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: 15%; /* تقليل بنسبة 85% من الجانب الأيمن */
+            width: 15%; /* 85% تقليل من الجانب الأيمن */
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
@@ -120,7 +120,7 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 8px; /* حشو أقل */
+            padding-left: 10px; /* حشو عادي */
             height: 100%;
             z-index: 2;
             position: relative;
@@ -128,13 +128,13 @@
         }
 
         .info-line {
-            margin: 0.1px 0; /* مسافة أقل */
-            font-size: 10px; /* خط أصغر */
-            line-height: 1.0; /* تباعد أقل */
+            margin: 0.5px 0; /* مسافة طبيعية */
+            font-size: 15px; /* خط كبير 15px */
+            line-height: 1.2; /* تباعد جيد */
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            letter-spacing: 0px;
+            letter-spacing: 0.1px;
             white-space: nowrap;
         }
 
@@ -150,12 +150,12 @@
         }
 
         .logo-text {
-            font-size: 14px;
+            font-size: 16px; /* خط الشعار أكبر أيضاً */
             color: rgba(255, 0, 0, 0.8);
             font-family: 'Arial Black', sans-serif;
             font-weight: 900;
             text-align: center;
-            letter-spacing: 0.2px;
+            letter-spacing: 0.3px;
             line-height: 1;
             text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
             text-transform: uppercase;
@@ -291,32 +291,33 @@
             .info-container {
                 flex-direction: column;
                 height: auto;
-                min-height: 100px;
+                min-height: 110px;
             }
             
             .info-background {
                 width: 100%;
-                height: 70px;
+                height: 85px;
             }
             
             .info-column {
                 width: 100%;
-                padding: 5px 8px;
-                height: 70px;
+                padding: 8px 10px;
+                height: 85px;
+            }
+            
+            .info-line {
+                font-size: 13px; /* أصغر قليلاً للجوال */
+                margin: 0.3px 0;
             }
             
             .logo-column {
                 width: 100%;
-                height: 25px;
-                margin-top: 3px;
+                height: 30px;
+                margin-top: 5px;
             }
             
             .logo-text {
-                font-size: 12px;
-            }
-            
-            .info-line {
-                font-size: 9px;
+                font-size: 14px; /* أصغر قليلاً للجوال */
             }
             
             .btn {
@@ -340,11 +341,11 @@
             }
             
             .info-line {
-                font-size: 8px;
+                font-size: 11px; /* أصغر للشاشات الصغيرة */
             }
             
             .logo-text {
-                font-size: 11px;
+                font-size: 12px; /* أصغر للشاشات الصغيرة */
             }
             
             .gallery-grid {
@@ -402,7 +403,7 @@
         </div>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript يبقى كما هو -->
     <script>
         let videoStream = null;
         let isCameraActive = false;
@@ -588,7 +589,7 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 16px "Arial Black", sans-serif';
+            context.font = '900 18px "Arial Black", sans-serif'; /* خط أكبر على الصورة */
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
@@ -609,9 +610,9 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // تقليل العرض بنسبة 85% على الصورة
-            const lineHeight = 12;
-            const totalHeight = lineHeight * 5 + 4;
+            // 15% من العرض فقط مع خط أكبر
+            const lineHeight = 16; /* تباعد أكبر للخط 15px */
+            const totalHeight = lineHeight * 5 + 6;
             const boxWidth = width * 0.15; /* 15% فقط من عرض الصورة */
             const boxX = 2;
             const boxY = height - totalHeight - 2;
@@ -619,20 +620,20 @@
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            context.font = 'bold 10px "Courier New", monospace';
+            context.font = 'bold 15px "Courier New", monospace'; /* خط 15px على الصورة */
             context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            const startY = boxY + 2;
+            const startY = boxY + 3;
             
-            context.fillText(infoLatitude.textContent, boxX + 3, startY);
-            context.fillText(infoLongitude.textContent, boxX + 3, startY + lineHeight);
-            context.fillText(infoElevation.textContent, boxX + 3, startY + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, boxX + 3, startY + (lineHeight * 3));
-            context.fillText(infoTime.textContent, boxX + 3, startY + (lineHeight * 4));
+            context.fillText(infoLatitude.textContent, boxX + 5, startY);
+            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
+            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
+            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
             
-            drawLogoOnImage(context, width - 2, boxY + totalHeight - 2);
+            drawLogoOnImage(context, width - 2, boxY + totalHeight - 3);
             
             context.restore();
         }
