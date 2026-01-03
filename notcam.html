@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,35 +17,35 @@
             font-family: 'Courier New', monospace;
             min-height: 100vh;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 10px;
         }
 
         .app-container {
             width: 100%;
             max-width: 600px;
             background: #000000;
-            border: 1px solid #333333;
         }
 
-        /* شريط العنوان */
-        .title-bar {
+        /* شريط الحالة */
+        .status-bar {
             background: #111111;
             padding: 8px 15px;
-            border-bottom: 1px solid #333333;
-            font-size: 14px;
+            font-size: 12px;
             color: #cccccc;
             text-align: center;
+            border-bottom: 1px solid #333333;
+            width: 100%;
         }
 
         /* منطقة الكاميرا */
-        .camera-view {
+        .camera-container {
             width: 100%;
             height: 400px;
-            background: #000000;
             position: relative;
-            border-bottom: 1px solid #333333;
+            background: #000000;
+            overflow: hidden;
         }
 
         #cameraVideo {
@@ -55,14 +55,14 @@
         }
 
         /* مؤشر التقاط */
-        .capture-indicator {
+        .capture-button {
             position: absolute;
             bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 70px;
             height: 70px;
-            border: 3px solid #ffffff;
+            border: 3px solid white;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
             cursor: pointer;
@@ -71,63 +71,63 @@
             justify-content: center;
         }
 
-        .capture-indicator:active {
-            background: rgba(255, 255, 255, 0.3);
+        .capture-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .capture-button:active {
             transform: translateX(-50%) scale(0.95);
         }
 
         .capture-inner {
             width: 50px;
             height: 50px;
-            border: 2px solid #ffffff;
+            border: 2px solid white;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات الصورة - تحت الكاميرا مباشرة */
-        .image-info {
+        /* معلومات تحت الصورة */
+        .info-panel {
             padding: 15px;
             background: #000000;
-            border-bottom: 1px solid #333333;
+            border-top: 1px solid #333333;
+            width: 100%;
         }
 
         .info-line {
-            margin: 3px 0;
+            margin: 4px 0;
             font-size: 14px;
             line-height: 1.4;
             color: #ffffff;
             font-family: 'Courier New', monospace;
         }
 
-        /* الشعار - بالأسفل تمامًا */
+        /* الشعار */
         .logo {
             padding: 10px 15px;
             text-align: center;
-            background: #000000;
-            font-size: 13px;
+            font-size: 12px;
             color: #888888;
             border-top: 1px solid #333333;
+            width: 100%;
         }
 
-        /* تحكم */
+        /* الأزرار */
         .controls {
             padding: 15px;
-            background: #111111;
-            border-top: 1px solid #333333;
-        }
-
-        .control-row {
             display: flex;
             gap: 10px;
-            margin-bottom: 10px;
+            justify-content: center;
+            width: 100%;
+            border-top: 1px solid #333333;
         }
 
         .btn {
-            flex: 1;
-            padding: 10px;
+            padding: 10px 20px;
             background: #222222;
             border: 1px solid #444444;
-            color: #ffffff;
+            color: white;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             cursor: pointer;
@@ -149,8 +149,8 @@
 
         /* معرض الصور */
         .gallery {
+            width: 100%;
             padding: 15px;
-            background: #111111;
             border-top: 1px solid #333333;
         }
 
@@ -162,7 +162,7 @@
             border-bottom: 1px solid #333333;
         }
 
-        .gallery-items {
+        .gallery-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
             gap: 10px;
@@ -171,6 +171,7 @@
         .gallery-item {
             position: relative;
             border: 1px solid #333333;
+            cursor: pointer;
         }
 
         .gallery-item img {
@@ -192,115 +193,164 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 12px;
-        }
-
-        /* حالة التطبيق */
-        .status {
-            padding: 10px 15px;
-            background: #111111;
-            border-top: 1px solid #333333;
-            font-size: 12px;
-            color: #888888;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         @media (max-width: 768px) {
-            .camera-view {
+            .camera-container {
                 height: 350px;
-            }
-            
-            body {
-                padding: 10px;
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
-        <!-- شريط العنوان -->
-        <div class="title-bar">
-            NotCam Emulator
+        <!-- شريط الحالة -->
+        <div class="status-bar" id="statusBar">
+            NotCam Emulator - جاهز
         </div>
 
-        <!-- العرض المباشر للكاميرا -->
-        <div class="camera-view">
+        <!-- الكاميرا -->
+        <div class="camera-container">
             <video id="cameraVideo" autoplay playsinline></video>
-            <div class="capture-indicator" id="captureBtn">
+            <div class="capture-button" id="captureBtn">
                 <div class="capture-inner"></div>
             </div>
         </div>
 
-        <!-- معلومات الصورة - تحت الكاميرا مباشرة -->
-        <div class="image-info">
-            <div class="info-line" id="locationLine">Latitude: 33.603039</div>
-            <div class="info-line" id="longitudeLine">Longitude: -7.636531</div>
-            <div class="info-line" id="elevationLine">Élévation: 10.64±10.9 m</div>
-            <div class="info-line" id="precisionLine">Précision: 77.6 m</div>
-            <div class="info-line" id="timeLine">Temps: 31-12-2025 17:49</div>
+        <!-- معلومات تحت الصورة -->
+        <div class="info-panel">
+            <div class="info-line" id="infoLatitude">Latitude: 33.603039</div>
+            <div class="info-line" id="infoLongitude">Longitude: -7.636531</div>
+            <div class="info-line" id="infoElevation">Élévation: 10.64±10.9 m</div>
+            <div class="info-line" id="infoPrecision">Précision: 77.6 m</div>
+            <div class="info-line" id="infoTime">Temps: 31-12-2025 17:49</div>
         </div>
 
-        <!-- الشعار - بالأسفل -->
+        <!-- الشعار -->
         <div class="logo">
             Powered by NotCam
         </div>
 
         <!-- التحكم -->
         <div class="controls">
-            <div class="control-row">
-                <button id="toggleCamera" class="btn btn-primary">تشغيل الكاميرا</button>
-                <button id="downloadBtn" class="btn" disabled>تحميل الصورة</button>
-            </div>
-            <div class="control-row">
-                <button id="refreshLocation" class="btn">تحديث الموقع</button>
-                <button id="settingsBtn" class="btn">الإعدادات</button>
-            </div>
+            <button id="toggleCamera" class="btn btn-primary">تشغيل الكاميرا</button>
+            <button id="downloadBtn" class="btn" disabled>تحميل الصورة</button>
         </div>
 
         <!-- معرض الصور -->
         <div class="gallery">
             <div class="gallery-title">الصور الملتقطة</div>
-            <div id="galleryItems" class="gallery-items">
-                <!-- ستظهر الصور هنا -->
+            <div id="galleryContainer" class="gallery-grid">
+                <!-- الصور ستظهر هنا -->
             </div>
-        </div>
-
-        <!-- الحالة -->
-        <div class="status" id="statusText">
-            جاهز للبدء
         </div>
     </div>
 
     <script>
-        // العناصر الرئيسية
-        const video = document.getElementById('cameraVideo');
+        // المتغيرات الأساسية
+        let videoStream = null;
+        let isCameraActive = false;
+        let currentImageData = null;
+        let userLocation = null;
+
+        // العناصر
+        const videoElement = document.getElementById('cameraVideo');
         const captureBtn = document.getElementById('captureBtn');
         const toggleCameraBtn = document.getElementById('toggleCamera');
         const downloadBtn = document.getElementById('downloadBtn');
-        const refreshLocationBtn = document.getElementById('refreshLocation');
-        const statusText = document.getElementById('statusText');
-        
+        const statusBar = document.getElementById('statusBar');
+        const galleryContainer = document.getElementById('galleryContainer');
+
         // عناصر المعلومات
-        const locationLine = document.getElementById('locationLine');
-        const longitudeLine = document.getElementById('longitudeLine');
-        const elevationLine = document.getElementById('elevationLine');
-        const precisionLine = document.getElementById('precisionLine');
-        const timeLine = document.getElementById('timeLine');
-        
-        // المتغيرات
-        let stream = null;
-        let isCameraOn = false;
-        let currentImage = null;
-        const galleryItems = document.getElementById('galleryItems');
-        
-        // بيانات الموقع الافتراضية (نفس الصورة المرسلة)
-        let locationData = {
-            latitude: 33.603039,
-            longitude: -7.636531,
-            elevation: "10.64±10.9 m",
-            precision: "77.6 m"
-        };
-        
-        // تحديث الوقت
-        function updateTime() {
+        const infoLatitude = document.getElementById('infoLatitude');
+        const infoLongitude = document.getElementById('infoLongitude');
+        const infoElevation = document.getElementById('infoElevation');
+        const infoPrecision = document.getElementById('infoPrecision');
+        const infoTime = document.getElementById('infoTime');
+
+        // تهيئة التطبيق
+        async function initializeApp() {
+            try {
+                // 1. طلب صلاحية الموقع أولاً
+                await requestLocationPermission();
+                
+                // 2. تحديث المعلومات
+                updateLocationInfo();
+                updateTimeInfo();
+                
+                // 3. تحديث الوقت كل دقيقة
+                setInterval(updateTimeInfo, 60000);
+                
+                // 4. تحديث الموقع كل 30 ثانية
+                setInterval(updateLocationInfo, 30000);
+                
+                statusBar.textContent = "NotCam - جاهز للاستخدام";
+                
+            } catch (error) {
+                console.error('خطأ في التهيئة:', error);
+                statusBar.textContent = "خطأ في التهيئة - تأكد من الصلاحيات";
+            }
+        }
+
+        // طلب صلاحية الموقع
+        function requestLocationPermission() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject('المتصفح لا يدعم خدمة الموقع');
+                    return;
+                }
+                
+                // طلب الصلاحية
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        userLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy,
+                            altitude: position.coords.altitude
+                        };
+                        resolve();
+                    },
+                    (error) => {
+                        // استخدام موقع افتراضي إذا رفض المستخدم
+                        userLocation = {
+                            latitude: 33.603039,
+                            longitude: -7.636531,
+                            accuracy: 77.6,
+                            altitude: 10.64
+                        };
+                        resolve(); // لا نرفض، نستخدم البيانات الافتراضية
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 10000,
+                        maximumAge: 0
+                    }
+                );
+            });
+        }
+
+        // تحديث معلومات الموقع
+        function updateLocationInfo() {
+            if (userLocation) {
+                infoLatitude.textContent = `Latitude: ${userLocation.latitude.toFixed(6)}`;
+                infoLongitude.textContent = `Longitude: ${userLocation.longitude.toFixed(6)}`;
+                
+                // إضافة تغيير طفيف في الارتفاع (محاكاة للجهاز)
+                const elevationVariation = (Math.random() * 2 - 1).toFixed(2);
+                const baseElevation = userLocation.altitude || 10.64;
+                const currentElevation = (parseFloat(baseElevation) + parseFloat(elevationVariation)).toFixed(2);
+                
+                infoElevation.textContent = `Élévation: ${currentElevation}±10.9 m`;
+                infoPrecision.textContent = `Précision: ${userLocation.accuracy ? userLocation.accuracy.toFixed(1) : 77.6} m`;
+            }
+        }
+
+        // تحديث معلومات الوقت
+        function updateTimeInfo() {
             const now = new Date();
             const day = String(now.getDate()).padStart(2, '0');
             const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -308,54 +358,16 @@
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
             
-            timeLine.textContent = `Temps: ${day}-${month}-${year} ${hours}:${minutes}`;
+            infoTime.textContent = `Temps: ${day}-${month}-${year} ${hours}:${minutes}`;
         }
-        
-        // تحديث بيانات الموقع
-        function updateLocation() {
-            locationLine.textContent = `Latitude: ${locationData.latitude}`;
-            longitudeLine.textContent = `Longitude: ${locationData.longitude}`;
-            elevationLine.textContent = `Élévation: ${locationData.elevation}`;
-            precisionLine.textContent = `Précision: ${locationData.precision}`;
-        }
-        
-        // الحصول على الموقع الحقيقي
-        function getRealLocation() {
-            if (navigator.geolocation) {
-                statusText.textContent = "جاري الحصول على الموقع...";
-                
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        locationData.latitude = position.coords.latitude.toFixed(6);
-                        locationData.longitude = position.coords.longitude.toFixed(6);
-                        locationData.precision = `${position.coords.accuracy.toFixed(1)} m`;
-                        
-                        // إضافة تغيير بسيط في الارتفاع لمحاكاة البيانات الحقيقية
-                        const baseElevation = 10.64;
-                        const variation = (Math.random() * 2 - 1).toFixed(2);
-                        locationData.elevation = `${(parseFloat(baseElevation) + parseFloat(variation)).toFixed(2)}±10.9 m`;
-                        
-                        updateLocation();
-                        statusText.textContent = "تم تحديث بيانات الموقع";
-                    },
-                    (error) => {
-                        statusText.textContent = "تعذر الحصول على الموقع، استخدام بيانات افتراضية";
-                        updateLocation();
-                    }
-                );
-            } else {
-                statusText.textContent = "المتصفح لا يدخدم خدمة الموقع";
-                updateLocation();
-            }
-        }
-        
+
         // تشغيل/إيقاف الكاميرا
         async function toggleCamera() {
-            if (!isCameraOn) {
+            if (!isCameraActive) {
                 try {
-                    statusText.textContent = "جاري تشغيل الكاميرا...";
+                    statusBar.textContent = "جاري تشغيل الكاميرا...";
                     
-                    stream = await navigator.mediaDevices.getUserMedia({
+                    videoStream = await navigator.mediaDevices.getUserMedia({
                         video: {
                             width: { ideal: 1280 },
                             height: { ideal: 720 },
@@ -364,162 +376,218 @@
                         audio: false
                     });
                     
-                    video.srcObject = stream;
-                    isCameraOn = true;
+                    videoElement.srcObject = videoStream;
+                    isCameraActive = true;
                     
                     toggleCameraBtn.textContent = "إيقاف الكاميرا";
                     captureBtn.style.display = 'flex';
-                    statusText.textContent = "الكاميرا تعمل - جاهز للتقاط الصور";
+                    statusBar.textContent = "الكاميرا تعمل - اضغط على الدائرة للتقاط صورة";
                     
-                } catch (err) {
-                    console.error("خطأ في تشغيل الكاميرا:", err);
-                    statusText.textContent = `خطأ: ${err.message}`;
-                    alert(`تعذر تشغيل الكاميرا: ${err.message}`);
+                } catch (error) {
+                    console.error('خطأ في تشغيل الكاميرا:', error);
+                    statusBar.textContent = "خطأ في تشغيل الكاميرا - تأكد من الصلاحيات";
+                    alert('تعذر تشغيل الكاميرا. تأكد من منح الصلاحية.');
                 }
             } else {
-                if (stream) {
-                    stream.getTracks().forEach(track => track.stop());
-                    stream = null;
+                // إيقاف الكاميرا
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    videoStream = null;
                 }
                 
-                video.srcObject = null;
-                isCameraOn = false;
+                videoElement.srcObject = null;
+                isCameraActive = false;
                 
                 toggleCameraBtn.textContent = "تشغيل الكاميرا";
-                captureBtn.style.display = 'none';
-                statusText.textContent = "الكاميرا متوقفة";
+                captureBtn.style.display = 'flex';
+                statusBar.textContent = "الكاميرا متوقفة";
             }
         }
-        
-        // التقاط صورة
-        async function captureImage() {
-            if (!isCameraOn || !stream) {
+
+        // التقاط صورة مع المعلومات
+        async function captureImageWithInfo() {
+            if (!isCameraActive || !videoStream) {
                 alert("يجب تشغيل الكاميرا أولاً!");
                 return;
             }
             
             try {
-                statusText.textContent = "جاري التقاط الصورة...";
+                statusBar.textContent = "جاري التقاط الصورة وإضافة المعلومات...";
                 
-                // إنشاء canvas
+                // إنشاء Canvas
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 
-                // ضبط أبعاد canvas
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
+                // ضبط أبعاد Canvas بنفس أبعاد الفيديو
+                canvas.width = videoElement.videoWidth;
+                canvas.height = videoElement.videoHeight;
                 
-                // رسم الفيديو على canvas
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                // رسم الفيديو على Canvas
+                context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
                 
-                // تحويل إلى blob
-                const blob = await new Promise(resolve => {
-                    canvas.toBlob(resolve, 'image/jpeg', 0.85);
-                });
+                // الآن نضيف المعلومات على الصورة نفسها
+                addInfoToImage(context, canvas.width, canvas.height);
                 
-                // إنشاء URL للصورة
-                const imageUrl = URL.createObjectURL(blob);
-                currentImage = imageUrl;
+                // تحويل Canvas إلى صورة
+                canvas.toBlob((blob) => {
+                    const imageUrl = URL.createObjectURL(blob);
+                    currentImageData = {
+                        url: imageUrl,
+                        blob: blob,
+                        timestamp: new Date()
+                    };
+                    
+                    // إضافة الصورة للمعرض
+                    addImageToGallery(imageUrl, blob);
+                    
+                    // تمكين زر التحميل
+                    downloadBtn.disabled = false;
+                    
+                    // تحديث شريط الحالة
+                    statusBar.textContent = "تم التقاط الصورة وإضافة المعلومات بنجاح!";
+                    
+                    // تأثير بصري
+                    captureBtn.style.transform = 'translateX(-50%) scale(0.95)';
+                    setTimeout(() => {
+                        captureBtn.style.transform = 'translateX(-50%) scale(1)';
+                    }, 100);
+                    
+                }, 'image/jpeg', 0.9);
                 
-                // تحديث المعلومات مع الوقت الحالي
-                updateTime();
-                
-                // إضافة الصورة للمعرض
-                addToGallery(imageUrl, blob);
-                
-                // تمكين زر التحميل
-                downloadBtn.disabled = false;
-                
-                statusText.textContent = "تم التقاط الصورة بنجاح!";
-                
-                // تأثير بصري
-                captureBtn.style.transform = 'translateX(-50%) scale(0.95)';
-                setTimeout(() => {
-                    captureBtn.style.transform = 'translateX(-50%) scale(1)';
-                }, 100);
-                
-            } catch (err) {
-                console.error("خطأ في التقاط الصورة:", err);
-                statusText.textContent = `خطأ في التقاط الصورة: ${err.message}`;
+            } catch (error) {
+                console.error('خطأ في التقاط الصورة:', error);
+                statusBar.textContent = "خطأ في التقاط الصورة";
             }
         }
-        
-        // إضافة صورة للمعرض
-        function addToGallery(imageUrl, blob) {
+
+        // إضافة المعلومات على الصورة
+        function addInfoToImage(context, width, height) {
+            // حفظ إعدادات Canvas الأصلية
+            context.save();
+            
+            // إعداد الخط
+            context.font = '16px "Courier New", monospace';
+            context.fillStyle = '#ffffff';
+            context.textAlign = 'left';
+            context.textBaseline = 'top';
+            
+            // إضافة ظل للنص لجعله أوضح
+            context.shadowColor = 'rgba(0, 0, 0, 0.8)';
+            context.shadowBlur = 3;
+            context.shadowOffsetX = 1;
+            context.shadowOffsetY = 1;
+            
+            // معلومات الموقع والوقت (تظهر على الصورة نفسها)
+            const infoY = height - 130; // من الأسفل
+            const lineHeight = 20;
+            
+            // بيانات الموقع الحالية
+            const latText = `Latitude: ${userLocation ? userLocation.latitude.toFixed(6) : '33.603039'}`;
+            const lngText = `Longitude: ${userLocation ? userLocation.longitude.toFixed(6) : '-7.636531'}`;
+            const elevationText = `Élévation: ${infoElevation.textContent.split(': ')[1]}`;
+            const precisionText = `Précision: ${infoPrecision.textContent.split(': ')[1]}`;
+            const timeText = infoTime.textContent;
+            
+            // كتابة المعلومات على الصورة
+            context.fillText(latText, 20, infoY);
+            context.fillText(lngText, 20, infoY + lineHeight);
+            context.fillText(elevationText, 20, infoY + (lineHeight * 2));
+            context.fillText(precisionText, 20, infoY + (lineHeight * 3));
+            context.fillText(timeText, 20, infoY + (lineHeight * 4));
+            
+            // كتابة Powered by NotCam
+            context.font = '12px "Courier New", monospace';
+            context.fillText('Powered by NotCam', 20, infoY + (lineHeight * 5) + 10);
+            
+            // استعادة إعدادات Canvas
+            context.restore();
+        }
+
+        // إضافة الصورة للمعرض
+        function addImageToGallery(imageUrl, blob) {
             const galleryItem = document.createElement('div');
             galleryItem.className = 'gallery-item';
             
-            const img = document.createElement('img');
-            img.src = imageUrl;
-            img.alt = 'صورة ملتقطة';
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            imgElement.alt = 'صورة ملتقطة';
             
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
-            deleteBtn.innerHTML = '×';
-            deleteBtn.onclick = function(e) {
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = (e) => {
                 e.stopPropagation();
-                if (confirm("هل تريد حذف هذه الصورة؟")) {
+                if (confirm('هل تريد حذف هذه الصورة؟')) {
                     galleryItem.remove();
                     URL.revokeObjectURL(imageUrl);
-                    statusText.textContent = "تم حذف الصورة";
+                    statusBar.textContent = 'تم حذف الصورة';
                 }
             };
             
-            galleryItem.appendChild(img);
+            galleryItem.appendChild(imgElement);
             galleryItem.appendChild(deleteBtn);
             
-            // إضافة حدث النقر للتحميل
-            galleryItem.onclick = function() {
-                downloadImage(imageUrl, `NotCam_${new Date().getTime()}.jpg`);
+            // عند النقر على الصورة في المعرض، نمكن التحميل
+            galleryItem.onclick = () => {
+                currentImageData = { url: imageUrl, blob: blob };
+                downloadBtn.disabled = false;
+                statusBar.textContent = 'تم تحديد الصورة - جاهزة للتحميل';
             };
             
-            galleryItems.insertBefore(galleryItem, galleryItems.firstChild);
+            galleryContainer.prepend(galleryItem);
         }
-        
+
         // تحميل الصورة
-        function downloadImage(imageUrl, filename) {
+        function downloadCurrentImage() {
+            if (!currentImageData) {
+                alert('لا توجد صورة للتحميل');
+                return;
+            }
+            
+            const now = new Date();
+            const fileName = `NotCam_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.jpg`;
+            
             const link = document.createElement('a');
-            link.href = imageUrl;
-            link.download = filename;
+            link.href = currentImageData.url;
+            link.download = fileName;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
-            statusText.textContent = `تم تحميل الصورة: ${filename}`;
+            
+            statusBar.textContent = `تم تحميل الصورة: ${fileName}`;
         }
-        
-        // تهيئة التطبيق
-        function initApp() {
-            // تحديث الوقت أولاً
-            updateTime();
+
+        // إضافة مستمعي الأحداث
+        document.addEventListener('DOMContentLoaded', () => {
+            // تهيئة التطبيق
+            initializeApp();
             
-            // تحديث الموقع
-            updateLocation();
-            
-            // تحديث الوقت كل دقيقة
-            setInterval(updateTime, 60000);
-            
-            // إضافة مستمعي الأحداث
+            // أحداث الأزرار
             toggleCameraBtn.addEventListener('click', toggleCamera);
-            captureBtn.addEventListener('click', captureImage);
-            downloadBtn.addEventListener('click', () => {
-                if (currentImage) {
-                    const now = new Date();
-                    const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
-                    const timeStr = `${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}`;
-                    downloadImage(currentImage, `NotCam_${dateStr}_${timeStr}.jpg`);
+            captureBtn.addEventListener('click', captureImageWithInfo);
+            downloadBtn.addEventListener('click', downloadCurrentImage);
+            
+            // تحديث المعلومات عند النقر على زر التقاط
+            captureBtn.addEventListener('click', () => {
+                updateLocationInfo();
+                updateTimeInfo();
+            });
+        });
+
+        // طلب الصلاحيات عند تحميل الصفحة
+        window.onload = async () => {
+            // طلب صلاحية الموقع
+            if (navigator.permissions) {
+                try {
+                    const result = await navigator.permissions.query({ name: 'geolocation' });
+                    if (result.state === 'prompt') {
+                        statusBar.textContent = 'يرجى السماح بالوصول إلى الموقع...';
+                    }
+                } catch (error) {
+                    console.log('لا يمكن التحقق من صلاحية الموقع');
                 }
-            });
-            
-            refreshLocationBtn.addEventListener('click', getRealLocation);
-            
-            // إعدادات زر
-            document.getElementById('settingsBtn').addEventListener('click', () => {
-                alert("الإعدادات:\n- التقاط مباشر من الكاميرا\n- تنسيق التاريخ الفرنسي\n- بيانات الموقع\n- دقة عالية");
-            });
-        }
-        
-        // بدء التطبيق
-        document.addEventListener('DOMContentLoaded', initApp);
+            }
+        };
     </script>
 </body>
 </html>
