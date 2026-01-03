@@ -3,8 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoteCam Emulator</title>
+    <title>نظام NoteCam للمشرف والموظفين</title>
     <style>
+        /* الأنماط الأساسية */
         * {
             margin: 0;
             padding: 0;
@@ -19,35 +20,161 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 0;
+            padding: 20px;
             overflow-x: hidden;
         }
 
+        /* حاوية التطبيق */
         .app-container {
             width: 100%;
-            max-width: 600px;
-            background: #000000;
-            margin: 0 auto;
+            max-width: 800px;
+            background: #111111;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
 
+        /* شريط الحالة */
         .status-bar {
-            background: #111111;
-            padding: 8px 15px;
-            font-size: 11px;
+            background: #222222;
+            padding: 10px 15px;
+            font-size: 12px;
             color: #cccccc;
             text-align: center;
-            border-bottom: 1px solid #222222;
+            border-bottom: 1px solid #333333;
             width: 100%;
-            font-family: 'Courier New', monospace;
-            letter-spacing: 0.5px;
         }
 
+        /* أنماط تسجيل الدخول */
+        .login-container {
+            background: #222222;
+            padding: 30px;
+            border-radius: 8px;
+            margin: 20px;
+            text-align: center;
+        }
+
+        .login-container h2 {
+            margin-bottom: 20px;
+            color: #ffffff;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            background: #333333;
+            border: 1px solid #444444;
+            border-radius: 5px;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #1a5fb4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        /* أنماط لوحة التحكم */
+        .admin-panel, .employee-panel {
+            display: none;
+        }
+
+        .panel-header {
+            background: #222222;
+            padding: 15px;
+            border-bottom: 1px solid #333333;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            color: #ffffff;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: #b41a1a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* أقسام لوحة التحكم */
+        .dashboard-section {
+            padding: 20px;
+            margin: 10px;
+            background: #222222;
+            border-radius: 8px;
+            border: 1px solid #333333;
+        }
+
+        .dashboard-section h3 {
+            margin-bottom: 15px;
+            color: #1a5fb4;
+            border-bottom: 1px solid #333333;
+            padding-bottom: 5px;
+        }
+
+        /* أنماط إدارة الموظفين */
+        .employee-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-input {
+            padding: 10px;
+            background: #333333;
+            border: 1px solid #444444;
+            border-radius: 5px;
+            color: white;
+            font-family: 'Courier New', monospace;
+        }
+
+        .action-btn {
+            padding: 10px 15px;
+            background: #1a5fb4;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+        }
+
+        .employee-list {
+            margin-top: 20px;
+        }
+
+        .employee-card {
+            background: #333333;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 4px solid #1a5fb4;
+        }
+
+        /* أنماط الكاميرا (بنفس تصميم NoteCam) */
         .camera-container {
             width: 100%;
             height: 400px;
             position: relative;
             background: #000000;
             overflow: hidden;
+            margin: 10px 0;
         }
 
         #cameraVideo {
@@ -74,10 +201,6 @@
             z-index: 10;
         }
 
-        .capture-button:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
         .capture-inner {
             width: 50px;
             height: 50px;
@@ -86,7 +209,7 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة - بدون أي فراغات */
+        /* معلومات الموقع (بنفس تصميم NoteCam) */
         .info-panel {
             background: #000000;
             width: 100%;
@@ -94,7 +217,6 @@
             padding: 8px 0;
         }
 
-        /* الحاوية الرئيسية */
         .info-container {
             display: flex;
             height: 95px;
@@ -103,18 +225,16 @@
             width: 100%;
         }
 
-        /* الخلفية البيضاء فقط للمعلومات - 18% من العرض (82% تقليل) */
         .info-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: 18%; /* 82% تقليل من الجانب الأيمن */
+            width: 18%;
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
         }
 
-        /* العمود الأيسر - المعلومات */
         .info-column {
             flex: 1;
             display: flex;
@@ -124,12 +244,12 @@
             height: 100%;
             z-index: 2;
             position: relative;
-            width: 18%; /* 18% فقط */
+            width: 18%;
         }
 
         .info-line {
             margin: 0.5px 0;
-            font-size: 15px; /* خط كبير 15px */
+            font-size: 15px;
             line-height: 1.2;
             color: #000000;
             font-family: 'Courier New', monospace;
@@ -138,12 +258,11 @@
             white-space: nowrap;
         }
 
-        /* العمود الأيمن - الشعار فوق الخلفية */
         .logo-column {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 82%; /* 82% المتبقية */
+            width: 82%;
             height: 100%;
             position: relative;
             z-index: 3;
@@ -165,6 +284,43 @@
             white-space: nowrap;
         }
 
+        /* منطقة الموظف والإدخال */
+        .employee-area {
+            background: #222222;
+            padding: 15px;
+            margin: 10px;
+            border-radius: 8px;
+            border: 1px solid #333333;
+        }
+
+        .area-info {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #333333;
+            border-radius: 5px;
+        }
+
+        .number-input-container {
+            margin: 15px 0;
+        }
+
+        .number-label {
+            display: block;
+            margin-bottom: 8px;
+            color: #1a5fb4;
+        }
+
+        .number-select {
+            width: 100%;
+            padding: 12px;
+            background: #333333;
+            border: 1px solid #444444;
+            border-radius: 5px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            font-size: 16px;
+        }
+
         /* عناصر التحكم */
         .controls {
             padding: 15px;
@@ -173,6 +329,7 @@
             justify-content: center;
             width: 100%;
             border-top: 1px solid #333333;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -247,7 +404,28 @@
             font-weight: bold;
         }
 
-        /* تأثيرات إضافية */
+        /* التقارير */
+        .reports-section {
+            margin: 10px;
+        }
+
+        .report-card {
+            background: #222222;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #333333;
+        }
+
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #333333;
+        }
+
+        /* تأثيرات */
         .flash-effect {
             position: absolute;
             top: 0;
@@ -266,7 +444,6 @@
             100% { opacity: 0; }
         }
 
-        /* شبكة الكاميرا */
         .camera-grid {
             position: absolute;
             top: 0;
@@ -284,174 +461,565 @@
 
         /* تعديلات للجوال */
         @media (max-width: 768px) {
-            .camera-container {
-                height: 350px;
+            .employee-form {
+                grid-template-columns: 1fr;
             }
             
-            .info-container {
+            .controls {
                 flex-direction: column;
-                height: auto;
-                min-height: 110px;
-            }
-            
-            .info-background {
-                width: 100%;
-                height: 85px;
-            }
-            
-            .info-column {
-                width: 100%;
-                padding: 8px 10px;
-                height: 85px;
-            }
-            
-            .info-line {
-                font-size: 13px;
-                margin: 0.3px 0;
-            }
-            
-            .logo-column {
-                width: 100%;
-                height: 30px;
-                margin-top: 5px;
-            }
-            
-            .logo-text {
-                font-size: 14px;
             }
             
             .btn {
-                min-width: 100px;
-                font-size: 11px;
-                padding: 8px 15px;
+                width: 100%;
             }
             
-            .gallery-grid {
-                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-            }
-            
-            .gallery-item img {
-                height: 70px;
-            }
-        }
-
-        @media (max-width: 480px) {
             .camera-container {
                 height: 300px;
             }
             
             .info-line {
-                font-size: 11px;
-            }
-            
-            .logo-text {
                 font-size: 12px;
             }
             
             .gallery-grid {
-                grid-template-columns: repeat(3, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .panel-title {
+                font-size: 14px;
+            }
+            
+            .dashboard-section {
+                padding: 15px;
+            }
+            
+            .info-line {
+                font-size: 10px;
+            }
+            
+            .logo-text {
+                font-size: 12px;
             }
         }
     </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- شريط الحالة -->
         <div class="status-bar" id="statusBar">
-            NoteCam ● جاهز ● 100%
+            نظام NoteCam ● جاهز ●
         </div>
 
-        <div class="camera-container">
-            <video id="cameraVideo" autoplay playsinline></video>
-            <div class="camera-grid"></div>
-            <div class="capture-button" id="captureBtn">
-                <div class="capture-inner"></div>
-            </div>
-            <div class="flash-effect" id="flashEffect"></div>
-        </div>
-
-        <!-- معلومات تحت الصورة - بدون فراغات -->
-        <div class="info-panel">
-            <div class="info-container">
-                <!-- الخلفية البيضاء فقط للمعلومات - 18% عرض -->
-                <div class="info-background"></div>
-                
-                <!-- العمود الأيسر - المعلومات -->
-                <div class="info-column">
-                    <div class="info-line" id="infoLatitude">Latitude: 33.603016</div>
-                    <div class="info-line" id="infoLongitude">Longitude: -7.636873</div>
-                    <div class="info-line" id="infoElevation">Elevation: 9.34±11.02 m</div>
-                    <div class="info-line" id="infoPrecision">Precision: 13.28 m</div>
-                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:44</div>
-                </div>
-                
-                <!-- العمود الأيمن - الشعار فوق الخلفية -->
-                <div class="logo-column">
-                    <div class="logo-text">Powered by NoteCam</div>
-                </div>
+        <!-- صفحة تسجيل الدخول -->
+        <div class="login-container" id="loginPage">
+            <h2>تسجيل الدخول</h2>
+            <input type="text" id="username" class="login-input" placeholder="اسم المستخدم">
+            <input type="password" id="password" class="login-input" placeholder="كلمة المرور">
+            <button class="login-btn" onclick="login()">تسجيل الدخول</button>
+            
+            <!-- معلومات تسجيل الدخول الافتراضية -->
+            <div style="margin-top: 20px; font-size: 12px; color: #888;">
+                <p>للتجربة:</p>
+                <p>المشرف: admin / admin123</p>
+                <p>الموظف: user1 / pass123</p>
             </div>
         </div>
 
-        <div class="controls">
-            <button id="toggleCamera" class="btn btn-primary">تشغيل الكاميرا</button>
-            <button id="downloadBtn" class="btn" disabled>تحميل الصورة</button>
-            <button id="clearGallery" class="btn">مسح المعرض</button>
+        <!-- لوحة تحكم المشرف -->
+        <div class="admin-panel" id="adminPanel">
+            <div class="panel-header">
+                <div class="panel-title">لوحة تحكم المشرف</div>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+
+            <!-- إدارة الموظفين -->
+            <div class="dashboard-section">
+                <h3>إدارة الموظفين</h3>
+                <div class="employee-form">
+                    <input type="text" id="empUsername" class="form-input" placeholder="اسم المستخدم">
+                    <input type="password" id="empPassword" class="form-input" placeholder="كلمة المرور">
+                    <input type="text" id="empName" class="form-input" placeholder="اسم الموظف">
+                    <button class="action-btn" onclick="addEmployee()">إضافة موظف</button>
+                </div>
+                <div class="employee-list" id="employeesList">
+                    <!-- قائمة الموظفين ستظهر هنا -->
+                </div>
+            </div>
+
+            <!-- تعيين المناطق -->
+            <div class="dashboard-section">
+                <h3>تعيين المناطق الجغرافية</h3>
+                <div class="employee-form">
+                    <select id="employeeSelect" class="form-input">
+                        <option value="">اختر الموظف</option>
+                    </select>
+                    <input type="text" id="areaName" class="form-input" placeholder="اسم المنطقة">
+                    <input type="text" id="areaCode" class="form-input" placeholder="كود المنطقة">
+                    <button class="action-btn" onclick="assignArea()">تعيين منطقة</button>
+                </div>
+            </div>
+
+            <!-- التقارير الواردة -->
+            <div class="dashboard-section">
+                <h3>التقارير الواردة</h3>
+                <div class="reports-section" id="reportsList">
+                    <!-- التقارير ستظهر هنا -->
+                </div>
+            </div>
         </div>
 
-        <div class="gallery">
-            <div class="gallery-title">الصور الملتقطة (<span id="photoCount">0</span>)</div>
-            <div id="galleryContainer" class="gallery-grid"></div>
+        <!-- لوحة الموظف -->
+        <div class="employee-panel" id="employeePanel">
+            <div class="panel-header">
+                <div class="panel-title" id="employeeName">لوحة الموظف</div>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+
+            <!-- معلومات المنطقة المخصصة -->
+            <div class="employee-area">
+                <div class="area-info" id="assignedAreaInfo">
+                    <h4>المنطقة المخصصة: <span id="assignedAreaName">لا توجد منطقة مخصصة</span></h4>
+                    <p>الكود: <span id="areaCodeDisplay">-</span></p>
+                </div>
+
+                <!-- إدخال الرقم من 0-8 -->
+                <div class="number-input-container">
+                    <label class="number-label">أدخل رقم من 0 إلى 8:</label>
+                    <select class="number-select" id="numberInput">
+                        <option value="">اختر رقم</option>
+                        <option value="0">0</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                        <option value="7">7</option>
+                        <option value="8">8</option>
+                    </select>
+                </div>
+
+                <!-- الكاميرا -->
+                <div class="camera-container">
+                    <video id="cameraVideo" autoplay playsinline></video>
+                    <div class="camera-grid"></div>
+                    <div class="capture-button" id="captureBtn">
+                        <div class="capture-inner"></div>
+                    </div>
+                    <div class="flash-effect" id="flashEffect"></div>
+                </div>
+
+                <!-- معلومات الموقع -->
+                <div class="info-panel">
+                    <div class="info-container">
+                        <div class="info-background"></div>
+                        <div class="info-column">
+                            <div class="info-line" id="infoLatitude">Latitude: 33.603016</div>
+                            <div class="info-line" id="infoLongitude">Longitude: -7.636873</div>
+                            <div class="info-line" id="infoElevation">Elevation: 9.34±11.02 m</div>
+                            <div class="info-line" id="infoPrecision">Precision: 13.28 m</div>
+                            <div class="info-line" id="infoTime">Temps: 03-01-2026 15:44</div>
+                        </div>
+                        <div class="logo-column">
+                            <div class="logo-text">Powered by NoteCam</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- عناصر التحكم -->
+                <div class="controls">
+                    <button id="toggleCamera" class="btn btn-primary">تشغيل الكاميرا</button>
+                    <button id="downloadBtn" class="btn" disabled>تحميل الصورة</button>
+                    <button id="sendReport" class="btn btn-primary" onclick="sendReport()">إرسال التقرير</button>
+                    <button id="clearGallery" class="btn">مسح المعرض</button>
+                </div>
+
+                <!-- معرض الصور -->
+                <div class="gallery">
+                    <div class="gallery-title">الصور الملتقطة (<span id="photoCount">0</span>/5)</div>
+                    <div id="galleryContainer" class="gallery-grid"></div>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- JavaScript -->
     <script>
+        // البيانات المخزنة
+        let usersData = {
+            // المشرف الافتراضي
+            admin: {
+                password: "admin123",
+                role: "admin",
+                name: "المشرف الرئيسي"
+            },
+            // موظفين افتراضيين
+            user1: {
+                password: "pass123",
+                role: "employee",
+                name: "الموظف الأول",
+                assignedAreas: []
+            },
+            user2: {
+                password: "pass123",
+                role: "employee",
+                name: "الموظف الثاني",
+                assignedAreas: []
+            }
+        };
+
+        let employees = [
+            {username: "user1", name: "الموظف الأول"},
+            {username: "user2", name: "الموظف الثاني"}
+        ];
+
+        let assignedAreas = [];
+
+        let reports = [];
+
+        // متغيرات النظام
+        let currentUser = null;
         let videoStream = null;
         let isCameraActive = false;
         let currentImageData = null;
         let photoCount = 0;
+        let capturedImages = [];
 
+        // عناصر DOM
+        const statusBar = document.getElementById('statusBar');
+        const loginPage = document.getElementById('loginPage');
+        const adminPanel = document.getElementById('adminPanel');
+        const employeePanel = document.getElementById('employeePanel');
+        const employeesList = document.getElementById('employeesList');
+        const employeeSelect = document.getElementById('employeeSelect');
+        const reportsList = document.getElementById('reportsList');
+        const employeeName = document.getElementById('employeeName');
+        const assignedAreaName = document.getElementById('assignedAreaName');
+        const areaCodeDisplay = document.getElementById('areaCodeDisplay');
+        const assignedAreaInfo = document.getElementById('assignedAreaInfo');
+        const numberInput = document.getElementById('numberInput');
+        const sendReportBtn = document.getElementById('sendReport');
+
+        // عناصر الكاميرا
         const videoElement = document.getElementById('cameraVideo');
         const captureBtn = document.getElementById('captureBtn');
         const toggleCameraBtn = document.getElementById('toggleCamera');
         const downloadBtn = document.getElementById('downloadBtn');
-        const statusBar = document.getElementById('statusBar');
-        const galleryContainer = document.getElementById('galleryContainer');
         const flashEffect = document.getElementById('flashEffect');
         const clearGalleryBtn = document.getElementById('clearGallery');
+        const galleryContainer = document.getElementById('galleryContainer');
         const photoCountElement = document.getElementById('photoCount');
 
+        // عناصر المعلومات الجغرافية
         const infoLatitude = document.getElementById('infoLatitude');
         const infoLongitude = document.getElementById('infoLongitude');
         const infoElevation = document.getElementById('infoElevation');
         const infoPrecision = document.getElementById('infoPrecision');
         const infoTime = document.getElementById('infoTime');
 
+        // البيانات الجغرافية
         const sampleLocations = [
             {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
             {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
             {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
         ];
 
-        async function initializeApp() {
-            try {
-                updateLocationInfo();
-                updateTimeInfo();
-                updateBatteryStatus();
-                
-                setInterval(updateTimeInfo, 60000);
-                setInterval(updateLocationInfo, 5000);
-                setInterval(updateBatteryStatus, 60000);
-                
-                statusBar.textContent = "NoteCam ● جاهز ● 100%";
-                
-                loadSavedPhotos();
-                
-            } catch (error) {
-                console.error('خطأ في التهيئة:', error);
-                statusBar.textContent = "NoteCam ● خطأ ● 100%";
+        // تهيئة التطبيق
+        function initializeApp() {
+            loadFromLocalStorage();
+            updateStatusBar("جاهز للاستخدام");
+            updateLocationInfo();
+            updateTimeInfo();
+            
+            setInterval(updateTimeInfo, 60000);
+            setInterval(updateLocationInfo, 5000);
+            
+            // تحميل قائمة الموظفين
+            updateEmployeeSelect();
+            displayEmployees();
+            displayReports();
+            
+            // إعداد مستخدم افتراضي للمشرف
+            if (!localStorage.getItem('usersData')) {
+                saveToLocalStorage();
             }
         }
 
+        // تسجيل الدخول
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert("يرجى إدخال اسم المستخدم وكلمة المرور");
+                return;
+            }
+            
+            const user = usersData[username];
+            
+            if (user && user.password === password) {
+                currentUser = {username, ...user};
+                updateStatusBar(`مرحباً ${user.name}`);
+                
+                // إخفاء صفحة تسجيل الدخول
+                loginPage.style.display = 'none';
+                
+                // عرض اللوحة المناسبة
+                if (user.role === 'admin') {
+                    adminPanel.style.display = 'block';
+                    employeePanel.style.display = 'none';
+                    updateAdminDashboard();
+                } else {
+                    adminPanel.style.display = 'none';
+                    employeePanel.style.display = 'block';
+                    employeeName.textContent = `موظف: ${user.name}`;
+                    loadEmployeeAreas();
+                }
+                
+                // حفظ حالة تسجيل الدخول
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            } else {
+                alert("اسم المستخدم أو كلمة المرور غير صحيحة");
+            }
+        }
+
+        // تسجيل الخروج
+        function logout() {
+            currentUser = null;
+            loginPage.style.display = 'block';
+            adminPanel.style.display = 'none';
+            employeePanel.style.display = 'none';
+            
+            // إيقاف الكاميرا إذا كانت تعمل
+            if (isCameraActive && videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+                videoElement.srcObject = null;
+                isCameraActive = false;
+                toggleCameraBtn.textContent = "تشغيل الكاميرا";
+            }
+            
+            localStorage.removeItem('currentUser');
+            updateStatusBar("تم تسجيل الخروج");
+        }
+
+        // إضافة موظف جديد
+        function addEmployee() {
+            const username = document.getElementById('empUsername').value;
+            const password = document.getElementById('empPassword').value;
+            const name = document.getElementById('empName').value;
+            
+            if (!username || !password || !name) {
+                alert("يرجى ملء جميع الحقول");
+                return;
+            }
+            
+            if (usersData[username]) {
+                alert("اسم المستخدم موجود بالفعل");
+                return;
+            }
+            
+            // إضافة الموظف
+            usersData[username] = {
+                password: password,
+                role: "employee",
+                name: name,
+                assignedAreas: []
+            };
+            
+            employees.push({username, name});
+            
+            // تحديث الواجهة
+            updateEmployeeSelect();
+            displayEmployees();
+            saveToLocalStorage();
+            
+            // مسح الحقول
+            document.getElementById('empUsername').value = '';
+            document.getElementById('empPassword').value = '';
+            document.getElementById('empName').value = '';
+            
+            alert("تمت إضافة الموظف بنجاح");
+        }
+
+        // تعيين منطقة لموظف
+        function assignArea() {
+            const employeeUsername = employeeSelect.value;
+            const areaName = document.getElementById('areaName').value;
+            const areaCode = document.getElementById('areaCode').value;
+            
+            if (!employeeUsername || !areaName || !areaCode) {
+                alert("يرجى ملء جميع الحقول");
+                return;
+            }
+            
+            // إضافة المنطقة
+            const area = {
+                employee: employeeUsername,
+                name: areaName,
+                code: areaCode,
+                date: new Date().toISOString()
+            };
+            
+            assignedAreas.push(area);
+            
+            // إضافة المنطقة للموظف
+            if (usersData[employeeUsername]) {
+                if (!usersData[employeeUsername].assignedAreas) {
+                    usersData[employeeUsername].assignedAreas = [];
+                }
+                usersData[employeeUsername].assignedAreas.push(area);
+            }
+            
+            // تحديث الواجهة
+            saveToLocalStorage();
+            
+            // مسح الحقول
+            document.getElementById('areaName').value = '';
+            document.getElementById('areaCode').value = '';
+            
+            alert("تم تعيين المنطقة بنجاح");
+        }
+
+        // تحميل مناطق الموظف
+        function loadEmployeeAreas() {
+            if (!currentUser || !currentUser.assignedAreas) {
+                assignedAreaName.textContent = "لا توجد منطقة مخصصة";
+                areaCodeDisplay.textContent = "-";
+                assignedAreaInfo.style.display = 'block';
+                return;
+            }
+            
+            const areas = currentUser.assignedAreas;
+            if (areas.length > 0) {
+                const latestArea = areas[areas.length - 1];
+                assignedAreaName.textContent = latestArea.name;
+                areaCodeDisplay.textContent = latestArea.code;
+                assignedAreaInfo.style.display = 'block';
+            } else {
+                assignedAreaName.textContent = "لا توجد منطقة مخصصة";
+                areaCodeDisplay.textContent = "-";
+                assignedAreaInfo.style.display = 'block';
+            }
+        }
+
+        // إرسال التقرير
+        function sendReport() {
+            const selectedNumber = numberInput.value;
+            
+            if (!selectedNumber) {
+                alert("يرجى اختيار رقم من 0 إلى 8");
+                return;
+            }
+            
+            if (photoCount < 5) {
+                alert("يرجى التقاط 5 صور قبل إرسال التقرير");
+                return;
+            }
+            
+            if (capturedImages.length < 5) {
+                alert("يجب أن تكون لديك 5 صور على الأقل");
+                return;
+            }
+            
+            // إنشاء التقرير
+            const report = {
+                id: Date.now(),
+                employee: currentUser.username,
+                employeeName: currentUser.name,
+                number: selectedNumber,
+                date: new Date().toISOString(),
+                location: {
+                    lat: parseFloat(infoLatitude.textContent.split(': ')[1]),
+                    lng: parseFloat(infoLongitude.textContent.split(': ')[1]),
+                    elev: infoElevation.textContent.split(': ')[1],
+                    prec: parseFloat(infoPrecision.textContent.split(': ')[1])
+                },
+                images: capturedImages.slice(0, 5),
+                area: assignedAreaName.textContent,
+                areaCode: areaCodeDisplay.textContent
+            };
+            
+            // إضافة التقرير
+            reports.push(report);
+            
+            // حفظ في التخزين المحلي
+            saveToLocalStorage();
+            
+            // إعادة تعيين الحقول
+            numberInput.value = "";
+            photoCount = 0;
+            capturedImages = [];
+            photoCountElement.textContent = "0";
+            galleryContainer.innerHTML = "";
+            
+            // تحديث الواجهة
+            displayReports();
+            
+            alert("تم إرسال التقرير بنجاح إلى المشرف");
+            updateStatusBar("تم إرسال التقرير بنجاح");
+        }
+
+        // عرض الموظفين
+        function displayEmployees() {
+            employeesList.innerHTML = '';
+            employees.forEach(emp => {
+                const employeeCard = document.createElement('div');
+                employeeCard.className = 'employee-card';
+                employeeCard.innerHTML = `
+                    <strong>${emp.name}</strong><br>
+                    <small>اسم المستخدم: ${emp.username}</small><br>
+                    <small>عدد المناطق: ${(usersData[emp.username]?.assignedAreas || []).length}</small>
+                `;
+                employeesList.appendChild(employeeCard);
+            });
+        }
+
+        // عرض التقارير
+        function displayReports() {
+            reportsList.innerHTML = '';
+            
+            if (reports.length === 0) {
+                reportsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد تقارير</p>';
+                return;
+            }
+            
+            reports.slice().reverse().forEach(report => {
+                const reportCard = document.createElement('div');
+                reportCard.className = 'report-card';
+                reportCard.innerHTML = `
+                    <div class="report-header">
+                        <strong>${report.employeeName}</strong>
+                        <small>${new Date(report.date).toLocaleString('ar-SA')}</small>
+                    </div>
+                    <p><strong>الرقم المدخل:</strong> ${report.number}</p>
+                    <p><strong>المنطقة:</strong> ${report.area} (كود: ${report.areaCode})</p>
+                    <p><strong>الموقع:</strong> ${report.location.lat.toFixed(6)}, ${report.location.lng.toFixed(6)}</p>
+                    <p><strong>عدد الصور:</strong> ${report.images.length}</p>
+                `;
+                reportsList.appendChild(reportCard);
+            });
+        }
+
+        // تحديث قائمة الموظفين في التحديد
+        function updateEmployeeSelect() {
+            employeeSelect.innerHTML = '<option value="">اختر الموظف</option>';
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.username;
+                option.textContent = `${emp.name} (${emp.username})`;
+                employeeSelect.appendChild(option);
+            });
+        }
+
+        // تحديث لوحة المشرف
+        function updateAdminDashboard() {
+            displayEmployees();
+            displayReports();
+        }
+
+        // وظائف الكاميرا (بنفس كود NoteCam)
         function updateLocationInfo() {
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
@@ -473,19 +1041,15 @@
             infoTime.textContent = `Temps: ${day}-${month}-${year} ${hours}:${minutes}`;
         }
 
-        function updateBatteryStatus() {
-            if (navigator.getBattery) {
-                navigator.getBattery().then(battery => {
-                    const level = Math.floor(battery.level * 100);
-                    statusBar.textContent = `NoteCam ● جاهز ● ${level}%`;
-                });
-            }
+        function updateStatusBar(message) {
+            statusBar.textContent = `نظام NoteCam ● ${message} ●`;
         }
 
+        // تشغيل/إيقاف الكاميرا
         async function toggleCamera() {
             if (!isCameraActive) {
                 try {
-                    statusBar.textContent = "NoteCam ● تشغيل الكاميرا... ●";
+                    updateStatusBar("جاري تشغيل الكاميرا...");
                     
                     videoStream = await navigator.mediaDevices.getUserMedia({
                         video: {
@@ -501,11 +1065,11 @@
                     
                     toggleCameraBtn.textContent = "إيقاف الكاميرا";
                     captureBtn.style.display = 'flex';
-                    statusBar.textContent = "NoteCam ● جاهز للتصوير ●";
+                    updateStatusBar("جاهز للتصوير");
                     
                 } catch (error) {
                     console.error('خطأ في تشغيل الكاميرا:', error);
-                    statusBar.textContent = "NoteCam ● خطأ في الكاميرا ●";
+                    updateStatusBar("خطأ في الكاميرا");
                     alert('تعذر تشغيل الكاميرا. تأكد من منح الصلاحية.');
                 }
             } else {
@@ -518,7 +1082,7 @@
                 isCameraActive = false;
                 
                 toggleCameraBtn.textContent = "تشغيل الكاميرا";
-                statusBar.textContent = "NoteCam ● جاهز ●";
+                updateStatusBar("الكاميرا متوقفة");
             }
         }
 
@@ -528,14 +1092,20 @@
             flashEffect.style.animation = 'flash 300ms ease-out';
         }
 
+        // التقاط صورة
         async function captureImageWithInfo() {
             if (!isCameraActive || !videoStream) {
                 alert("يجب تشغيل الكاميرا أولاً!");
                 return;
             }
             
+            if (photoCount >= 5) {
+                alert("لقد وصلت للحد الأقصى من الصور (5 صور)");
+                return;
+            }
+            
             try {
-                statusBar.textContent = "NoteCam ● جاري التقاط الصورة... ●";
+                updateStatusBar("جاري التقاط الصورة...");
                 
                 triggerFlash();
                 
@@ -555,7 +1125,13 @@
                     currentImageData = {
                         url: imageUrl,
                         blob: blob,
-                        timestamp: timestamp
+                        timestamp: timestamp,
+                        location: {
+                            lat: parseFloat(infoLatitude.textContent.split(': ')[1]),
+                            lng: parseFloat(infoLongitude.textContent.split(': ')[1]),
+                            elev: infoElevation.textContent.split(': ')[1],
+                            prec: parseFloat(infoPrecision.textContent.split(': ')[1])
+                        }
                     };
                     
                     addImageToGallery(imageUrl, blob, timestamp);
@@ -564,23 +1140,35 @@
                     photoCount++;
                     photoCountElement.textContent = photoCount;
                     
-                    savePhotoToStorage();
+                    // حفظ الصورة في المصفوفة
+                    capturedImages.push({
+                        url: imageUrl,
+                        timestamp: timestamp.toISOString(),
+                        location: currentImageData.location
+                    });
                     
-                    statusBar.textContent = "NoteCam ● تم التقاط الصورة ●";
+                    updateStatusBar("تم التقاط الصورة");
                     
+                    // تأثير الضغط على الزر
                     captureBtn.style.transform = 'translateX(-50%) scale(0.9)';
                     setTimeout(() => {
                         captureBtn.style.transform = 'translateX(-50%) scale(1)';
                     }, 100);
                     
+                    // إذا وصل إلى 5 صور
+                    if (photoCount === 5) {
+                        updateStatusBar("تم التقاط 5 صور - جاهز للإرسال");
+                    }
+                    
                 }, 'image/jpeg', 0.85);
                 
             } catch (error) {
                 console.error('خطأ في التقاط الصورة:', error);
-                statusBar.textContent = "NoteCam ● خطأ في التقاط الصورة ●";
+                updateStatusBar("خطأ في التقاط الصورة");
             }
         }
 
+        // إضافة المعلومات على الصورة
         function drawLogoOnImage(context, x, y) {
             context.save();
             
@@ -589,7 +1177,7 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 20px "Arial Black", sans-serif'; /* خط 20px على الصورة */
+            context.font = '900 20px "Arial Black", sans-serif';
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
@@ -610,17 +1198,16 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // 18% من العرض فقط مع خط 15px
             const lineHeight = 16;
             const totalHeight = lineHeight * 5 + 6;
-            const boxWidth = width * 0.18; /* 18% فقط من عرض الصورة */
+            const boxWidth = width * 0.18;
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            context.font = 'bold 15px "Courier New", monospace'; /* خط 15px على الصورة */
+            context.font = 'bold 15px "Courier New", monospace';
             context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
@@ -638,85 +1225,7 @@
             context.restore();
         }
 
-        function savePhotoToStorage() {
-            try {
-                const photos = JSON.parse(localStorage.getItem('noteCamPhotos') || '[]');
-                photos.unshift({
-                    timestamp: new Date().toISOString(),
-                    count: photoCount
-                });
-                
-                if (photos.length > 20) {
-                    photos.pop();
-                }
-                
-                localStorage.setItem('noteCamPhotos', JSON.stringify(photos));
-            } catch (error) {
-                console.error('خطأ في حفظ الصورة:', error);
-            }
-        }
-
-        function loadSavedPhotos() {
-            try {
-                const photos = JSON.parse(localStorage.getItem('noteCamPhotos') || '[]');
-                photoCount = photos.length;
-                photoCountElement.textContent = photoCount;
-                
-                photos.forEach((photo, index) => {
-                    setTimeout(() => {
-                        createGalleryItem(index);
-                    }, index * 100);
-                });
-            } catch (error) {
-                console.error('خطأ في تحميل الصور:', error);
-            }
-        }
-
-        function createGalleryItem(index) {
-            const galleryItem = document.createElement('div');
-            galleryItem.className = 'gallery-item';
-            
-            const canvas = document.createElement('canvas');
-            canvas.width = 100;
-            canvas.height = 80;
-            const ctx = canvas.getContext('2d');
-            
-            ctx.fillStyle = `hsl(${Math.random() * 360}, 50%, 30%)`;
-            ctx.fillRect(0, 0, 100, 80);
-            
-            ctx.fillStyle = 'white';
-            ctx.font = '10px Arial';
-            ctx.fillText(`صورة ${index + 1}`, 30, 40);
-            
-            const imgElement = document.createElement('img');
-            imgElement.src = canvas.toDataURL();
-            imgElement.alt = `صورة ${index + 1}`;
-            
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'delete-btn';
-            deleteBtn.textContent = '×';
-            deleteBtn.onclick = (e) => {
-                e.stopPropagation();
-                if (confirm('هل تريد حذف هذه الصورة؟')) {
-                    galleryItem.remove();
-                    photoCount--;
-                    photoCountElement.textContent = photoCount;
-                    statusBar.textContent = 'NoteCam ● تم حذف الصورة ●';
-                }
-            };
-            
-            galleryItem.appendChild(imgElement);
-            galleryItem.appendChild(deleteBtn);
-            
-            galleryItem.onclick = () => {
-                currentImageData = { url: imgElement.src };
-                downloadBtn.disabled = false;
-                statusBar.textContent = 'NoteCam ● تم تحديد الصورة ●';
-            };
-            
-            galleryContainer.appendChild(galleryItem);
-        }
-
+        // إضافة الصورة للمعرض
         function addImageToGallery(imageUrl, blob, timestamp) {
             const galleryItem = document.createElement('div');
             galleryItem.className = 'gallery-item';
@@ -734,7 +1243,14 @@
                     galleryItem.remove();
                     photoCount--;
                     photoCountElement.textContent = photoCount;
-                    statusBar.textContent = 'NoteCam ● تم حذف الصورة ●';
+                    
+                    // إزالة الصورة من المصفوفة
+                    const index = capturedImages.findIndex(img => img.url === imageUrl);
+                    if (index !== -1) {
+                        capturedImages.splice(index, 1);
+                    }
+                    
+                    updateStatusBar('تم حذف الصورة');
                 }
             };
             
@@ -744,12 +1260,13 @@
             galleryItem.onclick = () => {
                 currentImageData = { url: imageUrl, blob: blob };
                 downloadBtn.disabled = false;
-                statusBar.textContent = 'NoteCam ● تم تحديد الصورة ●';
+                updateStatusBar('تم تحديد الصورة');
             };
             
             galleryContainer.prepend(galleryItem);
         }
 
+        // تحميل الصورة الحالية
         function downloadCurrentImage() {
             if (!currentImageData) {
                 alert('لا توجد صورة للتحميل');
@@ -766,36 +1283,78 @@
             link.click();
             document.body.removeChild(link);
             
-            statusBar.textContent = `NoteCam ● تم التحميل: ${fileName} ●`;
+            updateStatusBar(`تم التحميل: ${fileName}`);
         }
 
+        // مسح المعرض
         function clearGallery() {
             if (confirm('هل تريد مسح جميع الصور من المعرض؟')) {
                 galleryContainer.innerHTML = '';
                 photoCount = 0;
                 photoCountElement.textContent = '0';
-                
-                localStorage.removeItem('noteCamPhotos');
-                
-                statusBar.textContent = 'NoteCam ● تم مسح المعرض ●';
+                capturedImages = [];
+                updateStatusBar('تم مسح المعرض');
             }
         }
 
+        // حفظ البيانات في التخزين المحلي
+        function saveToLocalStorage() {
+            const data = {
+                usersData,
+                employees,
+                assignedAreas,
+                reports
+            };
+            localStorage.setItem('noteCamSystemData', JSON.stringify(data));
+        }
+
+        // تحميل البيانات من التخزين المحلي
+        function loadFromLocalStorage() {
+            const savedData = localStorage.getItem('noteCamSystemData');
+            if (savedData) {
+                try {
+                    const data = JSON.parse(savedData);
+                    usersData = data.usersData || usersData;
+                    employees = data.employees || employees;
+                    assignedAreas = data.assignedAreas || assignedAreas;
+                    reports = data.reports || reports;
+                } catch (error) {
+                    console.error('خطأ في تحميل البيانات:', error);
+                }
+            }
+            
+            // تحميل حالة تسجيل الدخول
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    if (currentUser && usersData[currentUser.username]) {
+                        loginPage.style.display = 'none';
+                        if (currentUser.role === 'admin') {
+                            adminPanel.style.display = 'block';
+                            updateAdminDashboard();
+                        } else {
+                            employeePanel.style.display = 'block';
+                            employeeName.textContent = `موظف: ${currentUser.name}`;
+                            loadEmployeeAreas();
+                        }
+                        updateStatusBar(`مرحباً ${currentUser.name}`);
+                    }
+                } catch (error) {
+                    console.error('خطأ في تحميل حالة المستخدم:', error);
+                }
+            }
+        }
+
+        // إعداد الأحداث
         document.addEventListener('DOMContentLoaded', () => {
             initializeApp();
+            
             toggleCameraBtn.addEventListener('click', toggleCamera);
             captureBtn.addEventListener('click', captureImageWithInfo);
             downloadBtn.addEventListener('click', downloadCurrentImage);
             clearGalleryBtn.addEventListener('click', clearGallery);
         });
-
-        window.onload = async () => {
-            if (navigator.getBattery) {
-                navigator.getBattery().then(battery => {
-                    battery.addEventListener('levelchange', updateBatteryStatus);
-                });
-            }
-        };
     </script>
 </body>
 </html>
