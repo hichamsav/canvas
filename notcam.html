@@ -931,7 +931,7 @@
                             <div class="info-line" id="infoLongitude">Longitude : -7.636873</div>
                             <div class="info-line" id="infoElevation">Altitude : 9.34±11.02 m</div>
                             <div class="info-line" id="infoPrecision">Précision : 13.28 m</div>
-                            <div class="info-line" id="infoTime">Temps : 03-01-2026 15:44</div>
+                            <div class="info-line" id="infoTime">Heure : ٠٣/٠١/٢٠٢٦ ١٥:٤٤</div>
                         </div>
                         <div class="logo-column">
                             <div class="logo-text">Propulsé par NoteCam</div>
@@ -1048,20 +1048,19 @@
             {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
         ];
 
-        // ========== Fonction de formatage de date en français ==========
-        function formatDateFrench(dateString) {
-            const date = new Date(dateString);
-            
-            // Nombres français (٠١٢٣٤٥٦٧٨٩)
+        // ========== Fonction pour convertir les nombres en français ==========
+        function convertToFrenchNumbers(str) {
             const frenchNumbers = {
                 '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
                 '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
             };
             
-            // Convertir les nombres dans la chaîne en français
-            function convertToFrenchNumbers(str) {
-                return str.replace(/\d/g, char => frenchNumbers[char] || char);
-            }
+            return str.replace(/\d/g, char => frenchNumbers[char] || char);
+        }
+
+        // ========== Fonction de formatage de date en français COMPLET ==========
+        function formatDateFrench(dateString) {
+            const date = new Date(dateString);
             
             // Formater la date
             const day = String(date.getDate()).padStart(2, '0');
@@ -1071,8 +1070,8 @@
             const minutes = String(date.getMinutes()).padStart(2, '0');
             const seconds = String(date.getSeconds()).padStart(2, '0');
             
-            // Créer la date en format français
-            const dateStr = `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            // Créer la date en format français avec libellés en français
+            const dateStr = `Image - ${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
             
             // Convertir les nombres en français
             return convertToFrenchNumbers(dateStr);
@@ -1082,22 +1081,53 @@
         function formatSimpleDate(dateString) {
             const date = new Date(dateString);
             
-            // Nombres français (٠١٢٣٤٥٦٧٨٩)
-            const frenchNumbers = {
-                '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
-                '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
-            };
-            
-            // Convertir les nombres dans la chaîne en français
-            function convertToFrenchNumbers(str) {
-                return str.replace(/\d/g, char => frenchNumbers[char] || char);
-            }
-            
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
             
             const dateStr = `${day}/${month}/${year}`;
+            return convertToFrenchNumbers(dateStr);
+        }
+
+        // ========== Fonction pour formatage d'heure ==========
+        function formatTimeFrench() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            
+            const dateStr = `${day}/${month}/${year} ${hours}:${minutes}`;
+            return convertToFrenchNumbers(dateStr);
+        }
+
+        // ========== Fonction pour formatage d'image ==========
+        function formatImageTime(imageIndex, dateString) {
+            const date = new Date(dateString);
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+            
+            const dateStr = `Image ${imageIndex} - ${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            return convertToFrenchNumbers(dateStr);
+        }
+
+        // ========== Fonction pour formatage de date de rapport ==========
+        function formatReportDate(dateString) {
+            const date = new Date(dateString);
+            
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            
+            const dateStr = `${day}/${month}/${year} ${hours}:${minutes}`;
             return convertToFrenchNumbers(dateStr);
         }
 
@@ -1146,7 +1176,7 @@
             
             updateStatusBar("Création du rapport PDF...");
             
-            // Contenu du rapport
+            // Contenu du rapport en français
             const reportContent = `
 ===========================================
 Rapport NoteCam - ${report.employeeName}
@@ -1156,7 +1186,7 @@ Nom d'utilisateur : ${report.employee}
 Nombre saisi : ${report.number}
 Zone : ${report.area || 'Non spécifiée'}
 Code de zone : ${report.areaCode || 'Non spécifié'}
-Date d'envoi : ${formatDateFrench(report.date)}
+Date d'envoi : ${formatReportDate(report.date)}
 Latitude : ${report.location.lat.toFixed(6)}
 Longitude : ${report.location.lng.toFixed(6)}
 Altitude : ${report.location.elev} m
@@ -1167,7 +1197,7 @@ Informations des images :
 ${report.images.map((img, idx) => `Image ${idx + 1} : ${img.url}`).join('\n')}
 ===========================================
 Rapport généré par le système NoteCam
-Date de création : ${formatDateFrench(new Date().toISOString())}
+Date de création : ${formatReportDate(new Date().toISOString())}
             `;
             
             // Créer le fichier à télécharger
@@ -1679,7 +1709,7 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
                 reportCard.innerHTML = `
                     <div class="report-header">
                         <div class="employee-name">${report.employeeName}</div>
-                        <div class="report-date">${formatDateFrench(report.date)}</div>
+                        <div class="report-date">${formatReportDate(report.date)}</div>
                     </div>
                     <div class="report-details">
                         <div class="detail-item">
@@ -1692,7 +1722,7 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
                             <strong>Images :</strong> ${report.images.length}
                         </div>
                         <div class="detail-item">
-                            <strong>Date :</strong> ${formatDateFrench(report.date)}
+                            <strong>Date :</strong> ${formatReportDate(report.date)}
                         </div>
                     </div>
                     <button class="view-report-btn" onclick="viewSingleReport(${report.id}); event.stopPropagation();">
@@ -1730,7 +1760,7 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
                         <div class="report-image-item">
                             <img src="${img.url}" alt="Image ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">Image ${imgIndex + 1}</text></svg>';">
                             <div class="image-info">
-                                <div class="image-time">Image ${imgIndex + 1}</div>
+                                <div class="image-time">${formatImageTime(imgIndex + 1, img.timestamp)}</div>
                             </div>
                         </div>
                     `).join('');
@@ -1766,7 +1796,7 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Date d'envoi</div>
-                                <div class="info-value">${formatDateFrench(report.date)}</div>
+                                <div class="info-value">${formatReportDate(report.date)}</div>
                             </div>
                             <div class="info-item">
                                 <div class="info-label">Latitude</div>
@@ -1823,7 +1853,7 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
                     <div class="report-image-item">
                         <img src="${img.url}" alt="Image ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">Image ${imgIndex + 1}</text></svg>';">
                         <div class="image-info">
-                            <div class="image-time">Image ${imgIndex + 1} - ${formatDateFrench(img.timestamp)}</div>
+                            <div class="image-time">${formatImageTime(imgIndex + 1, img.timestamp)}</div>
                         </div>
                     </div>
                 `).join('');
@@ -1860,7 +1890,7 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
                         </div>
                         <div class="info-item">
                             <div class="info-label">Date d'envoi</div>
-                                <div class="info-value">${formatDateFrench(report.date)}</div>
+                            <div class="info-value">${formatReportDate(report.date)}</div>
                         </div>
                         <div class="info-item">
                             <div class="info-label">Latitude</div>
@@ -1937,25 +1967,8 @@ Date de création : ${formatDateFrench(new Date().toISOString())}
         }
 
         function updateTimeInfo() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            
-            // Convertir les nombres en français
-            const frenchNumbers = {
-                '0': '٠', '1': '١', '2': '٢', '3': '٣', '4': '٤',
-                '5': '٥', '6': '٦', '7': '٧', '8': '٨', '9': '٩'
-            };
-            
-            function convertToFrenchNumbers(str) {
-                return str.replace(/\d/g, char => frenchNumbers[char] || char);
-            }
-            
-            const dateStr = `${day}-${month}-${year} ${hours}:${minutes}`;
-            infoTime.textContent = `Temps : ${convertToFrenchNumbers(dateStr)}`;
+            // Maintenant "Temps" est changé à "Heure" en français
+            infoTime.textContent = `Heure : ${formatTimeFrench()}`;
         }
 
         function updateStatusBar(message) {
