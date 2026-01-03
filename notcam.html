@@ -103,12 +103,12 @@
             width: 100%;
         }
 
-        /* الخلفية البيضاء فقط للمعلومات - 30% من العرض (تقليل 70% من اليمين) */
+        /* الخلفية البيضاء فقط للمعلومات - 15% من العرض (تقليل 85% من اليمين) */
         .info-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: 30%; /* تقليل بنسبة 70% من الجانب الأيمن */
+            width: 15%; /* تقليل بنسبة 85% من الجانب الأيمن */
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
@@ -120,21 +120,21 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 10px;
+            padding-left: 8px; /* حشو أقل */
             height: 100%;
             z-index: 2;
             position: relative;
-            width: 30%; /* 30% فقط */
+            width: 15%; /* 15% فقط */
         }
 
         .info-line {
-            margin: 0.2px 0;
-            font-size: 11px;
-            line-height: 1.05;
+            margin: 0.1px 0; /* مسافة أقل */
+            font-size: 10px; /* خط أصغر */
+            line-height: 1.0; /* تباعد أقل */
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            letter-spacing: 0.1px;
+            letter-spacing: 0px;
             white-space: nowrap;
         }
 
@@ -143,7 +143,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 70%; /* 70% المتبقية */
+            width: 85%; /* 85% المتبقية */
             height: 100%;
             position: relative;
             z-index: 3;
@@ -291,24 +291,24 @@
             .info-container {
                 flex-direction: column;
                 height: auto;
-                min-height: 110px;
+                min-height: 100px;
             }
             
             .info-background {
                 width: 100%;
-                height: 80px;
+                height: 70px;
             }
             
             .info-column {
                 width: 100%;
-                padding: 8px 10px;
-                height: 80px;
+                padding: 5px 8px;
+                height: 70px;
             }
             
             .logo-column {
                 width: 100%;
-                height: 30px;
-                margin-top: 5px;
+                height: 25px;
+                margin-top: 3px;
             }
             
             .logo-text {
@@ -316,7 +316,7 @@
             }
             
             .info-line {
-                font-size: 10px;
+                font-size: 9px;
             }
             
             .btn {
@@ -340,7 +340,7 @@
             }
             
             .info-line {
-                font-size: 9px;
+                font-size: 8px;
             }
             
             .logo-text {
@@ -371,7 +371,7 @@
         <!-- معلومات تحت الصورة - بدون فراغات -->
         <div class="info-panel">
             <div class="info-container">
-                <!-- الخلفية البيضاء فقط للمعلومات - 30% عرض -->
+                <!-- الخلفية البيضاء فقط للمعلومات - 15% عرض -->
                 <div class="info-background"></div>
                 
                 <!-- العمود الأيسر - المعلومات -->
@@ -402,7 +402,7 @@
         </div>
     </div>
 
-    <!-- JavaScript يبقى كما هو -->
+    <!-- JavaScript -->
     <script>
         let videoStream = null;
         let isCameraActive = false;
@@ -609,10 +609,10 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // تقليل العرض بنسبة 70% على الصورة
+            // تقليل العرض بنسبة 85% على الصورة
             const lineHeight = 12;
             const totalHeight = lineHeight * 5 + 4;
-            const boxWidth = width * 0.3; /* 30% فقط من عرض الصورة */
+            const boxWidth = width * 0.15; /* 15% فقط من عرض الصورة */
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
