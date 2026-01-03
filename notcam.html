@@ -103,12 +103,12 @@
             width: 100%;
         }
 
-        /* الخلفية البيضاء فقط للمعلومات - 80% من العرض */
+        /* الخلفية البيضاء فقط للمعلومات - 30% من العرض (تقليل 70% من اليمين) */
         .info-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: 80%; /* تقليل بنسبة 20% من الجانب الأيمن */
+            width: 30%; /* تقليل بنسبة 70% من الجانب الأيمن */
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
@@ -124,7 +124,7 @@
             height: 100%;
             z-index: 2;
             position: relative;
-            width: 80%; /* 80% فقط */
+            width: 30%; /* 30% فقط */
         }
 
         .info-line {
@@ -143,7 +143,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 20%; /* 20% المتبقية */
+            width: 70%; /* 70% المتبقية */
             height: 100%;
             position: relative;
             z-index: 3;
@@ -371,7 +371,7 @@
         <!-- معلومات تحت الصورة - بدون فراغات -->
         <div class="info-panel">
             <div class="info-container">
-                <!-- الخلفية البيضاء فقط للمعلومات - 80% عرض -->
+                <!-- الخلفية البيضاء فقط للمعلومات - 30% عرض -->
                 <div class="info-background"></div>
                 
                 <!-- العمود الأيسر - المعلومات -->
@@ -609,10 +609,10 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // تقليل العرض بنسبة 20% على الصورة أيضاً
+            // تقليل العرض بنسبة 70% على الصورة
             const lineHeight = 12;
             const totalHeight = lineHeight * 5 + 4;
-            const boxWidth = width * 0.8; // 80% من عرض الصورة
+            const boxWidth = width * 0.3; /* 30% فقط من عرض الصورة */
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
