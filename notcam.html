@@ -14,7 +14,7 @@
         body {
             background: #000000;
             color: #ffffff;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', Courier, monospace;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -37,6 +37,7 @@
             text-align: center;
             border-bottom: 1px solid #333333;
             width: 100%;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         /* منطقة الكاميرا */
@@ -89,7 +90,7 @@
 
         /* معلومات تحت الصورة */
         .info-panel {
-            padding: 15px;
+            padding: 20px 15px 15px 15px;
             background: #000000;
             border-top: 1px solid #333333;
             width: 100%;
@@ -99,7 +100,7 @@
         .info-container {
             display: flex;
             justify-content: space-between;
-            align-items: flex-end;
+            align-items: flex-start;
         }
 
         .info-column {
@@ -111,20 +112,21 @@
             font-size: 14px;
             line-height: 1.4;
             color: #ffffff;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', Courier, monospace;
         }
 
-        /* الشعار - على الجانب الآخر */
+        /* الشعار - نفس الخط واللون بالضبط */
         .logo-side {
             text-align: right;
-            padding-bottom: 5px;
         }
 
         .logo-text {
             font-size: 12px;
-            color: #888888;
-            font-family: 'Courier New', monospace;
-            margin-top: 10px;
+            color: #ffffff; /* أبيض بالضبط مثل باقي النص */
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: normal;
+            letter-spacing: 0;
+            line-height: 1.4;
         }
 
         /* الأزرار */
@@ -142,7 +144,7 @@
             background: #222222;
             border: 1px solid #444444;
             color: white;
-            font-family: 'Courier New', monospace;
+            font-family: 'Courier New', Courier, monospace;
             font-size: 13px;
             cursor: pointer;
             border-radius: 3px;
@@ -174,6 +176,7 @@
             margin-bottom: 10px;
             padding-bottom: 5px;
             border-bottom: 1px solid #333333;
+            font-family: 'Courier New', Courier, monospace;
         }
 
         .gallery-grid {
@@ -493,9 +496,9 @@
             // حفظ إعدادات Canvas الأصلية
             context.save();
             
-            // إعداد الخط
-            context.font = '16px "Courier New", monospace';
-            context.fillStyle = '#ffffff';
+            // إعداد الخط بنفس الخط تماماً
+            context.font = '14px "Courier New", Courier, monospace';
+            context.fillStyle = '#ffffff'; // أبيض بالضبط
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
@@ -523,8 +526,8 @@
             context.fillText(precisionText, 20, infoY + (lineHeight * 3));
             context.fillText(timeText, 20, infoY + (lineHeight * 4));
             
-            // كتابة Powered by NoteCam على اليمين
-            context.font = '12px "Courier New", monospace';
+            // كتابة Powered by NoteCam على اليمين بنفس الخط واللون
+            context.font = '12px "Courier New", Courier, monospace';
             context.textAlign = 'right';
             context.fillText('Powered by NoteCam', width - 20, infoY + (lineHeight * 5) + 10);
             
