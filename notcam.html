@@ -103,12 +103,12 @@
             width: 100%;
         }
 
-        /* الخلفية البيضاء فقط للمعلومات - 15% من العرض (85% تقليل) */
+        /* الخلفية البيضاء فقط للمعلومات - 18% من العرض (82% تقليل) */
         .info-background {
             position: absolute;
             top: 0;
             left: 0;
-            width: 15%; /* 85% تقليل من الجانب الأيمن */
+            width: 18%; /* 82% تقليل من الجانب الأيمن */
             height: 100%;
             background: rgba(255, 255, 255, 0.5);
             z-index: 1;
@@ -120,17 +120,17 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 10px; /* حشو عادي */
+            padding-left: 10px;
             height: 100%;
             z-index: 2;
             position: relative;
-            width: 15%; /* 15% فقط */
+            width: 18%; /* 18% فقط */
         }
 
         .info-line {
-            margin: 0.5px 0; /* مسافة طبيعية */
+            margin: 0.5px 0;
             font-size: 15px; /* خط كبير 15px */
-            line-height: 1.2; /* تباعد جيد */
+            line-height: 1.2;
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
@@ -143,14 +143,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 85%; /* 85% المتبقية */
+            width: 82%; /* 82% المتبقية */
             height: 100%;
             position: relative;
             z-index: 3;
         }
 
         .logo-text {
-            font-size: 16px; /* خط الشعار أكبر أيضاً */
+            font-size: 16px;
             color: rgba(255, 0, 0, 0.8);
             font-family: 'Arial Black', sans-serif;
             font-weight: 900;
@@ -306,7 +306,7 @@
             }
             
             .info-line {
-                font-size: 13px; /* أصغر قليلاً للجوال */
+                font-size: 13px;
                 margin: 0.3px 0;
             }
             
@@ -317,7 +317,7 @@
             }
             
             .logo-text {
-                font-size: 14px; /* أصغر قليلاً للجوال */
+                font-size: 14px;
             }
             
             .btn {
@@ -341,11 +341,11 @@
             }
             
             .info-line {
-                font-size: 11px; /* أصغر للشاشات الصغيرة */
+                font-size: 11px;
             }
             
             .logo-text {
-                font-size: 12px; /* أصغر للشاشات الصغيرة */
+                font-size: 12px;
             }
             
             .gallery-grid {
@@ -372,7 +372,7 @@
         <!-- معلومات تحت الصورة - بدون فراغات -->
         <div class="info-panel">
             <div class="info-container">
-                <!-- الخلفية البيضاء فقط للمعلومات - 15% عرض -->
+                <!-- الخلفية البيضاء فقط للمعلومات - 18% عرض -->
                 <div class="info-background"></div>
                 
                 <!-- العمود الأيسر - المعلومات -->
@@ -403,7 +403,7 @@
         </div>
     </div>
 
-    <!-- JavaScript يبقى كما هو -->
+    <!-- JavaScript -->
     <script>
         let videoStream = null;
         let isCameraActive = false;
@@ -589,7 +589,7 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 18px "Arial Black", sans-serif'; /* خط أكبر على الصورة */
+            context.font = '900 20px "Arial Black", sans-serif'; /* خط 20px على الصورة */
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
@@ -610,10 +610,10 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // 15% من العرض فقط مع خط أكبر
-            const lineHeight = 16; /* تباعد أكبر للخط 15px */
+            // 18% من العرض فقط مع خط 15px
+            const lineHeight = 16;
             const totalHeight = lineHeight * 5 + 6;
-            const boxWidth = width * 0.15; /* 15% فقط من عرض الصورة */
+            const boxWidth = width * 0.18; /* 18% فقط من عرض الصورة */
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
