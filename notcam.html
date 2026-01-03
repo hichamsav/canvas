@@ -86,23 +86,24 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة - التنسيق الجديد */
+        /* معلومات تحت الصورة - التنسيق المضغوط الجديد */
         .info-panel {
             background: #000000;
             width: 100%;
             position: relative;
-            padding: 15px 0;
+            padding: 8px 0;
         }
 
-        /* الحاوية الرئيسية */
+        /* الحاوية الرئيسية مضغوطة */
         .info-container {
             display: flex;
-            height: 120px;
-            background: rgba(255, 255, 255, 0.5);
-            margin: 0 20px;
-            border-radius: 3px;
+            height: 95px;
+            margin: 0 15px;
+            border-radius: 2px;
             padding: 0;
             position: relative;
+            background: rgba(255, 255, 255, 0.5);
+            overflow: hidden;
         }
 
         /* العمود الأيسر - المعلومات */
@@ -111,18 +112,19 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 15px;
+            padding-left: 12px;
             height: 100%;
+            min-width: 200px;
         }
 
         .info-line {
-            margin: 1px 0;
-            font-size: 12px;
-            line-height: 1.2;
+            margin: 0.5px 0;
+            font-size: 11px;
+            line-height: 1.1;
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
         }
 
         /* العمود الأيمن - الشعار */
@@ -130,20 +132,20 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            min-width: 180px;
+            width: 160px;
             height: 100%;
             position: relative;
         }
 
         .logo-text {
-            font-size: 20px;
+            font-size: 16px;
             color: rgba(255, 0, 0, 0.8);
             font-family: 'Arial Black', 'Segoe UI', 'Verdana', sans-serif;
             font-weight: 900;
             text-align: center;
-            letter-spacing: 0.5px;
-            line-height: 1.2;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            letter-spacing: 0.3px;
+            line-height: 1;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
             text-transform: uppercase;
             background: none;
             padding: 0;
@@ -276,24 +278,28 @@
             .info-container {
                 flex-direction: column;
                 height: auto;
-                min-height: 130px;
+                min-height: 110px;
                 margin: 0 10px;
             }
             
             .info-column {
-                padding: 10px 15px;
+                padding: 8px 12px;
                 height: auto;
-                min-height: 90px;
+                min-width: auto;
             }
             
             .logo-column {
-                padding: 10px 15px;
-                min-width: auto;
-                height: 50px;
+                width: 100%;
+                height: 40px;
+                padding: 5px;
             }
             
             .logo-text {
-                font-size: 18px;
+                font-size: 14px;
+            }
+            
+            .info-line {
+                font-size: 10px;
             }
             
             .btn {
@@ -317,11 +323,11 @@
             }
             
             .info-line {
-                font-size: 11px;
+                font-size: 9px;
             }
             
             .logo-text {
-                font-size: 16px;
+                font-size: 12px;
             }
             
             .gallery-grid {
@@ -345,16 +351,16 @@
             <div class="flash-effect" id="flashEffect"></div>
         </div>
 
-        <!-- معلومات تحت الصورة -->
+        <!-- معلومات تحت الصورة - النسخة المضغوطة -->
         <div class="info-panel">
             <div class="info-container">
                 <!-- العمود الأيسر - المعلومات -->
                 <div class="info-column">
-                    <div class="info-line" id="infoLatitude">Latitude: 33.603058</div>
-                    <div class="info-line" id="infoLongitude">Longitude: -7.636560</div>
-                    <div class="info-line" id="infoElevation">Elevation: 10.44±7.73 m</div>
-                    <div class="info-line" id="infoPrecision">Precision: 56.10 m</div>
-                    <div class="info-line" id="infoTime">Temps: 03-01-2026 14:49</div>
+                    <div class="info-line" id="infoLatitude">Latitude: 33.603016</div>
+                    <div class="info-line" id="infoLongitude">Longitude: -7.636873</div>
+                    <div class="info-line" id="infoElevation">Elevation: 9.34±11.02 m</div>
+                    <div class="info-line" id="infoPrecision">Precision: 13.28 m</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:00</div>
                 </div>
                 
                 <!-- العمود الأيمن - الشعار -->
@@ -563,7 +569,7 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 22px "Arial Black", "Segoe UI", "Verdana", sans-serif';
+            context.font = '900 20px "Arial Black", "Segoe UI", "Verdana", sans-serif';
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
@@ -584,21 +590,22 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            const lineHeight = 16;
-            const totalHeight = lineHeight * 5 + 12;
-            const boxWidth = 320;
-            const boxX = 20;
-            const boxY = height - totalHeight - 15;
+            // أبعاد مضغوطة للخلفية - تتناسب مع حجم المعلومات فقط
+            const lineHeight = 14;
+            const totalHeight = lineHeight * 5 + 8;
+            const boxWidth = 280; // عرض أقل
+            const boxX = 15; // مسافة من الحافة اليسرى
+            const boxY = height - totalHeight - 10; // مسافة أقل من الأسفل
             
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            context.font = 'bold 12px "Courier New", monospace';
+            context.font = 'bold 11px "Courier New", monospace';
             context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            const startY = boxY + 6;
+            const startY = boxY + 5;
             
             context.fillText(infoLatitude.textContent, boxX + 8, startY);
             context.fillText(infoLongitude.textContent, boxX + 8, startY + lineHeight);
@@ -606,7 +613,7 @@
             context.fillText(infoPrecision.textContent, boxX + 8, startY + (lineHeight * 3));
             context.fillText(infoTime.textContent, boxX + 8, startY + (lineHeight * 4));
             
-            drawLogoOnImage(context, width - 20, boxY + totalHeight - 8);
+            drawLogoOnImage(context, width - 15, boxY + totalHeight - 5);
             
             context.restore();
         }
