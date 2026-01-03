@@ -94,7 +94,16 @@
             border-top: 1px solid #333333;
             width: 100%;
             position: relative;
-            min-height: 170px;
+        }
+
+        .info-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        .info-column {
+            flex: 1;
         }
 
         .info-line {
@@ -105,14 +114,17 @@
             font-family: 'Courier New', monospace;
         }
 
-        /* الشعار - Powered by NoteCam */
-        .logo {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
+        /* الشعار - على الجانب الآخر */
+        .logo-side {
+            text-align: right;
+            padding-bottom: 5px;
+        }
+
+        .logo-text {
             font-size: 12px;
             color: #888888;
             font-family: 'Courier New', monospace;
+            margin-top: 10px;
         }
 
         /* الأزرار */
@@ -204,6 +216,15 @@
             .camera-container {
                 height: 350px;
             }
+            
+            .info-container {
+                flex-direction: column;
+            }
+            
+            .logo-side {
+                text-align: left;
+                margin-top: 15px;
+            }
         }
     </style>
 </head>
@@ -222,16 +243,23 @@
             </div>
         </div>
 
-        <!-- معلومات تحت الصورة مع الشعار -->
+        <!-- معلومات تحت الصورة مع الشعار على الجانب -->
         <div class="info-panel">
-            <div class="info-line" id="infoLatitude">Latitude: 33.603039</div>
-            <div class="info-line" id="infoLongitude">Longitude: -7.636531</div>
-            <div class="info-line" id="infoElevation">Élévation: 10.64±10.9 m</div>
-            <div class="info-line" id="infoPrecision">Précision: 77.6 m</div>
-            <div class="info-line" id="infoTime">Temps: 31-12-2025 17:49</div>
-            
-            <!-- الشعار Powered by NoteCam -->
-            <div class="logo">Powered by NoteCam</div>
+            <div class="info-container">
+                <!-- المعلومات على اليسار -->
+                <div class="info-column">
+                    <div class="info-line" id="infoLatitude">Latitude: 33.603039</div>
+                    <div class="info-line" id="infoLongitude">Longitude: -7.636531</div>
+                    <div class="info-line" id="infoElevation">Élévation: 10.64±10.9 m</div>
+                    <div class="info-line" id="infoPrecision">Précision: 77.6 m</div>
+                    <div class="info-line" id="infoTime">Temps: 31-12-2025 17:49</div>
+                </div>
+                
+                <!-- الشعار Powered by NoteCam على اليمين -->
+                <div class="info-column logo-side">
+                    <div class="logo-text">Powered by NoteCam</div>
+                </div>
+            </div>
         </div>
 
         <!-- التحكم -->
@@ -488,16 +516,17 @@
             const precisionText = `Précision: ${infoPrecision.textContent.split(': ')[1]}`;
             const timeText = infoTime.textContent;
             
-            // كتابة المعلومات على الصورة
+            // كتابة المعلومات على الصورة (على اليسار)
             context.fillText(latText, 20, infoY);
             context.fillText(lngText, 20, infoY + lineHeight);
             context.fillText(elevationText, 20, infoY + (lineHeight * 2));
             context.fillText(precisionText, 20, infoY + (lineHeight * 3));
             context.fillText(timeText, 20, infoY + (lineHeight * 4));
             
-            // كتابة Powered by NoteCam بنفس التنسيق
+            // كتابة Powered by NoteCam على اليمين
             context.font = '12px "Courier New", monospace';
-            context.fillText('Powered by NoteCam', 20, infoY + (lineHeight * 5) + 10);
+            context.textAlign = 'right';
+            context.fillText('Powered by NoteCam', width - 20, infoY + (lineHeight * 5) + 10);
             
             // استعادة إعدادات Canvas
             context.restore();
