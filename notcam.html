@@ -86,23 +86,23 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة - التنسيق المضغوط الجديد */
+        /* معلومات تحت الصورة - بدون فراغات */
         .info-panel {
             background: #000000;
             width: 100%;
             position: relative;
-            padding: 8px 0;
+            padding: 0;
         }
 
-        /* الحاوية الرئيسية مضغوطة */
+        /* الحاوية الرئيسية - بدون هوامش */
         .info-container {
             display: flex;
-            height: 95px;
-            margin: 0 15px;
-            border-radius: 2px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.5);
+            margin: 0; /* بدون هوامش */
+            border-radius: 0; /* بدون زوايا دائرية */
             padding: 0;
             position: relative;
-            background: rgba(255, 255, 255, 0.5);
             overflow: hidden;
         }
 
@@ -112,19 +112,20 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            padding-left: 12px;
+            padding-left: 10px; /* أقل حشو ممكن */
             height: 100%;
-            min-width: 200px;
+            min-width: 0; /* السماح بالتقلص */
         }
 
         .info-line {
-            margin: 0.5px 0;
+            margin: 0.3px 0; /* أقل مسافة ممكنة */
             font-size: 11px;
             line-height: 1.1;
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
             letter-spacing: 0.2px;
+            white-space: nowrap; /* منع التفاف النص */
         }
 
         /* العمود الأيمن - الشعار */
@@ -132,24 +133,26 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 160px;
+            width: 150px; /* عرض ثابت صغير */
             height: 100%;
             position: relative;
+            padding: 0 5px;
         }
 
         .logo-text {
-            font-size: 16px;
+            font-size: 14px;
             color: rgba(255, 0, 0, 0.8);
-            font-family: 'Arial Black', 'Segoe UI', 'Verdana', sans-serif;
+            font-family: 'Arial Black', sans-serif;
             font-weight: 900;
             text-align: center;
-            letter-spacing: 0.3px;
+            letter-spacing: 0.2px;
             line-height: 1;
             text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
             text-transform: uppercase;
             background: none;
             padding: 0;
             margin: 0;
+            white-space: nowrap; /* منع التفاف الشعار */
         }
 
         /* عناصر التحكم */
@@ -278,24 +281,23 @@
             .info-container {
                 flex-direction: column;
                 height: auto;
-                min-height: 110px;
-                margin: 0 10px;
+                min-height: 105px;
             }
             
             .info-column {
-                padding: 8px 12px;
+                padding: 8px 10px;
                 height: auto;
                 min-width: auto;
             }
             
             .logo-column {
                 width: 100%;
-                height: 40px;
-                padding: 5px;
+                height: 35px;
+                padding: 3px;
             }
             
             .logo-text {
-                font-size: 14px;
+                font-size: 12px;
             }
             
             .info-line {
@@ -327,7 +329,7 @@
             }
             
             .logo-text {
-                font-size: 12px;
+                font-size: 11px;
             }
             
             .gallery-grid {
@@ -351,16 +353,16 @@
             <div class="flash-effect" id="flashEffect"></div>
         </div>
 
-        <!-- معلومات تحت الصورة - النسخة المضغوطة -->
+        <!-- معلومات تحت الصورة - بدون فراغات -->
         <div class="info-panel">
             <div class="info-container">
                 <!-- العمود الأيسر - المعلومات -->
                 <div class="info-column">
-                    <div class="info-line" id="infoLatitude">Latitude: 33.603016</div>
-                    <div class="info-line" id="infoLongitude">Longitude: -7.636873</div>
-                    <div class="info-line" id="infoElevation">Elevation: 9.34±11.02 m</div>
-                    <div class="info-line" id="infoPrecision">Precision: 13.28 m</div>
-                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:00</div>
+                    <div class="info-line" id="infoLatitude">Latitude: 33.603058</div>
+                    <div class="info-line" id="infoLongitude">Longitude: -7.636560</div>
+                    <div class="info-line" id="infoElevation">Elevation: 10.44±7.73 m</div>
+                    <div class="info-line" id="infoPrecision">Precision: 56.10 m</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 15:12</div>
                 </div>
                 
                 <!-- العمود الأيمن - الشعار -->
@@ -569,7 +571,7 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            context.font = '900 20px "Arial Black", "Segoe UI", "Verdana", sans-serif';
+            context.font = '900 18px "Arial Black", sans-serif';
             context.fillStyle = 'rgba(255, 0, 0, 0.85)';
             context.textAlign = 'right';
             context.textBaseline = 'bottom';
@@ -590,12 +592,12 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // أبعاد مضغوطة للخلفية - تتناسب مع حجم المعلومات فقط
-            const lineHeight = 14;
-            const totalHeight = lineHeight * 5 + 8;
-            const boxWidth = 280; // عرض أقل
-            const boxX = 15; // مسافة من الحافة اليسرى
-            const boxY = height - totalHeight - 10; // مسافة أقل من الأسفل
+            // أبعاد مضغوطة جداً - بدون فراغات
+            const lineHeight = 13;
+            const totalHeight = lineHeight * 5 + 6;
+            const boxWidth = 270;
+            const boxX = 5; // من أقصى اليسار مباشرة
+            const boxY = height - totalHeight - 5; // من أقصى الأسفل مباشرة
             
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
@@ -605,15 +607,15 @@
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            const startY = boxY + 5;
+            const startY = boxY + 3;
             
-            context.fillText(infoLatitude.textContent, boxX + 8, startY);
-            context.fillText(infoLongitude.textContent, boxX + 8, startY + lineHeight);
-            context.fillText(infoElevation.textContent, boxX + 8, startY + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, boxX + 8, startY + (lineHeight * 3));
-            context.fillText(infoTime.textContent, boxX + 8, startY + (lineHeight * 4));
+            context.fillText(infoLatitude.textContent, boxX + 5, startY);
+            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
+            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
+            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
             
-            drawLogoOnImage(context, width - 15, boxY + totalHeight - 5);
+            drawLogoOnImage(context, width - 5, boxY + totalHeight - 3);
             
             context.restore();
         }
