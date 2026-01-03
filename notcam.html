@@ -442,6 +442,18 @@
             gap: 8px;
         }
         
+        .time-display {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
+        
         @media (max-width: 1200px) {
             .users-container {
                 grid-template-columns: 1fr;
@@ -474,6 +486,11 @@
     </style>
 </head>
 <body>
+    <!-- عرض الوقت الحقيقي -->
+    <div class="time-display" id="realTimeDisplay">
+        <i class="fas fa-clock"></i> <span id="currentTime">جاري تحميل الوقت...</span>
+    </div>
+    
     <div class="container">
         <!-- شاشة الدخول -->
         <div id="loginScreen" class="active">
@@ -482,6 +499,7 @@
             </h1>
             <p style="color: #666; font-size: 18px; margin-bottom: 20px;">
                 نظام إدارة الصور والبيانات المتكامل
+                <br><span id="loginTime" style="font-size: 14px; color: var(--primary);"></span>
             </p>
             
             <div class="login-options">
@@ -491,7 +509,7 @@
                     </div>
                     <h3 style="color: var(--primary); margin-bottom: 10px;">واجهة المشرف</h3>
                     <p style="color: #666; line-height: 1.6;">
-                        عرض جميع المستخدمين والبيانات والصور
+                        عرض جميع المستخدمين والبيانات
                         <br>إدارة النظام الكاملة
                         <br>إرسال التقارير إلى البريد
                     </p>
@@ -504,7 +522,7 @@
                     <h3 style="color: var(--primary); margin-bottom: 10px;">واجهة المستخدم</h3>
                     <p style="color: #666; line-height: 1.6;">
                         إدخال البيانات الشخصية
-                        <br>التقاط الصور المطلوبة
+                        <br>التقاط الصور عبر NotCam
                         <br>إرسال البيانات إلى النظام
                     </p>
                 </div>
@@ -512,6 +530,9 @@
             
             <div style="margin-top: 40px; color: #666; font-size: 14px;">
                 <p><i class="fas fa-info-circle"></i> اختر الواجهة المناسبة لدورك في النظام</p>
+                <p style="margin-top: 10px; font-size: 12px;">
+                    نظام يدعم التقاط الصور مباشرة من NotCam والكاميرات الخارجية
+                </p>
             </div>
         </div>
         
@@ -525,7 +546,7 @@
                 </div>
                 <div style="text-align: center;">
                     <h1><i class="fas fa-crown"></i> لوحة تحكم المشرف</h1>
-                    <p>عرض وإدارة جميع البيانات والصور</p>
+                    <p>عرض وإدارة جميع البيانات والصور <span id="adminDate"></span></p>
                 </div>
                 <div style="width: 100px;"></div>
             </div>
@@ -660,6 +681,7 @@
             <!-- تبويب الإحصائيات -->
             <div id="adminStatsTab" class="admin-content">
                 <h2><i class="fas fa-chart-bar"></i> إحصائيات النظام</h2>
+                <p style="color: #666; margin-bottom: 20px;">إحصائيات حية وتحديث مباشر</p>
                 
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0;">
                     <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border-top: 4px solid var(--primary);">
@@ -673,6 +695,10 @@
                     <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border-top: 4px solid var(--secondary);">
                         <div style="font-size: 2.5rem; color: var(--secondary); font-weight: bold;" id="totalPhotosStat">0</div>
                         <div>إجمالي الصور</div>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 3px 10px rgba(0,0,0,0.1); border-top: 4px solid var(--warning);">
+                        <div style="font-size: 2.5rem; color: var(--warning); font-weight: bold;" id="lastUpdateStat">الآن</div>
+                        <div>آخر تحديث</div>
                     </div>
                 </div>
                 
@@ -704,6 +730,7 @@
             <!-- تبويب إدارة النظام -->
             <div id="adminManagementTab" class="admin-content">
                 <h2><i class="fas fa-cog"></i> إدارة النظام</h2>
+                <p style="color: #666; margin-bottom: 20px;">إعدادات وإدارة النظام الكاملة</p>
                 
                 <div class="form-section">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
@@ -770,7 +797,7 @@
                     <h1><i class="fas fa-user"></i> نظام NotCam - إدخال البيانات</h1>
                     <div style="width: 100px;"></div>
                 </div>
-                <p>أدخل بياناتك والتقط الصور المطلوبة</p>
+                <p>أدخل بياناتك والتقط الصور عبر NotCam <span id="userDate"></span></p>
             </div>
             
             <div class="user-container">
@@ -789,6 +816,10 @@
                             <option value="AREA-004">AREA-004</option>
                             <option value="AREA-005">AREA-005</option>
                             <option value="AREA-006">AREA-006</option>
+                            <option value="AREA-007">AREA-007</option>
+                            <option value="AREA-008">AREA-008</option>
+                            <option value="AREA-009">AREA-009</option>
+                            <option value="AREA-010">AREA-010</option>
                         </select>
                     </div>
                     
@@ -810,29 +841,48 @@
                 
                 <div class="form-section">
                     <h3 style="color: var(--primary); margin-bottom: 20px;">
-                        <i class="fas fa-camera"></i> التقاط الصور
+                        <i class="fas fa-camera"></i> التقاط الصور عبر NotCam
                     </h3>
+                    
+                    <div style="background: #e8f4fd; padding: 20px; border-radius: 10px; margin-bottom: 20px; border: 2px dashed var(--primary);">
+                        <h4 style="color: var(--primary); margin-bottom: 10px;">
+                            <i class="fas fa-info-circle"></i> كيفية التقاط الصور
+                        </h4>
+                        <ol style="color: #666; line-height: 1.8; padding-right: 20px;">
+                            <li>افتح تطبيق NotCam على جهاز الكمبيوتر</li>
+                            <li>اضبط الكاميرا لالتقاط الصور المطلوبة</li>
+                            <li>احفظ الصور على جهاز الكمبيوتر</li>
+                            <li>اختر الملفات من جهازك أدناه</li>
+                            <li>سيتم رفع الصور وتخزينها في النظام</li>
+                        </ol>
+                    </div>
                     
                     <div class="photos-section">
                         <div class="photo-box">
                             <h4><i class="fas fa-camera"></i> المجموعة الأولى (5 صور)</h4>
                             <div id="firstPhotosPreview" class="photo-preview"></div>
-                            <button class="camera-btn" onclick="takePhoto('first')">
-                                <i class="fas fa-camera"></i> التقاط صورة
-                            </button>
+                            <div style="margin-top: 15px;">
+                                <button class="camera-btn" onclick="document.getElementById('firstPhotosInput').click()">
+                                    <i class="fas fa-upload"></i> رفع صور من NotCam
+                                </button>
+                                <input type="file" id="firstPhotosInput" accept="image/*" multiple style="display: none;" onchange="handleNotCamPhotos('first', this.files)">
+                            </div>
                             <div style="font-size: 12px; color: #666; margin-top: 10px;">
-                                الصور الملتقطة: <span id="firstCount">0</span>/5
+                                الصور المرفوعة: <span id="firstCount">0</span>/5
                             </div>
                         </div>
                         
                         <div class="photo-box">
                             <h4><i class="fas fa-camera"></i> المجموعة الثانية (5 صور)</h4>
                             <div id="secondPhotosPreview" class="photo-preview"></div>
-                            <button class="camera-btn" onclick="takePhoto('second')">
-                                <i class="fas fa-camera"></i> التقاط صورة
-                            </button>
+                            <div style="margin-top: 15px;">
+                                <button class="camera-btn" onclick="document.getElementById('secondPhotosInput').click()">
+                                    <i class="fas fa-upload"></i> رفع صور من NotCam
+                                </button>
+                                <input type="file" id="secondPhotosInput" accept="image/*" multiple style="display: none;" onchange="handleNotCamPhotos('second', this.files)">
+                            </div>
                             <div style="font-size: 12px; color: #666; margin-top: 10px;">
-                                الصور الملتقطة: <span id="secondCount">0</span>/5
+                                الصور المرفوعة: <span id="secondCount">0</span>/5
                             </div>
                         </div>
                     </div>
@@ -856,6 +906,20 @@
                             <i class="fas fa-save"></i> حفظ كمسودة
                         </button>
                     </div>
+                    
+                    <div style="margin-top: 20px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #ddd;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <i class="fas fa-calendar"></i> وقت الإرسال:
+                                <span id="submitTime" style="font-weight: bold; color: var(--primary);">
+                                    ${getCurrentDateTime()}
+                                </span>
+                            </div>
+                            <div style="font-size: 12px; color: #666;">
+                                <i class="fas fa-sync"></i> الوقت الحقيقي
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
                 <div id="userAlert" class="alert"></div>
@@ -863,9 +927,9 @@
         </div>
         
         <!-- عناصر مخفية -->
-        <input type="file" id="cameraInput" accept="image/*" capture="environment" style="display: none;" onchange="handlePhotoTaken(event)">
+        <input type="file" id="cameraInput" accept="image/*" style="display: none;" onchange="handlePhotoTaken(event)">
         
-        <div id="mainAlert" class="alert" style="position: fixed; top: 20px; right: 20px; z-index: 2000; max-width: 400px;"></div>
+        <div id="mainAlert" class="alert" style="position: fixed; top: 60px; right: 20px; z-index: 2000; max-width: 400px;"></div>
     </div>
 
     <script>
@@ -876,6 +940,49 @@
         let firstPhotos = [];
         let secondPhotos = [];
         let currentPhotoType = '';
+        
+        // ============== الوقت الحقيقي ==============
+        function updateRealTime() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('ar-SA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const timeStr = now.toLocaleTimeString('ar-SA', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            
+            document.getElementById('currentTime').textContent = `${dateStr} - ${timeStr}`;
+            document.getElementById('loginTime').textContent = `الوقت الحالي: ${timeStr}`;
+            
+            // تحديث التواريخ في الواجهات
+            if (document.getElementById('adminPanel').style.display === 'block') {
+                document.getElementById('adminDate').textContent = `- ${dateStr}`;
+            }
+            if (document.getElementById('userPanel').style.display === 'block') {
+                document.getElementById('userDate').textContent = `- ${dateStr}`;
+                document.getElementById('submitTime').textContent = `${dateStr} ${timeStr}`;
+            }
+        }
+        
+        function getCurrentDateTime() {
+            const now = new Date();
+            return now.toLocaleString('ar-SA', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        function updateLastUpdateTime() {
+            document.getElementById('lastUpdateStat').textContent = 
+                new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+        }
         
         // ============== التنقل بين الواجهات ==============
         function backToLogin() {
@@ -966,6 +1073,7 @@
             updateAdminStatistics();
             updateSystemInfo();
             updateNotifications();
+            updateLastUpdateTime();
         }
         
         function collectAdminImagesFromSubmission(data) {
@@ -973,7 +1081,7 @@
             
             if (data.firstPhotos && Array.isArray(data.firstPhotos)) {
                 data.firstPhotos.forEach((photo, index) => {
-                    if (photo && photo.startsWith('data:image')) {
+                    if (photo) {
                         images.push({
                             src: photo,
                             title: `الصورة الأولى ${index + 1}`,
@@ -985,7 +1093,7 @@
             
             if (data.secondPhotos && Array.isArray(data.secondPhotos)) {
                 data.secondPhotos.forEach((photo, index) => {
-                    if (photo && photo.startsWith('data:image')) {
+                    if (photo) {
                         images.push({
                             src: photo,
                             title: `الصورة الثانية ${index + 1}`,
@@ -1158,7 +1266,8 @@
                     card.className = 'photo-card';
                     card.innerHTML = `
                         <div class="photo-number">${index + 1}</div>
-                        <img src="${img.src}" class="photo-img" alt="صورة ${index + 1}">
+                        <img src="${img.src}" class="photo-img" alt="صورة ${index + 1}" 
+                             onerror="this.src='https://via.placeholder.com/300x200?text=NotCam+صورة'">
                         <div style="padding: 10px; background: white;">
                             <div style="font-weight: bold; font-size: 12px;">${img.title}</div>
                         </div>
@@ -1280,7 +1389,7 @@
             link.click();
             
             // استخدام mailto
-            const mailtoBody = `${message}\n\n---\nتم إنشاء البيانات في: ${new Date().toLocaleString('ar-SA')}`;
+            const mailtoBody = `${message}\n\n---\nتم إنشاء البيانات في: ${getCurrentDateTime()}`;
             const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(mailtoBody)}`;
             
             setTimeout(() => {
@@ -1312,6 +1421,7 @@
                 usersArray.reduce((sum, user) => sum + user.totalImages, 0);
             
             updateRecentActivity();
+            updateLastUpdateTime();
         }
         
         function updateRecentActivity() {
@@ -1372,7 +1482,7 @@
                     <i class="fas fa-images"></i> إجمالي الصور: <strong>${usersArray.reduce((sum, user) => sum + user.totalImages, 0)}</strong>
                 </div>
                 <div>
-                    <i class="fas fa-calendar"></i> آخر تحديث: <strong>${new Date().toLocaleString('ar-SA')}</strong>
+                    <i class="fas fa-calendar"></i> آخر تحديث: <strong>${getCurrentDateTime()}</strong>
                 </div>
             `;
         }
@@ -1412,7 +1522,8 @@
         function backupAllData() {
             const backupData = {
                 users: allUsers,
-                backupDate: new Date().toISOString()
+                backupDate: new Date().toISOString(),
+                systemTime: getCurrentDateTime()
             };
             
             const dataStr = JSON.stringify(backupData, null, 2);
@@ -1485,51 +1596,54 @@
             }
         }
         
-        // ============== نظام المستخدم ==============
-        function takePhoto(type) {
+        // ============== نظام المستخدم مع NotCam ==============
+        function handleNotCamPhotos(type, files) {
             const code = document.getElementById('areaCode').value;
             if (!code) {
                 showAlert('يجب اختيار كود المنطقة أولاً', 'error', 'user');
                 return;
             }
             
-            currentPhotoType = type;
+            if (files.length === 0) return;
             
-            if (type === 'first' && firstPhotos.length >= 5) {
-                showAlert('لقد التقطت الحد الأقصى للصور في المجموعة الأولى', 'error', 'user');
+            // التحقق من عدد الصور
+            if (type === 'first' && (firstPhotos.length + files.length) > 5) {
+                showAlert('لا يمكن تجاوز 5 صور في المجموعة الأولى', 'error', 'user');
                 return;
             }
             
-            if (type === 'second' && secondPhotos.length >= 5) {
-                showAlert('لقد التقطت الحد الأقصى للصور في المجموعة الثانية', 'error', 'user');
+            if (type === 'second' && (secondPhotos.length + files.length) > 5) {
+                showAlert('لا يمكن تجاوز 5 صور في المجموعة الثانية', 'error', 'user');
                 return;
             }
             
-            document.getElementById('cameraInput').click();
-        }
-        
-        function handlePhotoTaken(event) {
-            const file = event.target.files[0];
-            if (!file) return;
+            // معالجة كل صورة
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoData = e.target.result;
+                    
+                    if (type === 'first') {
+                        firstPhotos.push(photoData);
+                        updateUserPhotoPreview('first', firstPhotos);
+                        document.getElementById('firstCount').textContent = firstPhotos.length;
+                    } else {
+                        secondPhotos.push(photoData);
+                        updateUserPhotoPreview('second', secondPhotos);
+                        document.getElementById('secondCount').textContent = secondPhotos.length;
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
             
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const photoData = e.target.result;
-                
-                if (currentPhotoType === 'first') {
-                    firstPhotos.push(photoData);
-                    updateUserPhotoPreview('first', firstPhotos);
-                    document.getElementById('firstCount').textContent = firstPhotos.length;
-                } else {
-                    secondPhotos.push(photoData);
-                    updateUserPhotoPreview('second', secondPhotos);
-                    document.getElementById('secondCount').textContent = secondPhotos.length;
-                }
-                
-                event.target.value = '';
-            };
+            // إعادة تعيين الـ input
+            if (type === 'first') {
+                document.getElementById('firstPhotosInput').value = '';
+            } else {
+                document.getElementById('secondPhotosInput').value = '';
+            }
             
-            reader.readAsDataURL(file);
+            showAlert(`تم رفع ${files.length} صورة من NotCam`, 'success', 'user');
         }
         
         function updateUserPhotoPreview(type, photos) {
@@ -1540,7 +1654,7 @@
                 const div = document.createElement('div');
                 div.className = 'photo-item';
                 div.innerHTML = `
-                    <img src="${photo}" alt="صورة ${index + 1}">
+                    <img src="${photo}" alt="صورة ${index + 1} من NotCam">
                     <button class="remove-photo" onclick="removeUserPhoto('${type}', ${index})">
                         <i class="fas fa-times"></i>
                     </button>
@@ -1574,9 +1688,13 @@
             }
             
             if (firstPhotos.length === 0 && secondPhotos.length === 0) {
-                showAlert('يجب التقاط على الأقل صورة واحدة', 'error', 'user');
+                showAlert('يجب رفع على الأقل صورة واحدة من NotCam', 'error', 'user');
                 return;
             }
+            
+            // وقت الحقيقي الحالي
+            const currentTime = new Date().toISOString();
+            const displayTime = getCurrentDateTime();
             
             const submissionData = {
                 selectedCode: areaCode,
@@ -1586,8 +1704,10 @@
                 notes: notes || '',
                 firstPhotos: firstPhotos,
                 secondPhotos: secondPhotos,
-                timestamp: new Date().toISOString(),
-                status: 'completed'
+                timestamp: currentTime,
+                displayTime: displayTime,
+                status: 'completed',
+                source: 'NotCam'
             };
             
             const submissionKey = `notcam_submission_${areaCode}_${Date.now()}`;
@@ -1598,7 +1718,9 @@
                 type: 'new_submission',
                 code: areaCode,
                 username: username,
-                time: new Date().toISOString(),
+                time: currentTime,
+                displayTime: displayTime,
+                photosCount: firstPhotos.length + secondPhotos.length,
                 read: false
             };
             
@@ -1609,7 +1731,7 @@
             // إعادة تعيين النموذج
             resetUserForm();
             
-            showAlert('تم إرسال البيانات بنجاح!', 'success', 'user');
+            showAlert(`تم إرسال البيانات بنجاح! الوقت: ${displayTime}`, 'success', 'user');
         }
         
         function saveUserDraft() {
@@ -1624,6 +1746,8 @@
                 return;
             }
             
+            const currentTime = new Date().toISOString();
+            
             const draftData = {
                 selectedCode: areaCode,
                 username: username || '',
@@ -1632,8 +1756,10 @@
                 notes: notes || '',
                 firstPhotos: firstPhotos,
                 secondPhotos: secondPhotos,
-                timestamp: new Date().toISOString(),
-                status: 'draft'
+                timestamp: currentTime,
+                displayTime: getCurrentDateTime(),
+                status: 'draft',
+                source: 'NotCam'
             };
             
             const draftKey = `notcam_draft_${areaCode}`;
@@ -1669,6 +1795,10 @@
                     updateUserPhotoPreview('second', secondPhotos);
                     document.getElementById('firstCount').textContent = firstPhotos.length;
                     document.getElementById('secondCount').textContent = secondPhotos.length;
+                    
+                    if (draftData.displayTime) {
+                        document.getElementById('submitTime').textContent = draftData.displayTime;
+                    }
                 }
             }
         }
@@ -1687,6 +1817,9 @@
             updateUserPhotoPreview('second', secondPhotos);
             document.getElementById('firstCount').textContent = '0';
             document.getElementById('secondCount').textContent = '0';
+            
+            // تحديث الوقت الحالي
+            document.getElementById('submitTime').textContent = getCurrentDateTime();
         }
         
         // ============== دوال مشتركة ==============
@@ -1731,6 +1864,9 @@
                     <img src="${src}" style="max-width: 90vw; max-height: 90vh; border-radius: 10px;">
                     <div style="background: white; padding: 20px; border-radius: 0 0 10px 10px; margin-top: -5px;">
                         <h3 style="color: var(--primary);">${title}</h3>
+                        <div style="color: #666; font-size: 14px; margin-top: 10px;">
+                            <i class="fas fa-camera"></i> مأخوذة من NotCam
+                        </div>
                     </div>
                 </div>
             `;
@@ -1762,14 +1898,18 @@
         
         // تشغيل النظام
         window.onload = function() {
-            showAlert('مرحباً في نظام NotCam الكامل', 'success');
+            // تحديث الوقت كل ثانية
+            updateRealTime();
+            setInterval(updateRealTime, 1000);
             
-            // تحديث إشعارات المشرف
+            // تحديث إشعارات المشرف كل 5 ثواني
             setInterval(() => {
                 if (document.getElementById('adminPanel').style.display === 'block') {
                     updateNotifications();
                 }
-            }, 10000);
+            }, 5000);
+            
+            showAlert('مرحباً في نظام NotCam الكامل - الوقت الحقيقي مفعل', 'success');
         };
     </script>
 </body>
