@@ -14,7 +14,7 @@
         body {
             background: #000000;
             color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', monospace;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -28,7 +28,6 @@
             background: #000000;
         }
 
-        /* شريط الحالة */
         .status-bar {
             background: #111111;
             padding: 8px 15px;
@@ -37,10 +36,8 @@
             text-align: center;
             border-bottom: 1px solid #333333;
             width: 100%;
-            font-family: 'Courier New', Courier, monospace;
         }
 
-        /* منطقة الكاميرا */
         .camera-container {
             width: 100%;
             height: 400px;
@@ -55,7 +52,6 @@
             object-fit: cover;
         }
 
-        /* مؤشر التقاط */
         .capture-button {
             position: absolute;
             bottom: 20px;
@@ -76,10 +72,6 @@
             background: rgba(255, 255, 255, 0.2);
         }
 
-        .capture-button:active {
-            transform: translateX(-50%) scale(0.95);
-        }
-
         .capture-inner {
             width: 50px;
             height: 50px;
@@ -94,7 +86,6 @@
             background: #000000;
             border-top: 1px solid #333333;
             width: 100%;
-            position: relative;
         }
 
         .info-container {
@@ -107,29 +98,33 @@
             flex: 1;
         }
 
+        /* معلومات الموقع - بخط عادي أبيض */
         .info-line {
             margin: 4px 0;
             font-size: 14px;
             line-height: 1.4;
             color: #ffffff;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
         }
 
-        /* الشعار - نفس الخط واللون بالضبط */
+        /* الشعار - بنفس شكل الصورة */
         .logo-side {
             text-align: right;
+            padding-top: 5px;
         }
 
         .logo-text {
-            font-size: 12px;
-            color: #ffffff; /* أبيض بالضبط مثل باقي النص */
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: normal;
-            letter-spacing: 0;
-            line-height: 1.4;
+            font-size: 11px; /* أصغر حجم */
+            color: #aaaaaa; /* رمادي فاتح - ليس أبيض كامل */
+            font-family: 'Arial Narrow', 'Helvetica Neue', Arial, sans-serif; /* خط مختلف */
+            font-weight: 300; /* أخف وزن */
+            letter-spacing: 0.5px;
+            line-height: 1.3;
+            opacity: 0.8; /* شفافية خفيفة */
         }
 
-        /* الأزرار */
+        /* بقية العناصر */
         .controls {
             padding: 15px;
             display: flex;
@@ -144,14 +139,10 @@
             background: #222222;
             border: 1px solid #444444;
             color: white;
-            font-family: 'Courier New', Courier, monospace;
+            font-family: 'Courier New', monospace;
             font-size: 13px;
             cursor: pointer;
             border-radius: 3px;
-        }
-
-        .btn:hover {
-            background: #333333;
         }
 
         .btn-primary {
@@ -159,11 +150,6 @@
             border-color: #1a5fb4;
         }
 
-        .btn-primary:hover {
-            background: #1c71d8;
-        }
-
-        /* معرض الصور */
         .gallery {
             width: 100%;
             padding: 15px;
@@ -176,7 +162,6 @@
             margin-bottom: 10px;
             padding-bottom: 5px;
             border-bottom: 1px solid #333333;
-            font-family: 'Courier New', Courier, monospace;
         }
 
         .gallery-grid {
@@ -233,12 +218,10 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- شريط الحالة -->
         <div class="status-bar" id="statusBar">
             NoteCam Emulator - جاهز
         </div>
 
-        <!-- الكاميرا -->
         <div class="camera-container">
             <video id="cameraVideo" autoplay playsinline></video>
             <div class="capture-button" id="captureBtn">
@@ -246,10 +229,8 @@
             </div>
         </div>
 
-        <!-- معلومات تحت الصورة مع الشعار على الجانب -->
         <div class="info-panel">
             <div class="info-container">
-                <!-- المعلومات على اليسار -->
                 <div class="info-column">
                     <div class="info-line" id="infoLatitude">Latitude: 33.603039</div>
                     <div class="info-line" id="infoLongitude">Longitude: -7.636531</div>
@@ -258,36 +239,29 @@
                     <div class="info-line" id="infoTime">Temps: 31-12-2025 17:49</div>
                 </div>
                 
-                <!-- الشعار Powered by NoteCam على اليمين -->
                 <div class="info-column logo-side">
                     <div class="logo-text">Powered by NoteCam</div>
                 </div>
             </div>
         </div>
 
-        <!-- التحكم -->
         <div class="controls">
             <button id="toggleCamera" class="btn btn-primary">تشغيل الكاميرا</button>
             <button id="downloadBtn" class="btn" disabled>تحميل الصورة</button>
         </div>
 
-        <!-- معرض الصور -->
         <div class="gallery">
             <div class="gallery-title">الصور الملتقطة</div>
-            <div id="galleryContainer" class="gallery-grid">
-                <!-- الصور ستظهر هنا -->
-            </div>
+            <div id="galleryContainer" class="gallery-grid"></div>
         </div>
     </div>
 
     <script>
-        // المتغيرات الأساسية
         let videoStream = null;
         let isCameraActive = false;
         let currentImageData = null;
         let userLocation = null;
 
-        // العناصر
         const videoElement = document.getElementById('cameraVideo');
         const captureBtn = document.getElementById('captureBtn');
         const toggleCameraBtn = document.getElementById('toggleCamera');
@@ -295,38 +269,26 @@
         const statusBar = document.getElementById('statusBar');
         const galleryContainer = document.getElementById('galleryContainer');
 
-        // عناصر المعلومات
         const infoLatitude = document.getElementById('infoLatitude');
         const infoLongitude = document.getElementById('infoLongitude');
         const infoElevation = document.getElementById('infoElevation');
         const infoPrecision = document.getElementById('infoPrecision');
         const infoTime = document.getElementById('infoTime');
 
-        // تهيئة التطبيق
         async function initializeApp() {
             try {
-                // 1. طلب صلاحية الموقع أولاً
                 await requestLocationPermission();
-                
-                // 2. تحديث المعلومات
                 updateLocationInfo();
                 updateTimeInfo();
-                
-                // 3. تحديث الوقت كل دقيقة
                 setInterval(updateTimeInfo, 60000);
-                
-                // 4. تحديث الموقع كل 30 ثانية
                 setInterval(updateLocationInfo, 30000);
-                
                 statusBar.textContent = "NoteCam - جاهز للاستخدام";
-                
             } catch (error) {
                 console.error('خطأ في التهيئة:', error);
                 statusBar.textContent = "خطأ في التهيئة - تأكد من الصلاحيات";
             }
         }
 
-        // طلب صلاحية الموقع
         function requestLocationPermission() {
             return new Promise((resolve, reject) => {
                 if (!navigator.geolocation) {
@@ -334,7 +296,6 @@
                     return;
                 }
                 
-                // طلب الصلاحية
                 navigator.geolocation.getCurrentPosition(
                     (position) => {
                         userLocation = {
@@ -346,14 +307,13 @@
                         resolve();
                     },
                     (error) => {
-                        // استخدام موقع افتراضي إذا رفض المستخدم
                         userLocation = {
                             latitude: 33.603039,
                             longitude: -7.636531,
                             accuracy: 77.6,
                             altitude: 10.64
                         };
-                        resolve(); // لا نرفض، نستخدم البيانات الافتراضية
+                        resolve();
                     },
                     {
                         enableHighAccuracy: true,
@@ -364,13 +324,11 @@
             });
         }
 
-        // تحديث معلومات الموقع
         function updateLocationInfo() {
             if (userLocation) {
                 infoLatitude.textContent = `Latitude: ${userLocation.latitude.toFixed(6)}`;
                 infoLongitude.textContent = `Longitude: ${userLocation.longitude.toFixed(6)}`;
                 
-                // إضافة تغيير طفيف في الارتفاع (محاكاة للجهاز)
                 const elevationVariation = (Math.random() * 2 - 1).toFixed(2);
                 const baseElevation = userLocation.altitude || 10.64;
                 const currentElevation = (parseFloat(baseElevation) + parseFloat(elevationVariation)).toFixed(2);
@@ -380,7 +338,6 @@
             }
         }
 
-        // تحديث معلومات الوقت
         function updateTimeInfo() {
             const now = new Date();
             const day = String(now.getDate()).padStart(2, '0');
@@ -392,7 +349,6 @@
             infoTime.textContent = `Temps: ${day}-${month}-${year} ${hours}:${minutes}`;
         }
 
-        // تشغيل/إيقاف الكاميرا
         async function toggleCamera() {
             if (!isCameraActive) {
                 try {
@@ -420,7 +376,6 @@
                     alert('تعذر تشغيل الكاميرا. تأكد من منح الصلاحية.');
                 }
             } else {
-                // إيقاف الكاميرا
                 if (videoStream) {
                     videoStream.getTracks().forEach(track => track.stop());
                     videoStream = null;
@@ -435,7 +390,6 @@
             }
         }
 
-        // التقاط صورة مع المعلومات
         async function captureImageWithInfo() {
             if (!isCameraActive || !videoStream) {
                 alert("يجب تشغيل الكاميرا أولاً!");
@@ -445,21 +399,15 @@
             try {
                 statusBar.textContent = "جاري التقاط الصورة وإضافة المعلومات...";
                 
-                // إنشاء Canvas
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 
-                // ضبط أبعاد Canvas بنفس أبعاد الفيديو
                 canvas.width = videoElement.videoWidth;
                 canvas.height = videoElement.videoHeight;
                 
-                // رسم الفيديو على Canvas
                 context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
-                
-                // الآن نضيف المعلومات على الصورة نفسها
                 addInfoToImage(context, canvas.width, canvas.height);
                 
-                // تحويل Canvas إلى صورة
                 canvas.toBlob((blob) => {
                     const imageUrl = URL.createObjectURL(blob);
                     currentImageData = {
@@ -468,16 +416,10 @@
                         timestamp: new Date()
                     };
                     
-                    // إضافة الصورة للمعرض
                     addImageToGallery(imageUrl, blob);
-                    
-                    // تمكين زر التحميل
                     downloadBtn.disabled = false;
-                    
-                    // تحديث شريط الحالة
                     statusBar.textContent = "تم التقاط الصورة وإضافة المعلومات بنجاح!";
                     
-                    // تأثير بصري
                     captureBtn.style.transform = 'translateX(-50%) scale(0.95)';
                     setTimeout(() => {
                         captureBtn.style.transform = 'translateX(-50%) scale(1)';
@@ -491,51 +433,44 @@
             }
         }
 
-        // إضافة المعلومات على الصورة
         function addInfoToImage(context, width, height) {
-            // حفظ إعدادات Canvas الأصلية
             context.save();
             
-            // إعداد الخط بنفس الخط تماماً
-            context.font = '14px "Courier New", Courier, monospace';
-            context.fillStyle = '#ffffff'; // أبيض بالضبط
+            // معلومات الموقع - بخط أبيض عادي
+            context.font = 'bold 14px "Courier New", monospace';
+            context.fillStyle = '#ffffff';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            // إضافة ظل للنص لجعله أوضح
             context.shadowColor = 'rgba(0, 0, 0, 0.8)';
             context.shadowBlur = 3;
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            // معلومات الموقع والوقت (تظهر على الصورة نفسها)
-            const infoY = height - 130; // من الأسفل
+            const infoY = height - 130;
             const lineHeight = 20;
             
-            // بيانات الموقع الحالية
             const latText = `Latitude: ${userLocation ? userLocation.latitude.toFixed(6) : '33.603039'}`;
             const lngText = `Longitude: ${userLocation ? userLocation.longitude.toFixed(6) : '-7.636531'}`;
             const elevationText = `Élévation: ${infoElevation.textContent.split(': ')[1]}`;
             const precisionText = `Précision: ${infoPrecision.textContent.split(': ')[1]}`;
             const timeText = infoTime.textContent;
             
-            // كتابة المعلومات على الصورة (على اليسار)
             context.fillText(latText, 20, infoY);
             context.fillText(lngText, 20, infoY + lineHeight);
             context.fillText(elevationText, 20, infoY + (lineHeight * 2));
             context.fillText(precisionText, 20, infoY + (lineHeight * 3));
             context.fillText(timeText, 20, infoY + (lineHeight * 4));
             
-            // كتابة Powered by NoteCam على اليمين بنفس الخط واللون
-            context.font = '12px "Courier New", Courier, monospace';
+            // الشعار - بنفس شكل الصورة (أصغر، أخف، خط مختلف)
+            context.font = '300 11px "Arial Narrow", "Helvetica Neue", Arial, sans-serif';
+            context.fillStyle = '#aaaaaa'; // رمادي فاتح
             context.textAlign = 'right';
             context.fillText('Powered by NoteCam', width - 20, infoY + (lineHeight * 5) + 10);
             
-            // استعادة إعدادات Canvas
             context.restore();
         }
 
-        // إضافة الصورة للمعرض
         function addImageToGallery(imageUrl, blob) {
             const galleryItem = document.createElement('div');
             galleryItem.className = 'gallery-item';
@@ -559,7 +494,6 @@
             galleryItem.appendChild(imgElement);
             galleryItem.appendChild(deleteBtn);
             
-            // عند النقر على الصورة في المعرض، نمكن التحميل
             galleryItem.onclick = () => {
                 currentImageData = { url: imageUrl, blob: blob };
                 downloadBtn.disabled = false;
@@ -569,7 +503,6 @@
             galleryContainer.prepend(galleryItem);
         }
 
-        // تحميل الصورة
         function downloadCurrentImage() {
             if (!currentImageData) {
                 alert('لا توجد صورة للتحميل');
@@ -589,26 +522,18 @@
             statusBar.textContent = `تم تحميل الصورة: ${fileName}`;
         }
 
-        // إضافة مستمعي الأحداث
         document.addEventListener('DOMContentLoaded', () => {
-            // تهيئة التطبيق
             initializeApp();
-            
-            // أحداث الأزرار
             toggleCameraBtn.addEventListener('click', toggleCamera);
             captureBtn.addEventListener('click', captureImageWithInfo);
             downloadBtn.addEventListener('click', downloadCurrentImage);
-            
-            // تحديث المعلومات عند النقر على زر التقاط
             captureBtn.addEventListener('click', () => {
                 updateLocationInfo();
                 updateTimeInfo();
             });
         });
 
-        // طلب الصلاحيات عند تحميل الصفحة
         window.onload = async () => {
-            // طلب صلاحية الموقع
             if (navigator.permissions) {
                 try {
                     const result = await navigator.permissions.query({ name: 'geolocation' });
