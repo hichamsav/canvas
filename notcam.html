@@ -214,7 +214,7 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* Information de localisation - VERSION ORIGINALE */
+        /* Information de localisation - VERSION MODIFIÉE */
         .info-panel {
             background: #000000;
             width: 100%;
@@ -266,42 +266,65 @@
         .logo-column {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
+            align-items: flex-end;
+            justify-content: flex-end;
             width: 82%;
             height: 100%;
             position: relative;
             z-index: 3;
+            padding-right: 10px;
+            padding-bottom: 5px;
         }
 
-        .logo-text {
-            font-size: 16px;
-            color: rgba(255, 0, 0, 0.8);
+        /* تنسيق Note ورقمها */
+        .note-code-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-bottom: 5px;
+        }
+
+        .note-label {
+            font-size: 14px;
+            color: rgba(255, 0, 0, 0.9);
             font-family: 'Arial Black', sans-serif;
             font-weight: 900;
-            text-align: center;
+            letter-spacing: 0.2px;
+            line-height: 1;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
+            background: none;
+            padding: 0;
+            margin: 0 0 2px 0;
+            white-space: nowrap;
+        }
+
+        .note-value {
+            font-size: 16px;
+            color: rgba(255, 0, 0, 0.9);
+            font-family: 'Arial Black', sans-serif;
+            font-weight: 900;
             letter-spacing: 0.3px;
             line-height: 1;
             text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
-            text-transform: uppercase;
             background: none;
             padding: 0;
             margin: 0;
             white-space: nowrap;
         }
 
-        .note-text {
-            font-size: 14px;
-            color: #000000;
+        .powered-by {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
             font-family: 'Courier New', monospace;
             font-weight: bold;
-            text-align: center;
+            text-align: right;
             letter-spacing: 0.1px;
             line-height: 1.2;
             background: none;
             padding: 0;
-            margin: 5px 0 0 0;
+            margin: 0;
             white-space: nowrap;
+            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.5);
         }
 
         /* Zone de l'employé */
@@ -795,10 +818,6 @@
                 font-size: 10px;
             }
             
-            .logo-text {
-                font-size: 12px;
-            }
-            
             .report-images-grid {
                 grid-template-columns: 1fr;
             }
@@ -937,7 +956,7 @@
                     <div class="flash-effect" id="flashEffect"></div>
                 </div>
 
-                <!-- Information de localisation - VERSION ORIGINALE AVEC NOTE -->
+                <!-- Information de localisation - VERSION MODIFIÉE -->
                 <div class="info-panel">
                     <div class="info-container">
                         <div class="info-background"></div>
@@ -949,8 +968,11 @@
                             <div class="info-line" id="infoTime">Temps : 03/01/2026 15:44</div>
                         </div>
                         <div class="logo-column">
-                            <div class="note-text" id="noteCode">ZN001</div>
-                            <div class="logo-text">Powered by NoteCam</div>
+                            <div class="note-code-container">
+                                <div class="note-label">Note</div>
+                                <div class="note-value" id="noteCode">ZN001</div>
+                            </div>
+                            <div class="powered-by">Powered by NoteCam</div>
                         </div>
                     </div>
                 </div>
@@ -1249,6 +1271,76 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             container.appendChild(downloadReportBtn);
             
             return container;
+        }
+
+        // ========== Mettre à jour المعلومات في الصورة ==========
+        function drawLogoOnImage(context, x, y, areaCode) {
+            context.save();
+            
+            // إعداد الظل
+            context.shadowColor = 'rgba(0, 0, 0, 0.4)';
+            context.shadowBlur = 2;
+            context.shadowOffsetX = 1;
+            context.shadowOffsetY = 1;
+            
+            // "Note" باللون الأحمر
+            context.font = '900 16px "Arial Black", sans-serif';
+            context.fillStyle = 'rgba(255, 0, 0, 0.9)';
+            context.textAlign = 'right';
+            context.textBaseline = 'alphabetic';
+            
+            const noteText = "Note";
+            context.fillText(noteText, x, y - 20);
+            
+            // رقم المنطقة باللون الأحمر (أسفل Note مباشرة)
+            context.font = '900 18px "Arial Black", sans-serif';
+            const areaCodeText = areaCode || 'ZN000';
+            context.fillText(areaCodeText, x, y);
+            
+            // "Powered by NoteCam" باللون الأبيض (أسفل رقم المنطقة)
+            context.shadowColor = 'rgba(255, 255, 255, 0.2)';
+            context.shadowBlur = 1;
+            context.shadowOffsetX = 0;
+            context.shadowOffsetY = 0;
+            context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            context.font = 'bold 11px "Courier New", monospace';
+            context.fillText('Powered by NoteCam', x, y + 15);
+            
+            context.restore();
+        }
+
+        // ========== إضافة المعلومات إلى الصورة ==========
+        function addInfoToImage(context, width, height) {
+            context.save();
+            
+            const lineHeight = 16;
+            const totalHeight = lineHeight * 5 + 6;
+            const boxWidth = width * 0.18;
+            const boxX = 2;
+            const boxY = height - totalHeight - 2;
+            
+            // خلفية بيضاء للمعلومات
+            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            context.fillRect(boxX, boxY, boxWidth, totalHeight);
+            
+            context.font = 'bold 15px "Courier New", monospace';
+            context.fillStyle = '#000000';
+            context.textAlign = 'left';
+            context.textBaseline = 'top';
+            
+            const startY = boxY + 3;
+            
+            // معلومات الموقع
+            context.fillText(document.getElementById('infoLatitude').textContent, boxX + 5, startY);
+            context.fillText(document.getElementById('infoLongitude').textContent, boxX + 5, startY + lineHeight);
+            context.fillText(document.getElementById('infoElevation').textContent, boxX + 5, startY + (lineHeight * 2));
+            context.fillText(document.getElementById('infoPrecision').textContent, boxX + 5, startY + (lineHeight * 3));
+            context.fillText(document.getElementById('infoTime').textContent, boxX + 5, startY + (lineHeight * 4));
+            
+            // Note ورقمها + Powered by NoteCam
+            drawLogoOnImage(context, width - 10, boxY + totalHeight - 5, document.getElementById('noteCode').textContent);
+            
+            context.restore();
         }
 
         // Initialisation de l'application
@@ -2120,68 +2212,6 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                 console.error('Erreur de capture :', error);
                 updateStatusBar("Erreur de capture");
             }
-        }
-
-        function drawLogoOnImage(context, x, y, areaCode) {
-            context.save();
-            
-            context.shadowColor = 'rgba(0, 0, 0, 0.4)';
-            context.shadowBlur = 2;
-            context.shadowOffsetX = 1;
-            context.shadowOffsetY = 1;
-            
-            // Note en rouge
-            context.font = '900 20px "Arial Black", sans-serif';
-            context.fillStyle = 'rgba(255, 0, 0, 0.85)';
-            context.textAlign = 'right';
-            context.textBaseline = 'bottom';
-            
-            const noteText = areaCode || 'ZN000';
-            context.fillText(`Note ${noteText}`, x, y);
-            
-            // Powered by NoteCam en blanc
-            context.shadowColor = 'rgba(255, 255, 255, 0.2)';
-            context.shadowBlur = 1;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            context.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            context.font = 'bold 12px "Courier New", monospace';
-            context.fillText('Powered by NoteCam', x, y - 25);
-            
-            context.restore();
-        }
-
-        function addInfoToImage(context, width, height) {
-            context.save();
-            
-            const lineHeight = 16;
-            const totalHeight = lineHeight * 5 + 6;
-            const boxWidth = width * 0.18;
-            const boxX = 2;
-            const boxY = height - totalHeight - 2;
-            
-            // Fond blanc pour les informations
-            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(boxX, boxY, boxWidth, totalHeight);
-            
-            context.font = 'bold 15px "Courier New", monospace';
-            context.fillStyle = '#000000';
-            context.textAlign = 'left';
-            context.textBaseline = 'top';
-            
-            const startY = boxY + 3;
-            
-            // Informations de localisation
-            context.fillText(infoLatitude.textContent, boxX + 5, startY);
-            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
-            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
-            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
-            
-            // Note + Powered by NoteCam
-            drawLogoOnImage(context, width - 2, boxY + totalHeight - 3, noteCode.textContent);
-            
-            context.restore();
         }
 
         function addImageToGallery(imageUrl, blob, timestamp) {
