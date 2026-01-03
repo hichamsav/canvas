@@ -28,7 +28,6 @@
             max-width: 600px;
             background: #000000;
             margin: 0 auto;
-            position: relative;
         }
 
         .status-bar {
@@ -49,7 +48,6 @@
             position: relative;
             background: #000000;
             overflow: hidden;
-            border-bottom: 2px solid #222;
         }
 
         #cameraVideo {
@@ -88,43 +86,37 @@
             background: rgba(255, 255, 255, 0.3);
         }
 
-        /* معلومات تحت الصورة */
+        /* معلومات تحت الصورة - بدون فراغات */
         .info-panel {
-            padding: 15px 0;
             background: #000000;
-            border-top: 1px solid #333333;
             width: 100%;
             position: relative;
-            min-height: 120px;
+            padding: 0; /* إزالة الحشو */
         }
 
-        /* الحاوية الرئيسية */
+        /* الحاوية الرئيسية - بدون فراغات */
         .info-container {
             display: flex;
-            justify-content: space-between;
-            align-items: stretch;
-            height: 100%;
-            padding: 0 15px;
+            height: 110px; /* ارتفاع ثابت */
+            background: rgba(255, 255, 255, 0.5); /* الخلفية البيضاء مباشرة */
+            padding: 0; /* بدون حشو */
+            margin: 0; /* بدون هوامش */
         }
 
         /* العمود الأيسر - المعلومات */
         .info-column {
             flex: 1;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 8px 12px;
-            border-radius: 3px;
-            margin-right: 15px;
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 100px;
-            font-family: 'Courier New', monospace;
+            padding-left: 15px; /* حشو داخلي فقط من اليسار */
+            height: 100%;
         }
 
         .info-line {
-            margin: 2px 0;
+            margin: 1px 0;
             font-size: 12px;
-            line-height: 1.3;
+            line-height: 1.2;
             color: #000000;
             font-family: 'Courier New', monospace;
             font-weight: bold;
@@ -135,9 +127,11 @@
         .logo-column {
             display: flex;
             align-items: flex-end;
-            justify-content: center;
+            justify-content: flex-end;
+            padding-right: 15px; /* حشو داخلي فقط من اليمين */
             padding-bottom: 8px;
-            min-width: 150px;
+            min-width: 180px;
+            height: 100%;
         }
 
         .logo-text {
@@ -145,10 +139,9 @@
             color: #ff0000;
             font-family: 'Arial', sans-serif;
             font-weight: bold;
-            text-align: center;
+            text-align: right;
             letter-spacing: 0.5px;
             line-height: 1.2;
-            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
         }
 
         /* عناصر التحكم */
@@ -252,21 +245,6 @@
             100% { opacity: 0; }
         }
 
-        .camera-grid {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-            pointer-events: none;
-            z-index: 1;
-            opacity: 0.3;
-        }
-
         /* تعديلات للجوال */
         @media (max-width: 768px) {
             .camera-container {
@@ -275,19 +253,25 @@
             
             .info-container {
                 flex-direction: column;
-                padding: 0 10px;
+                height: auto;
+                min-height: 110px;
             }
             
             .info-column {
-                margin-right: 0;
-                margin-bottom: 10px;
+                padding: 10px 15px;
+                height: auto;
                 min-height: 90px;
             }
             
             .logo-column {
-                align-items: center;
-                padding-bottom: 5px;
+                justify-content: center;
+                padding: 10px 15px;
                 min-width: auto;
+                height: auto;
+            }
+            
+            .logo-text {
+                text-align: center;
             }
             
             .btn {
@@ -332,23 +316,22 @@
 
         <div class="camera-container">
             <video id="cameraVideo" autoplay playsinline></video>
-            <div class="camera-grid"></div>
             <div class="capture-button" id="captureBtn">
                 <div class="capture-inner"></div>
             </div>
             <div class="flash-effect" id="flashEffect"></div>
         </div>
 
-        <!-- معلومات تحت الصورة -->
+        <!-- معلومات تحت الصورة - بدون فراغات -->
         <div class="info-panel">
             <div class="info-container">
                 <!-- العمود الأيسر - المعلومات -->
                 <div class="info-column">
-                    <div class="info-line" id="infoLatitude">Latitude: 33.603068</div>
-                    <div class="info-line" id="infoLongitude">Longitude: -7.636578</div>
-                    <div class="info-line" id="infoElevation">Élévation: 10.44±15.9 m</div>
-                    <div class="info-line" id="infoPrecision">Précision: 72.9 m</div>
-                    <div class="info-line" id="infoTime">Temps: 31-12-2025 13:48</div>
+                    <div class="info-line" id="infoLatitude">Latitude: 33.603058</div>
+                    <div class="info-line" id="infoLongitude">Longitude: -7.636560</div>
+                    <div class="info-line" id="infoElevation">Elevation: 10.44±7.73 m</div>
+                    <div class="info-line" id="infoPrecision">Precision: 56.10 m</div>
+                    <div class="info-line" id="infoTime">Temps: 03-01-2026 14:42</div>
                 </div>
                 
                 <!-- العمود الأيمن - الشعار -->
@@ -374,7 +357,6 @@
         let videoStream = null;
         let isCameraActive = false;
         let currentImageData = null;
-        let userLocation = null;
         let photoCount = 0;
 
         const videoElement = document.getElementById('cameraVideo');
@@ -397,21 +379,19 @@
         // البيانات من الصور
         const sampleLocations = [
             {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
-            {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.1},
+            {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
             {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
         ];
 
         async function initializeApp() {
             try {
-                // استخدام البيانات من الصور بدلاً من الموقع الحقيقي
-                userLocation = sampleLocations[0];
-                
+                // عرض البيانات الأولى مباشرة
                 updateLocationInfo();
                 updateTimeInfo();
                 updateBatteryStatus();
                 
                 setInterval(updateTimeInfo, 60000);
-                setInterval(updateLocationInfo, 30000);
+                setInterval(updateLocationInfo, 5000); // تحديث كل 5 ثواني
                 setInterval(updateBatteryStatus, 60000);
                 
                 statusBar.textContent = "NoteCam ● جاهز ● 100%";
@@ -426,16 +406,14 @@
         }
 
         function updateLocationInfo() {
-            if (userLocation) {
-                // اختيار موقع عشوائي من العينات
-                const randomIndex = Math.floor(Math.random() * sampleLocations.length);
-                const location = sampleLocations[randomIndex];
-                
-                infoLatitude.textContent = `Latitude: ${location.lat.toFixed(6)}`;
-                infoLongitude.textContent = `Longitude: ${location.lng.toFixed(6)}`;
-                infoElevation.textContent = `Élévation: ${location.elev} m`;
-                infoPrecision.textContent = `Précision: ${location.prec.toFixed(2)} m`;
-            }
+            // اختيار موقع عشوائي من العينات
+            const randomIndex = Math.floor(Math.random() * sampleLocations.length);
+            const location = sampleLocations[randomIndex];
+            
+            infoLatitude.textContent = `Latitude: ${location.lat.toFixed(6)}`;
+            infoLongitude.textContent = `Longitude: ${location.lng.toFixed(6)}`;
+            infoElevation.textContent = `Elevation: ${location.elev} m`;
+            infoPrecision.textContent = `Precision: ${location.prec.toFixed(2)} m`;
         }
 
         function updateTimeInfo() {
@@ -500,7 +478,7 @@
 
         function triggerFlash() {
             flashEffect.style.animation = 'none';
-            void flashEffect.offsetWidth; // Trigger reflow
+            void flashEffect.offsetWidth;
             flashEffect.style.animation = 'flash 300ms ease-out';
         }
 
@@ -532,13 +510,7 @@
                     currentImageData = {
                         url: imageUrl,
                         blob: blob,
-                        timestamp: timestamp,
-                        location: {
-                            lat: parseFloat(infoLatitude.textContent.split(': ')[1]),
-                            lng: parseFloat(infoLongitude.textContent.split(': ')[1]),
-                            elev: infoElevation.textContent.split(': ')[1],
-                            prec: parseFloat(infoPrecision.textContent.split(': ')[1])
-                        }
+                        timestamp: timestamp
                     };
                     
                     addImageToGallery(imageUrl, blob, timestamp);
@@ -548,7 +520,7 @@
                     photoCountElement.textContent = photoCount;
                     
                     // حفظ في localStorage
-                    savePhotoToStorage(currentImageData);
+                    savePhotoToStorage();
                     
                     statusBar.textContent = "NoteCam ● تم التقاط الصورة ●";
                     
@@ -569,16 +541,15 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // خلفية المعلومات البيضاء الشفافة
+            // خلفية المعلومات البيضاء الشفافة - بدون فراغات
             const lineHeight = 16;
-            const totalHeight = lineHeight * 5 + 12;
-            const boxWidth = 320;
-            const boxX = 15;
-            const boxY = height - totalHeight - 15;
+            const totalHeight = lineHeight * 5 + 10;
+            const startX = 0; // بداية من أقصى اليسار
+            const startY = height - totalHeight; // تبدأ من الأسفل مباشرة
             
-            // الخلفية البيضاء الشفافة
+            // الخلفية البيضاء الشفافة تغطي عرض الصورة بالكامل
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(boxX, boxY, boxWidth, totalHeight);
+            context.fillRect(startX, startY, width, totalHeight);
             
             // معلومات الموقع باللون الأسود
             context.font = 'bold 12px "Courier New", monospace';
@@ -586,34 +557,30 @@
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            const startY = boxY + 6;
-            
             // كتابة المعلومات
-            context.fillText(infoLatitude.textContent, boxX + 8, startY);
-            context.fillText(infoLongitude.textContent, boxX + 8, startY + lineHeight);
-            context.fillText(infoElevation.textContent, boxX + 8, startY + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, boxX + 8, startY + (lineHeight * 3));
-            context.fillText(infoTime.textContent, boxX + 8, startY + (lineHeight * 4));
+            context.fillText(infoLatitude.textContent, startX + 15, startY + 5);
+            context.fillText(infoLongitude.textContent, startX + 15, startY + 5 + lineHeight);
+            context.fillText(infoElevation.textContent, startX + 15, startY + 5 + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, startX + 15, startY + 5 + (lineHeight * 3));
+            context.fillText(infoTime.textContent, startX + 15, startY + 5 + (lineHeight * 4));
             
-            // الشعار باللون الأحمر
-            context.font = 'bold 13px "Arial", sans-serif';
+            // الشعار باللون الأحمر في الجهة اليمنى
+            context.font = 'bold 14px "Arial", sans-serif';
             context.fillStyle = '#ff0000';
             context.textAlign = 'right';
-            context.fillText('Powered by NoteCam', width - 15, boxY + totalHeight - 5);
+            context.fillText('Powered by NoteCam', width - 15, startY + totalHeight - 8);
             
             context.restore();
         }
 
-        function savePhotoToStorage(photoData) {
+        function savePhotoToStorage() {
             try {
                 const photos = JSON.parse(localStorage.getItem('noteCamPhotos') || '[]');
                 photos.unshift({
-                    timestamp: photoData.timestamp.toISOString(),
-                    location: photoData.location,
-                    data: photoData.blob.size // نكتفي بحجم البيانات فقط
+                    timestamp: new Date().toISOString(),
+                    count: photoCount
                 });
                 
-                // حفظ آخر 20 صورة فقط
                 if (photos.length > 20) {
                     photos.pop();
                 }
@@ -629,19 +596,40 @@
                 const photos = JSON.parse(localStorage.getItem('noteCamPhotos') || '[]');
                 photoCount = photos.length;
                 photoCountElement.textContent = photoCount;
+                
+                // عرض الصور المحفوظة
+                photos.forEach((photo, index) => {
+                    setTimeout(() => {
+                        createGalleryItem(index);
+                    }, index * 100);
+                });
             } catch (error) {
                 console.error('خطأ في تحميل الصور:', error);
             }
         }
 
-        function addImageToGallery(imageUrl, blob, timestamp) {
+        function createGalleryItem(index) {
             const galleryItem = document.createElement('div');
             galleryItem.className = 'gallery-item';
             
+            // صورة افتراضية
+            const canvas = document.createElement('canvas');
+            canvas.width = 100;
+            canvas.height = 80;
+            const ctx = canvas.getContext('2d');
+            
+            // خلفية عشوائية
+            ctx.fillStyle = `hsl(${Math.random() * 360}, 50%, 30%)`;
+            ctx.fillRect(0, 0, 100, 80);
+            
+            // إضافة نص
+            ctx.fillStyle = 'white';
+            ctx.font = '10px Arial';
+            ctx.fillText(`صورة ${index + 1}`, 30, 40);
+            
             const imgElement = document.createElement('img');
-            imgElement.src = imageUrl;
-            imgElement.alt = 'صورة ملتقطة';
-            imgElement.loading = 'lazy';
+            imgElement.src = canvas.toDataURL();
+            imgElement.alt = `صورة ${index + 1}`;
             
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'delete-btn';
@@ -650,7 +638,6 @@
                 e.stopPropagation();
                 if (confirm('هل تريد حذف هذه الصورة؟')) {
                     galleryItem.remove();
-                    URL.revokeObjectURL(imageUrl);
                     photoCount--;
                     photoCountElement.textContent = photoCount;
                     statusBar.textContent = 'NoteCam ● تم حذف الصورة ●';
@@ -661,7 +648,40 @@
             galleryItem.appendChild(deleteBtn);
             
             galleryItem.onclick = () => {
-                currentImageData = { url: imageUrl, blob: blob, timestamp: timestamp };
+                currentImageData = { url: imgElement.src };
+                downloadBtn.disabled = false;
+                statusBar.textContent = 'NoteCam ● تم تحديد الصورة ●';
+            };
+            
+            galleryContainer.appendChild(galleryItem);
+        }
+
+        function addImageToGallery(imageUrl, blob, timestamp) {
+            const galleryItem = document.createElement('div');
+            galleryItem.className = 'gallery-item';
+            
+            const imgElement = document.createElement('img');
+            imgElement.src = imageUrl;
+            imgElement.alt = 'صورة ملتقطة';
+            
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.textContent = '×';
+            deleteBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (confirm('هل تريد حذف هذه الصورة؟')) {
+                    galleryItem.remove();
+                    photoCount--;
+                    photoCountElement.textContent = photoCount;
+                    statusBar.textContent = 'NoteCam ● تم حذف الصورة ●';
+                }
+            };
+            
+            galleryItem.appendChild(imgElement);
+            galleryItem.appendChild(deleteBtn);
+            
+            galleryItem.onclick = () => {
+                currentImageData = { url: imageUrl, blob: blob };
                 downloadBtn.disabled = false;
                 statusBar.textContent = 'NoteCam ● تم تحديد الصورة ●';
             };
@@ -675,7 +695,7 @@
                 return;
             }
             
-            const now = currentImageData.timestamp || new Date();
+            const now = new Date();
             const fileName = `NoteCam_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}_${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}.jpg`;
             
             const link = document.createElement('a');
@@ -694,7 +714,6 @@
                 photoCount = 0;
                 photoCountElement.textContent = '0';
                 
-                // مسح localStorage
                 localStorage.removeItem('noteCamPhotos');
                 
                 statusBar.textContent = 'NoteCam ● تم مسح المعرض ●';
@@ -707,18 +726,9 @@
             captureBtn.addEventListener('click', captureImageWithInfo);
             downloadBtn.addEventListener('click', downloadCurrentImage);
             clearGalleryBtn.addEventListener('click', clearGallery);
-            
-            // تحديث المعلومات عند التقاط الصورة
-            captureBtn.addEventListener('click', () => {
-                setTimeout(() => {
-                    updateLocationInfo();
-                    updateTimeInfo();
-                }, 100);
-            });
         });
 
         window.onload = async () => {
-            // تحديث حالة البطارية
             if (navigator.getBattery) {
                 navigator.getBattery().then(battery => {
                     battery.addEventListener('levelchange', updateBatteryStatus);
