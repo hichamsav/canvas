@@ -27,7 +27,7 @@
         /* حاوية التطبيق */
         .app-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 900px;
             background: #111111;
             border-radius: 10px;
             overflow: hidden;
@@ -84,7 +84,7 @@
         }
 
         /* أنماط لوحة التحكم */
-        .admin-panel, .employee-panel {
+        .admin-panel, .employee-panel, .reports-panel {
             display: none;
         }
 
@@ -102,7 +102,7 @@
             color: #ffffff;
         }
 
-        .logout-btn {
+        .logout-btn, .back-btn {
             padding: 8px 15px;
             background: #b41a1a;
             color: white;
@@ -110,6 +110,11 @@
             border-radius: 5px;
             cursor: pointer;
             font-family: 'Courier New', monospace;
+            margin-left: 5px;
+        }
+
+        .back-btn {
+            background: #1a5fb4;
         }
 
         /* أقسام لوحة التحكم */
@@ -404,25 +409,199 @@
             font-weight: bold;
         }
 
-        /* التقارير */
-        .reports-section {
-            margin: 10px;
+        /* صفحة عرض التقارير الكاملة */
+        .reports-panel {
+            background: #111111;
+            min-height: 100vh;
         }
 
-        .report-card {
+        .reports-header {
+            padding: 20px;
             background: #222222;
+            border-bottom: 2px solid #1a5fb4;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .report-details-container {
+            padding: 20px;
+        }
+
+        .full-report-card {
+            background: #222222;
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 2px solid #333333;
+        }
+
+        .report-main-info {
+            background: #333333;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .report-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .info-item {
+            background: #444444;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #1a5fb4;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #aaaaaa;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            color: #ffffff;
+            font-weight: bold;
+        }
+
+        .report-images-section {
+            margin-top: 30px;
+        }
+
+        .images-title {
+            font-size: 18px;
+            color: #1a5fb4;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333333;
+        }
+
+        .report-images-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .report-image-item {
+            background: #333333;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #444444;
+            transition: transform 0.3s ease;
+        }
+
+        .report-image-item:hover {
+            transform: scale(1.05);
+            border-color: #1a5fb4;
+        }
+
+        .report-image-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .image-info {
+            padding: 10px;
+            background: #222222;
+        }
+
+        .image-time {
+            font-size: 11px;
+            color: #aaaaaa;
+            text-align: center;
+        }
+
+        .no-reports-message {
+            text-align: center;
+            padding: 50px;
+            background: #222222;
+            border-radius: 10px;
+            margin: 20px;
+            border: 2px dashed #333333;
+        }
+
+        .no-reports-message h3 {
+            color: #1a5fb4;
+            margin-bottom: 15px;
+        }
+
+        .no-reports-message p {
+            color: #888888;
+            margin-bottom: 10px;
+        }
+
+        /* التقارير المصغرة */
+        .reports-list {
+            margin-top: 20px;
+        }
+
+        .report-card-mini {
+            background: #333333;
             padding: 15px;
             margin: 10px 0;
             border-radius: 8px;
-            border: 1px solid #333333;
+            border: 1px solid #444444;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
 
-        .report-header {
+        .report-card-mini:hover {
+            background: #3a3a3a;
+            border-color: #1a5fb4;
+            transform: translateX(5px);
+        }
+
+        .report-card-mini .report-header {
             display: flex;
             justify-content: space-between;
+            align-items: center;
             margin-bottom: 10px;
             padding-bottom: 5px;
-            border-bottom: 1px solid #333333;
+            border-bottom: 1px solid #444444;
+        }
+
+        .report-card-mini .employee-name {
+            font-weight: bold;
+            color: #1a5fb4;
+            font-size: 16px;
+        }
+
+        .report-card-mini .report-date {
+            font-size: 12px;
+            color: #aaaaaa;
+        }
+
+        .report-card-mini .report-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .report-card-mini .detail-item {
+            background: #444444;
+            padding: 8px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .view-report-btn {
+            background: #1a5fb4;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            margin-top: 10px;
+            display: inline-block;
         }
 
         /* تأثيرات */
@@ -484,6 +663,14 @@
             .gallery-grid {
                 grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
             }
+            
+            .report-images-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+            
+            .report-info-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
@@ -501,6 +688,10 @@
             
             .logo-text {
                 font-size: 12px;
+            }
+            
+            .report-images-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -531,7 +722,9 @@
         <div class="admin-panel" id="adminPanel">
             <div class="panel-header">
                 <div class="panel-title">لوحة تحكم المشرف</div>
-                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                <div>
+                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                </div>
             </div>
 
             <!-- إدارة الموظفين -->
@@ -563,9 +756,12 @@
 
             <!-- التقارير الواردة -->
             <div class="dashboard-section">
-                <h3>التقارير الواردة</h3>
-                <div class="reports-section" id="reportsList">
-                    <!-- التقارير ستظهر هنا -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 style="margin: 0;">التقارير الواردة</h3>
+                    <button class="view-report-btn" onclick="viewAllReports()">عرض جميع التقارير</button>
+                </div>
+                <div class="reports-list" id="reportsListMini">
+                    <!-- التقارير المصغرة ستظهر هنا -->
                 </div>
             </div>
         </div>
@@ -643,35 +839,41 @@
                 </div>
             </div>
         </div>
+
+        <!-- صفحة عرض التقارير الكاملة -->
+        <div class="reports-panel" id="reportsPanel">
+            <div class="reports-header">
+                <div class="panel-title">جميع التقارير الواردة</div>
+                <div>
+                    <button class="back-btn" onclick="backToAdminPanel()">رجوع</button>
+                    <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+                </div>
+            </div>
+
+            <div class="report-details-container" id="reportDetailsContainer">
+                <!-- التقارير الكاملة ستظهر هنا -->
+            </div>
+        </div>
     </div>
 
     <script>
         // البيانات المخزنة
         let usersData = {
-            // المشرف الافتراضي
             admin: {
                 password: "admin123",
                 role: "admin",
                 name: "المشرف الرئيسي"
             },
-            // موظفين افتراضيين
             user1: {
                 password: "pass123",
                 role: "employee",
                 name: "الموظف الأول",
                 assignedAreas: []
-            },
-            user2: {
-                password: "pass123",
-                role: "employee",
-                name: "الموظف الثاني",
-                assignedAreas: []
             }
         };
 
         let employees = [
-            {username: "user1", name: "الموظف الأول"},
-            {username: "user2", name: "الموظف الثاني"}
+            {username: "user1", name: "الموظف الأول"}
         ];
 
         let assignedAreas = [];
@@ -691,15 +893,16 @@
         const loginPage = document.getElementById('loginPage');
         const adminPanel = document.getElementById('adminPanel');
         const employeePanel = document.getElementById('employeePanel');
+        const reportsPanel = document.getElementById('reportsPanel');
         const employeesList = document.getElementById('employeesList');
         const employeeSelect = document.getElementById('employeeSelect');
-        const reportsList = document.getElementById('reportsList');
+        const reportsListMini = document.getElementById('reportsListMini');
+        const reportDetailsContainer = document.getElementById('reportDetailsContainer');
         const employeeName = document.getElementById('employeeName');
         const assignedAreaName = document.getElementById('assignedAreaName');
         const areaCodeDisplay = document.getElementById('areaCodeDisplay');
         const assignedAreaInfo = document.getElementById('assignedAreaInfo');
         const numberInput = document.getElementById('numberInput');
-        const sendReportBtn = document.getElementById('sendReport');
 
         // عناصر الكاميرا
         const videoElement = document.getElementById('cameraVideo');
@@ -738,9 +941,9 @@
             // تحميل قائمة الموظفين
             updateEmployeeSelect();
             displayEmployees();
-            displayReports();
+            displayMiniReports();
             
-            // إعداد مستخدم افتراضي للمشرف
+            // إعداد مستخدم افتراضي
             if (!localStorage.getItem('usersData')) {
                 saveToLocalStorage();
             }
@@ -762,22 +965,21 @@
                 currentUser = {username, ...user};
                 updateStatusBar(`مرحباً ${user.name}`);
                 
-                // إخفاء صفحة تسجيل الدخول
                 loginPage.style.display = 'none';
                 
-                // عرض اللوحة المناسبة
                 if (user.role === 'admin') {
                     adminPanel.style.display = 'block';
                     employeePanel.style.display = 'none';
+                    reportsPanel.style.display = 'none';
                     updateAdminDashboard();
                 } else {
                     adminPanel.style.display = 'none';
                     employeePanel.style.display = 'block';
+                    reportsPanel.style.display = 'none';
                     employeeName.textContent = `موظف: ${user.name}`;
                     loadEmployeeAreas();
                 }
                 
-                // حفظ حالة تسجيل الدخول
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
             } else {
                 alert("اسم المستخدم أو كلمة المرور غير صحيحة");
@@ -790,8 +992,8 @@
             loginPage.style.display = 'block';
             adminPanel.style.display = 'none';
             employeePanel.style.display = 'none';
+            reportsPanel.style.display = 'none';
             
-            // إيقاف الكاميرا إذا كانت تعمل
             if (isCameraActive && videoStream) {
                 videoStream.getTracks().forEach(track => track.stop());
                 videoStream = null;
@@ -802,6 +1004,19 @@
             
             localStorage.removeItem('currentUser');
             updateStatusBar("تم تسجيل الخروج");
+        }
+
+        // الرجوع للوحة التحكم
+        function backToAdminPanel() {
+            adminPanel.style.display = 'block';
+            reportsPanel.style.display = 'none';
+        }
+
+        // عرض جميع التقارير
+        function viewAllReports() {
+            adminPanel.style.display = 'none';
+            reportsPanel.style.display = 'block';
+            displayFullReports();
         }
 
         // إضافة موظف جديد
@@ -820,7 +1035,6 @@
                 return;
             }
             
-            // إضافة الموظف
             usersData[username] = {
                 password: password,
                 role: "employee",
@@ -830,12 +1044,10 @@
             
             employees.push({username, name});
             
-            // تحديث الواجهة
             updateEmployeeSelect();
             displayEmployees();
             saveToLocalStorage();
             
-            // مسح الحقول
             document.getElementById('empUsername').value = '';
             document.getElementById('empPassword').value = '';
             document.getElementById('empName').value = '';
@@ -854,7 +1066,6 @@
                 return;
             }
             
-            // إضافة المنطقة
             const area = {
                 employee: employeeUsername,
                 name: areaName,
@@ -864,7 +1075,6 @@
             
             assignedAreas.push(area);
             
-            // إضافة المنطقة للموظف
             if (usersData[employeeUsername]) {
                 if (!usersData[employeeUsername].assignedAreas) {
                     usersData[employeeUsername].assignedAreas = [];
@@ -872,10 +1082,8 @@
                 usersData[employeeUsername].assignedAreas.push(area);
             }
             
-            // تحديث الواجهة
             saveToLocalStorage();
             
-            // مسح الحقول
             document.getElementById('areaName').value = '';
             document.getElementById('areaCode').value = '';
             
@@ -923,7 +1131,6 @@
                 return;
             }
             
-            // إنشاء التقرير
             const report = {
                 id: Date.now(),
                 employee: currentUser.username,
@@ -941,21 +1148,16 @@
                 areaCode: areaCodeDisplay.textContent
             };
             
-            // إضافة التقرير
             reports.push(report);
-            
-            // حفظ في التخزين المحلي
             saveToLocalStorage();
             
-            // إعادة تعيين الحقول
             numberInput.value = "";
             photoCount = 0;
             capturedImages = [];
             photoCountElement.textContent = "0";
             galleryContainer.innerHTML = "";
             
-            // تحديث الواجهة
-            displayReports();
+            displayMiniReports();
             
             alert("تم إرسال التقرير بنجاح إلى المشرف");
             updateStatusBar("تم إرسال التقرير بنجاح");
@@ -976,30 +1178,241 @@
             });
         }
 
-        // عرض التقارير
-        function displayReports() {
-            reportsList.innerHTML = '';
+        // عرض التقارير المصغرة
+        function displayMiniReports() {
+            reportsListMini.innerHTML = '';
             
             if (reports.length === 0) {
-                reportsList.innerHTML = '<p style="text-align: center; color: #888;">لا توجد تقارير</p>';
+                reportsListMini.innerHTML = `
+                    <div class="no-reports-message">
+                        <h3>لا توجد تقارير</h3>
+                        <p>لم يتم استلام أي تقارير حتى الآن</p>
+                    </div>
+                `;
                 return;
             }
             
             reports.slice().reverse().forEach(report => {
                 const reportCard = document.createElement('div');
-                reportCard.className = 'report-card';
+                reportCard.className = 'report-card-mini';
+                reportCard.onclick = () => viewSingleReport(report.id);
+                
                 reportCard.innerHTML = `
                     <div class="report-header">
-                        <strong>${report.employeeName}</strong>
-                        <small>${new Date(report.date).toLocaleString('ar-SA')}</small>
+                        <div class="employee-name">${report.employeeName}</div>
+                        <div class="report-date">${new Date(report.date).toLocaleString('ar-SA')}</div>
                     </div>
-                    <p><strong>الرقم المدخل:</strong> ${report.number}</p>
-                    <p><strong>المنطقة:</strong> ${report.area} (كود: ${report.areaCode})</p>
-                    <p><strong>الموقع:</strong> ${report.location.lat.toFixed(6)}, ${report.location.lng.toFixed(6)}</p>
-                    <p><strong>عدد الصور:</strong> ${report.images.length}</p>
+                    <div class="report-details">
+                        <div class="detail-item">
+                            <strong>الرقم:</strong> ${report.number}
+                        </div>
+                        <div class="detail-item">
+                            <strong>المنطقة:</strong> ${report.area}
+                        </div>
+                        <div class="detail-item">
+                            <strong>عدد الصور:</strong> ${report.images.length}
+                        </div>
+                        <div class="detail-item">
+                            <strong>التاريخ:</strong> ${new Date(report.date).toLocaleDateString('ar-SA')}
+                        </div>
+                    </div>
+                    <button class="view-report-btn" onclick="viewSingleReport(${report.id}); event.stopPropagation();">
+                        عرض التقرير الكامل
+                    </button>
                 `;
-                reportsList.appendChild(reportCard);
+                reportsListMini.appendChild(reportCard);
             });
+        }
+
+        // عرض التقارير الكاملة
+        function displayFullReports() {
+            reportDetailsContainer.innerHTML = '';
+            
+            if (reports.length === 0) {
+                reportDetailsContainer.innerHTML = `
+                    <div class="no-reports-message">
+                        <h3>لا توجد تقارير</h3>
+                        <p>لم يتم استلام أي تقارير حتى الآن</p>
+                        <p>سيتلقى النظام تقارير جديدة عندما يقوم الموظفون بإرسالها</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            reports.slice().reverse().forEach((report, index) => {
+                const reportCard = document.createElement('div');
+                reportCard.className = 'full-report-card';
+                reportCard.id = `report-${report.id}`;
+                
+                // إنشاء HTML للصور
+                let imagesHTML = '';
+                if (report.images && report.images.length > 0) {
+                    imagesHTML = report.images.map((img, imgIndex) => `
+                        <div class="report-image-item">
+                            <img src="${img.url}" alt="صورة ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">صورة ${imgIndex + 1}</text></svg>';">
+                            <div class="image-info">
+                                <div class="image-time">صورة ${imgIndex + 1}</div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    imagesHTML = '<p style="text-align: center; color: #888; grid-column: 1 / -1;">لا توجد صور في هذا التقرير</p>';
+                }
+                
+                reportCard.innerHTML = `
+                    <div class="report-main-info">
+                        <h3 style="color: #1a5fb4; margin-bottom: 15px;">
+                            تقرير #${index + 1} - ${report.employeeName}
+                        </h3>
+                        <div class="report-info-grid">
+                            <div class="info-item">
+                                <div class="info-label">اسم الموظف</div>
+                                <div class="info-value">${report.employeeName}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">اسم المستخدم</div>
+                                <div class="info-value">${report.employee}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">الرقم المدخل</div>
+                                <div class="info-value">${report.number}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">المنطقة</div>
+                                <div class="info-value">${report.area || 'غير محدد'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">كود المنطقة</div>
+                                <div class="info-value">${report.areaCode || 'غير محدد'}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">تاريخ الإرسال</div>
+                                <div class="info-value">${new Date(report.date).toLocaleString('ar-SA')}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">خط العرض</div>
+                                <div class="info-value">${report.location.lat.toFixed(6)}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">خط الطول</div>
+                                <div class="info-value">${report.location.lng.toFixed(6)}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">الارتفاع</div>
+                                <div class="info-value">${report.location.elev}</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">الدقة</div>
+                                <div class="info-value">${report.location.prec.toFixed(2)} م</div>
+                            </div>
+                            <div class="info-item">
+                                <div class="info-label">عدد الصور</div>
+                                <div class="info-value">${report.images.length} صورة</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="report-images-section">
+                        <div class="images-title">الصور الملتقطة</div>
+                        <div class="report-images-grid">
+                            ${imagesHTML}
+                        </div>
+                    </div>
+                `;
+                reportDetailsContainer.appendChild(reportCard);
+            });
+        }
+
+        // عرض تقرير مفرد
+        function viewSingleReport(reportId) {
+            adminPanel.style.display = 'none';
+            reportsPanel.style.display = 'block';
+            
+            const report = reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            reportDetailsContainer.innerHTML = '';
+            
+            let imagesHTML = '';
+            if (report.images && report.images.length > 0) {
+                imagesHTML = report.images.map((img, imgIndex) => `
+                    <div class="report-image-item">
+                        <img src="${img.url}" alt="صورة ${imgIndex + 1}" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"200\" height=\"150\" viewBox=\"0 0 200 150\"><rect width=\"200\" height=\"150\" fill=\"%23333\"/><text x=\"100\" y=\"75\" font-family=\"Arial\" font-size=\"14\" fill=\"%23fff\" text-anchor=\"middle\">صورة ${imgIndex + 1}</text></svg>';">
+                        <div class="image-info">
+                            <div class="image-time">صورة ${imgIndex + 1} - ${new Date(img.timestamp).toLocaleTimeString('ar-SA')}</div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            const reportCard = document.createElement('div');
+            reportCard.className = 'full-report-card';
+            
+            reportCard.innerHTML = `
+                <div class="report-main-info">
+                    <h3 style="color: #1a5fb4; margin-bottom: 15px;">
+                        تقرير مفصل - ${report.employeeName}
+                    </h3>
+                    <div class="report-info-grid">
+                        <div class="info-item">
+                            <div class="info-label">اسم الموظف</div>
+                            <div class="info-value">${report.employeeName}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">اسم المستخدم</div>
+                            <div class="info-value">${report.employee}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">الرقم المدخل</div>
+                            <div class="info-value">${report.number}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">المنطقة</div>
+                            <div class="info-value">${report.area || 'غير محدد'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">كود المنطقة</div>
+                            <div class="info-value">${report.areaCode || 'غير محدد'}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">تاريخ الإرسال</div>
+                            <div class="info-value">${new Date(report.date).toLocaleString('ar-SA')}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">خط العرض</div>
+                            <div class="info-value">${report.location.lat.toFixed(6)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">خط الطول</div>
+                            <div class="info-value">${report.location.lng.toFixed(6)}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">الارتفاع</div>
+                            <div class="info-value">${report.location.elev}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">الدقة</div>
+                            <div class="info-value">${report.location.prec.toFixed(2)} م</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">عدد الصور</div>
+                            <div class="info-value">${report.images.length} صورة</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="report-images-section">
+                    <div class="images-title">الصور الملتقطة (${report.images.length} صورة)</div>
+                    <div class="report-images-grid">
+                        ${imagesHTML || '<p style="text-align: center; color: #888; grid-column: 1 / -1;">لا توجد صور في هذا التقرير</p>'}
+                    </div>
+                </div>
+                
+                <div style="margin-top: 30px; text-align: center;">
+                    <button class="back-btn" onclick="viewAllReports()">عرض جميع التقارير</button>
+                </div>
+            `;
+            reportDetailsContainer.appendChild(reportCard);
         }
 
         // تحديث قائمة الموظفين في التحديد
@@ -1016,10 +1429,10 @@
         // تحديث لوحة المشرف
         function updateAdminDashboard() {
             displayEmployees();
-            displayReports();
+            displayMiniReports();
         }
 
-        // وظائف الكاميرا (بنفس كود NoteCam)
+        // وظائف الكاميرا
         function updateLocationInfo() {
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
@@ -1045,7 +1458,7 @@
             statusBar.textContent = `نظام NoteCam ● ${message} ●`;
         }
 
-        // تشغيل/إيقاف الكاميرا
+        // وظائف الكاميرا الأساسية
         async function toggleCamera() {
             if (!isCameraActive) {
                 try {
@@ -1092,7 +1505,6 @@
             flashEffect.style.animation = 'flash 300ms ease-out';
         }
 
-        // التقاط صورة
         async function captureImageWithInfo() {
             if (!isCameraActive || !videoStream) {
                 alert("يجب تشغيل الكاميرا أولاً!");
@@ -1140,7 +1552,6 @@
                     photoCount++;
                     photoCountElement.textContent = photoCount;
                     
-                    // حفظ الصورة في المصفوفة
                     capturedImages.push({
                         url: imageUrl,
                         timestamp: timestamp.toISOString(),
@@ -1149,13 +1560,11 @@
                     
                     updateStatusBar("تم التقاط الصورة");
                     
-                    // تأثير الضغط على الزر
                     captureBtn.style.transform = 'translateX(-50%) scale(0.9)';
                     setTimeout(() => {
                         captureBtn.style.transform = 'translateX(-50%) scale(1)';
                     }, 100);
                     
-                    // إذا وصل إلى 5 صور
                     if (photoCount === 5) {
                         updateStatusBar("تم التقاط 5 صور - جاهز للإرسال");
                     }
@@ -1168,7 +1577,6 @@
             }
         }
 
-        // إضافة المعلومات على الصورة
         function drawLogoOnImage(context, x, y) {
             context.save();
             
@@ -1225,7 +1633,6 @@
             context.restore();
         }
 
-        // إضافة الصورة للمعرض
         function addImageToGallery(imageUrl, blob, timestamp) {
             const galleryItem = document.createElement('div');
             galleryItem.className = 'gallery-item';
@@ -1244,7 +1651,6 @@
                     photoCount--;
                     photoCountElement.textContent = photoCount;
                     
-                    // إزالة الصورة من المصفوفة
                     const index = capturedImages.findIndex(img => img.url === imageUrl);
                     if (index !== -1) {
                         capturedImages.splice(index, 1);
@@ -1266,7 +1672,6 @@
             galleryContainer.prepend(galleryItem);
         }
 
-        // تحميل الصورة الحالية
         function downloadCurrentImage() {
             if (!currentImageData) {
                 alert('لا توجد صورة للتحميل');
@@ -1286,7 +1691,6 @@
             updateStatusBar(`تم التحميل: ${fileName}`);
         }
 
-        // مسح المعرض
         function clearGallery() {
             if (confirm('هل تريد مسح جميع الصور من المعرض؟')) {
                 galleryContainer.innerHTML = '';
@@ -1297,7 +1701,7 @@
             }
         }
 
-        // حفظ البيانات في التخزين المحلي
+        // حفظ البيانات
         function saveToLocalStorage() {
             const data = {
                 usersData,
@@ -1308,7 +1712,6 @@
             localStorage.setItem('noteCamSystemData', JSON.stringify(data));
         }
 
-        // تحميل البيانات من التخزين المحلي
         function loadFromLocalStorage() {
             const savedData = localStorage.getItem('noteCamSystemData');
             if (savedData) {
@@ -1323,7 +1726,6 @@
                 }
             }
             
-            // تحميل حالة تسجيل الدخول
             const savedUser = localStorage.getItem('currentUser');
             if (savedUser) {
                 try {
