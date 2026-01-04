@@ -277,6 +277,93 @@
             box-shadow: 0 3px 10px rgba(26, 95, 180, 0.1);
         }
 
+        /* Contrôles sous la zone sélectionnée */
+        .controls-under-area {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0 25px 0;
+            flex-wrap: wrap;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e1e8ed;
+        }
+
+        .control-btn {
+            padding: 12px 24px;
+            background: #ffffff;
+            border: 2px solid #e1e8ed;
+            color: #333;
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: 8px;
+            min-width: 140px;
+            transition: all 0.3s ease;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .control-btn.primary {
+            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
+            color: white;
+            border: none;
+        }
+
+        .control-btn.danger {
+            background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
+            color: white;
+            border: none;
+        }
+
+        /* Indicateur de caméra */
+        .camera-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: #f0fff4;
+            border-radius: 8px;
+            border: 2px solid #2ea043;
+            margin: 15px 0;
+        }
+
+        .camera-status.active {
+            background: #e3f2fd;
+            border-color: #1a5fb4;
+        }
+
+        .camera-icon {
+            font-size: 24px;
+            color: #2ea043;
+        }
+
+        .camera-status.active .camera-icon {
+            color: #1a5fb4;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+
+        .camera-text {
+            font-weight: 600;
+            color: #2ea043;
+        }
+
+        .camera-status.active .camera-text {
+            color: #1a5fb4;
+        }
+
         /* Conteneur des images */
         .photos-container {
             margin: 25px 0;
@@ -448,46 +535,6 @@
             background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
         }
 
-        /* Contrôles */
-        .controls-under-number {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 15px 0 25px 0;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            padding: 12px 24px;
-            background: #ffffff;
-            border: 2px solid #e1e8ed;
-            color: #333;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            min-width: 140px;
-            transition: all 0.3s ease;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .control-btn.primary {
-            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
-            color: white;
-            border: none;
-        }
-
-        .control-btn.danger {
-            background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
-            color: white;
-            border: none;
-        }
-
         /* Rapports */
         .reports-container {
             margin-top: 25px;
@@ -638,6 +685,11 @@
                 padding: 12px 30px;
                 font-size: 18px;
             }
+            
+            .controls-under-area {
+                flex-direction: column;
+                align-items: center;
+            }
         }
 
         @media (max-width: 480px) {
@@ -666,11 +718,6 @@
             .apres-button {
                 padding: 10px 20px;
                 font-size: 16px;
-            }
-            
-            .controls-under-number {
-                flex-direction: column;
-                align-items: center;
             }
             
             .control-btn {
@@ -787,12 +834,7 @@
             <input type="password" id="password" class="login-input" placeholder="Mot de passe">
             <button class="login-btn" onclick="login()">Se connecter</button>
             
-            <!-- Informations de connexion par défaut -->
-            <div style="margin-top: 25px; font-size: 13px; color: #666; background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #2ea043;">
-                <p style="font-weight: 700; color: #1a5fb4; margin-bottom: 8px;">Pour tester :</p>
-                <p>👨‍💼 Superviseur : <strong>admin / admin123</strong></p>
-                <p>👷 Employé : <strong>user1 / pass123</strong></p>
-            </div>
+            <!-- Pas d'informations de connexion visibles pour la sécurité -->
         </div>
 
         <!-- Panneau du superviseur -->
@@ -887,6 +929,27 @@
                     </div>
                 </div>
 
+                <!-- Indicateur de caméra (automatique) -->
+                <div class="camera-status" id="cameraStatus">
+                    <div class="camera-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="camera-text">Caméra en cours d'activation...</div>
+                </div>
+
+                <!-- Les 3 boutons sous la zone sélectionnée -->
+                <div class="controls-under-area">
+                    <button class="control-btn primary" id="toggleCamera" style="display: none;">
+                        <i class="fas fa-video"></i> Activer la caméra
+                    </button>
+                    <button class="control-btn danger" id="clearPhotos">
+                        <i class="fas fa-trash"></i> Effacer les photos
+                    </button>
+                    <button class="control-btn" id="refreshLocation">
+                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
+                    </button>
+                </div>
+
                 <!-- Liste des zones disponibles -->
                 <div class="areas-list" id="employeeAreasList">
                     <!-- Zones de l'employé -->
@@ -945,19 +1008,6 @@
                     <div style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;">
                         Nombre sélectionné : <span id="selectedNumberDisplay" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
                     </div>
-                </div>
-
-                <!-- Les 3 boutons (toujours visibles) -->
-                <div class="controls-under-number">
-                    <button class="control-btn primary" id="toggleCamera">
-                        <i class="fas fa-video"></i> Activer la caméra
-                    </button>
-                    <button class="control-btn danger" id="clearPhotos">
-                        <i class="fas fa-trash"></i> Effacer les photos
-                    </button>
-                    <button class="control-btn" id="refreshLocation">
-                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
-                    </button>
                 </div>
 
                 <!-- Bouton d'envoi des photos AVANT -->
@@ -1070,7 +1120,8 @@
 
     <script>
         // ========== DONNÉES SYSTÈME ==========
-        let usersData = {
+        // Données utilisateurs par défaut
+        const defaultUsersData = {
             admin: {
                 password: "admin123",
                 role: "admin",
@@ -1084,13 +1135,11 @@
             }
         };
 
+        let usersData = JSON.parse(JSON.stringify(defaultUsersData));
         let employees = [
             {username: "user1", name: "Employé Un"}
         ];
-
         let assignedAreas = [];
-
-        // Données stockées par code de zone
         let zoneReports = {};
 
         // Variables système
@@ -1099,7 +1148,7 @@
         let isCameraActive = false;
         let selectedArea = null;
         let selectedNumber = null;
-        let currentStep = 1; // 1 = AVANT, 2 = APRÈS
+        let currentStep = 1;
         
         // Photos avant et après
         let beforePhotos = [null, null, null, null, null];
@@ -1145,6 +1194,7 @@
         const refreshLocationBtn = document.getElementById('refreshLocation');
         const captureFlash = document.getElementById('captureFlash');
         const notification = document.getElementById('notification');
+        const cameraStatus = document.getElementById('cameraStatus');
         
         // Éléments de statut
         const statusNumber = document.getElementById('statusNumber');
@@ -1233,6 +1283,119 @@
             updateStatusBar("Localisation actualisée");
         }
 
+        // ========== GESTION AUTOMATIQUE DE LA CAMÉRA ==========
+        async function activateCameraAutomatically() {
+            try {
+                cameraStatus.innerHTML = `
+                    <div class="camera-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="camera-text">Activation automatique de la caméra...</div>
+                `;
+                
+                // Désactiver le bouton manuel
+                toggleCameraBtn.style.display = 'none';
+                
+                updateStatusBar("Activation automatique de la caméra...");
+                
+                // Demander l'accès à la caméra
+                videoStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        facingMode: 'environment'
+                    },
+                    audio: false
+                });
+                
+                isCameraActive = true;
+                
+                // Mettre à jour l'interface
+                cameraStatus.classList.add('active');
+                cameraStatus.innerHTML = `
+                    <div class="camera-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="camera-text">Caméra active ✓</div>
+                `;
+                
+                showNotification("Caméra activée automatiquement", "success");
+                updateStatusBar("Caméra activée automatiquement - Prêt à capturer");
+                
+            } catch (error) {
+                console.error('Erreur d\'activation automatique de la caméra :', error);
+                
+                // En cas d'erreur, montrer le bouton manuel
+                toggleCameraBtn.style.display = 'block';
+                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer manuellement la caméra';
+                
+                cameraStatus.innerHTML = `
+                    <div class="camera-icon" style="color: #ff6b6b;">
+                        <i class="fas fa-video-slash"></i>
+                    </div>
+                    <div class="camera-text" style="color: #ff6b6b;">Caméra non disponible - Cliquez sur le bouton ci-dessous</div>
+                `;
+                
+                showNotification("Impossible d'activer automatiquement la caméra", "error");
+                updateStatusBar("Erreur de caméra - Activation manuelle nécessaire");
+            }
+        }
+
+        // Fonction manuelle de secours
+        async function toggleCameraManually() {
+            if (!isCameraActive) {
+                try {
+                    updateStatusBar("Activation manuelle de la caméra...");
+                    
+                    videoStream = await navigator.mediaDevices.getUserMedia({
+                        video: {
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'environment'
+                        },
+                        audio: false
+                    });
+                    
+                    isCameraActive = true;
+                    toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash"></i> Désactiver la caméra';
+                    cameraStatus.classList.add('active');
+                    cameraStatus.innerHTML = `
+                        <div class="camera-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="camera-text">Caméra active ✓</div>
+                    `;
+                    
+                    showNotification("Caméra activée manuellement", "success");
+                    updateStatusBar("Caméra activée - Prêt à capturer");
+                    
+                } catch (error) {
+                    console.error('Erreur de caméra manuelle :', error);
+                    showNotification("Erreur de caméra", "error");
+                    updateStatusBar("Erreur de caméra");
+                    alert('Impossible d\'activer la caméra. Vérifiez les autorisations.');
+                }
+            } else {
+                if (videoStream) {
+                    videoStream.getTracks().forEach(track => track.stop());
+                    videoStream = null;
+                }
+                
+                isCameraActive = false;
+                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
+                cameraStatus.classList.remove('active');
+                cameraStatus.innerHTML = `
+                    <div class="camera-icon">
+                        <i class="fas fa-video-slash"></i>
+                    </div>
+                    <div class="camera-text">Caméra désactivée</div>
+                `;
+                
+                showNotification("Caméra désactivée", "success");
+                updateStatusBar("Caméra désactivée");
+            }
+        }
+
         // ========== INITIALISATION ==========
         function initializeApp() {
             loadFromLocalStorage();
@@ -1249,7 +1412,7 @@
             setupPhotoBoxes();
             
             // Écouteurs d'événements
-            toggleCameraBtn.addEventListener('click', toggleCamera);
+            toggleCameraBtn.addEventListener('click', toggleCameraManually);
             clearPhotosBtn.addEventListener('click', clearAllPhotos);
             refreshLocationBtn.addEventListener('click', updateLocationInfo);
             
@@ -1328,7 +1491,7 @@
 
         async function capturePhoto(index, type) {
             if (!isCameraActive || !videoStream) {
-                alert("Veuillez activer la caméra d'abord !");
+                alert("La caméra n'est pas encore activée. Veuillez patienter quelques secondes.");
                 return;
             }
             
@@ -1371,8 +1534,8 @@
                 // Dessiner la vidéo sur le canvas
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                // Ajouter les informations géographiques comme dans l'image originale
-                addOriginalInfoToImage(context, canvas.width, canvas.height);
+                // Ajouter les informations géographiques
+                addInfoToImage(context, canvas.width, canvas.height);
                 
                 // Convertir en URL
                 canvas.toBlob((blob) => {
@@ -1416,17 +1579,17 @@
             }
         }
 
-        function addOriginalInfoToImage(context, width, height) {
+        function addInfoToImage(context, width, height) {
             context.save();
             
-            // Paramètres exacts comme dans l'image originale
+            // Paramètres exacts
             const lineHeight = 16;
             const totalHeight = lineHeight * 6 + 8;
             const boxWidth = width * 0.18;
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
-            // Fond blanc semi-transparent pour les informations
+            // Fond blanc semi-transparent
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
@@ -1449,23 +1612,22 @@
                 `Note : ${noteCode}`
             ];
             
-            // Dessiner chaque ligne d'information
+            // Dessiner chaque ligne
             infoLines.forEach((line, i) => {
                 context.fillText(line, boxX + 5, startY + (i * lineHeight));
             });
             
-            // Ajouter "Powered by Notecam" en bas à droite
+            // Ajouter "Powered by Notecam"
             context.textAlign = 'right';
             context.font = '900 16px "Arial Black", sans-serif';
             context.fillStyle = '#ff0000';
             
-            // Ajouter un léger ombrage
+            // Ombre
             context.shadowColor = 'rgba(0, 0, 0, 0.7)';
             context.shadowBlur = 2;
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            // SEULEMENT "Powered by Notecam" - PAS de AVANT/APRÈS
             context.fillText('Powered by Notecam', width - 11, boxY + totalHeight - 12);
             
             context.restore();
@@ -1478,14 +1640,12 @@
                 statusBefore.textContent = `${beforeCount}/5`;
                 summaryBeforePhotos.textContent = `${beforeCount}/5`;
                 
-                // Mettre à jour le style du compteur
                 if (beforeCount === 5) {
                     statusBefore.classList.add('completed');
                 } else {
                     statusBefore.classList.remove('completed');
                 }
                 
-                // Vérifier si on peut envoyer les photos AVANT
                 checkSendBeforeStatus();
             } else {
                 const afterCount = afterPhotos.filter(p => p !== null).length;
@@ -1493,14 +1653,12 @@
                 statusAfter.textContent = `${afterCount}/5`;
                 summaryAfterPhotos.textContent = `${afterCount}/5`;
                 
-                // Mettre à jour le style du compteur
                 if (afterCount === 5) {
                     statusAfter.classList.add('completed');
                 } else {
                     statusAfter.classList.remove('completed');
                 }
                 
-                // Vérifier si on peut envoyer les photos APRÈS
                 checkSendAfterStatus();
             }
         }
@@ -1525,7 +1683,7 @@
             updatePhotoCount('before');
             updatePhotoCount('after');
             
-            // Réinitialiser les boutons d'envoi
+            // Réinitialiser les boutons
             checkSendBeforeStatus();
             checkSendAfterStatus();
             
@@ -1553,7 +1711,6 @@
 
         // ========== GESTION DES ÉTAPES ==========
         function updateStepDisplay() {
-            // Mettre à jour les indicateurs de progression
             if (currentStep === 1) {
                 step1.classList.add('active');
                 step2.classList.remove('active');
@@ -1567,7 +1724,6 @@
                 step2Label.style.fontWeight = '700';
             }
             
-            // Mettre à jour l'affichage des zones
             if (selectedArea) {
                 statusZone.textContent = selectedArea.name;
                 statusZoneAfter.textContent = selectedArea.name;
@@ -1582,7 +1738,7 @@
                 return;
             }
             
-            // Créer un rapport temporaire pour les photos AVANT
+            // Créer rapport temporaire
             tempReport = {
                 id: Date.now(),
                 employee: currentUser.username,
@@ -1597,31 +1753,27 @@
                 status: 'before_only'
             };
             
-            // Stocker temporairement
             localStorage.setItem('tempReport', JSON.stringify(tempReport));
             
-            // Masquer la section AVANT et montrer le bouton APRÈS
+            // Masquer AVANT, montrer APRÈS
             beforePhotosContainer.style.display = 'none';
             sendBeforeContainer.style.display = 'none';
             apresButtonContainer.style.display = 'block';
             
-            // Désactiver la modification du nombre et de la zone
+            // Désactiver modifications
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.disabled = true;
             });
             document.getElementById('areaSelect').disabled = true;
             
-            // Mettre à jour le statut
             showNotification("Photos AVANT envoyées avec succès !", "success");
             updateStatusBar("Photos AVANT envoyées avec succès");
             
-            // Mettre à jour l'étape
             currentStep = 2;
             updateStepDisplay();
         }
 
         function showAfterPhotos() {
-            // Masquer le bouton APRÈS et montrer la section APRÈS
             apresButtonContainer.style.display = 'none';
             afterPhotosContainer.style.display = 'block';
             sendAfterContainer.style.display = 'block';
@@ -1641,7 +1793,7 @@
                 return;
             }
             
-            // Créer le rapport complet
+            // Créer rapport complet
             const report = {
                 id: tempReport.id,
                 employee: tempReport.employee,
@@ -1657,7 +1809,7 @@
                 status: 'complete'
             };
             
-            // Ajouter aux rapports de la zone
+            // Ajouter aux rapports
             const zoneCode = selectedArea.code;
             if (!zoneReports[zoneCode]) {
                 zoneReports[zoneCode] = {
@@ -1669,7 +1821,7 @@
             
             zoneReports[zoneCode].reports.push(report);
             
-            // Ajouter les photos à la zone
+            // Ajouter photos
             report.beforePhotos.forEach((photo, index) => {
                 zoneReports[zoneCode].photos.push({
                     type: 'before',
@@ -1692,50 +1844,40 @@
             
             saveToLocalStorage();
             
-            // Générer le fichier de la zone
+            // Générer fichier
             generateZoneFile(zoneCode);
             
-            // Supprimer le rapport temporaire
+            // Supprimer temporaire
             tempReport = null;
             localStorage.removeItem('tempReport');
             
-            // Réinitialiser le formulaire complet
+            // Réinitialiser
             resetForm();
             
-            // Notifier le superviseur
+            // Notifier superviseur
             notifySupervisor(report);
             
             showNotification("Rapport complet envoyé avec succès !", "success");
             updateStatusBar("Rapport complet envoyé et fichier généré");
             
-            // Mettre à jour les compteurs
             updateCounters();
         }
 
         function notifySupervisor(report) {
-            // Cette fonction simule la notification au superviseur
             console.log("📢 Notification au superviseur :", report);
             
-            // En production, on pourrait utiliser :
-            // - WebSockets
-            // - Server-Sent Events
-            // - Polling régulier
-            // - Notifications push
-            
-            // Pour cette démo, on met juste à jour l'interface
             if (adminPanel.style.display === 'block') {
                 displayMiniReports();
             }
         }
 
         function resetForm() {
-            // Réinitialiser toutes les variables
             selectedNumber = null;
             beforePhotos = [null, null, null, null, null];
             afterPhotos = [null, null, null, null, null];
             currentStep = 1;
             
-            // Réinitialiser l'interface
+            // Réinitialiser interface
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.classList.remove('selected');
                 btn.disabled = false;
@@ -1748,7 +1890,7 @@
             summaryNumber.textContent = "-";
             summaryNumberAfter.textContent = "-";
             
-            // Réinitialiser les photos
+            // Réinitialiser photos
             document.querySelectorAll('.photo-box').forEach(box => {
                 box.classList.remove('captured');
                 const preview = box.querySelector('.photo-preview');
@@ -1757,7 +1899,7 @@
                 }
             });
             
-            // Réinitialiser les compteurs
+            // Réinitialiser compteurs
             beforePhotosCount.textContent = "0/5";
             afterPhotosCount.textContent = "0/5";
             statusBefore.textContent = "0/5";
@@ -1765,65 +1907,25 @@
             summaryBeforePhotos.textContent = "0/5";
             summaryAfterPhotos.textContent = "0/5";
             
-            // Réinitialiser les styles
+            // Réinitialiser styles
             statusBefore.classList.remove('completed');
             statusAfter.classList.remove('completed');
             
-            // Réafficher le formulaire AVANT
+            // Réafficher AVANT
             beforePhotosContainer.style.display = 'block';
             afterPhotosContainer.style.display = 'none';
             sendBeforeContainer.style.display = 'block';
             sendAfterContainer.style.display = 'none';
             apresButtonContainer.style.display = 'none';
             
-            // Réinitialiser les boutons
+            // Réinitialiser boutons
             sendBeforeBtn.disabled = true;
             sendAfterBtn.disabled = true;
             
-            // Mettre à jour l'étape
             updateStepDisplay();
             
             showNotification("Formulaire réinitialisé - Prêt pour un nouveau rapport", "success");
             updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
-        }
-
-        // ========== GESTION DE LA CAMÉRA ==========
-        async function toggleCamera() {
-            if (!isCameraActive) {
-                try {
-                    updateStatusBar("Activation de la caméra...");
-                    
-                    videoStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 },
-                            facingMode: 'environment'
-                        },
-                        audio: false
-                    });
-                    
-                    isCameraActive = true;
-                    toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash"></i> Désactiver la caméra';
-                    showNotification("Caméra activée", "success");
-                    updateStatusBar("Caméra activée - Prêt à capturer");
-                    
-                } catch (error) {
-                    console.error('Erreur de caméra :', error);
-                    showNotification("Erreur de caméra", "error");
-                    updateStatusBar("Erreur de caméra");
-                    alert('Impossible d\'activer la caméra. Vérifiez les autorisations.');
-                }
-            } else {
-                if (videoStream) {
-                    videoStream.getTracks().forEach(track => track.stop());
-                    videoStream = null;
-                }
-                
-                isCameraActive = false;
-                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
-                showNotification("Caméra désactivée", "success");
-                updateStatusBar("Caméra désactivée");
-            }
         }
 
         // ========== GESTION DES DONNÉES ==========
@@ -1832,18 +1934,17 @@
                 const savedData = localStorage.getItem('noteCamSystemData');
                 if (savedData) {
                     const data = JSON.parse(savedData);
-                    usersData = data.usersData || usersData;
+                    usersData = {...defaultUsersData, ...data.usersData};
                     employees = data.employees || employees;
                     assignedAreas = data.assignedAreas || assignedAreas;
                     zoneReports = data.zoneReports || {};
                 }
                 
-                // Charger le rapport temporaire
+                // Charger rapport temporaire
                 const savedTempReport = localStorage.getItem('tempReport');
                 if (savedTempReport) {
                     try {
                         tempReport = JSON.parse(savedTempReport);
-                        // Si un rapport temporaire existe, on reprend à l'étape 2
                         if (tempReport) {
                             currentStep = 2;
                             selectedNumber = tempReport.number;
@@ -1906,7 +2007,12 @@
                     loadEmployeeAreas();
                     populateAreaSelect();
                     
-                    // Si un rapport temporaire existe, on ajuste l'interface
+                    // Activer automatiquement la caméra pour les employés
+                    setTimeout(() => {
+                        activateCameraAutomatically();
+                    }, 1000);
+                    
+                    // Si rapport temporaire existe
                     if (tempReport) {
                         beforePhotosContainer.style.display = 'none';
                         sendBeforeContainer.style.display = 'none';
@@ -1938,7 +2044,11 @@
                     loadEmployeeAreas();
                     populateAreaSelect();
                     
-                    // Si un rapport temporaire existe, on ajuste l'interface
+                    // Activer automatiquement la caméra pour les employés
+                    setTimeout(() => {
+                        activateCameraAutomatically();
+                    }, 1000);
+                    
                     if (tempReport) {
                         beforePhotosContainer.style.display = 'none';
                         sendBeforeContainer.style.display = 'none';
@@ -1954,6 +2064,13 @@
         }
 
         function logout() {
+            // Arrêter la caméra si active
+            if (isCameraActive && videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+                isCameraActive = false;
+            }
+            
             currentUser = null;
             selectedArea = null;
             selectedNumber = null;
@@ -1962,13 +2079,6 @@
             adminPanel.style.display = 'none';
             employeePanel.style.display = 'none';
             reportsPanel.style.display = 'none';
-            
-            if (isCameraActive && videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-                isCameraActive = false;
-                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
-            }
             
             localStorage.removeItem('currentUser');
             showNotification("Déconnexion réussie", "success");
@@ -2057,18 +2167,15 @@
                 return;
             }
             
-            // Supprimer de la liste des employés
             const index = employees.findIndex(emp => emp.username === username);
             if (index !== -1) {
                 employees.splice(index, 1);
             }
             
-            // Supprimer des données utilisateur
             if (usersData[username]) {
                 delete usersData[username];
             }
             
-            // Supprimer les zones attribuées
             assignedAreas = assignedAreas.filter(area => area.employee !== username);
             
             updateEmployeeSelect();
@@ -2091,7 +2198,6 @@
                 return;
             }
             
-            // Vérifier si le code existe déjà
             if (assignedAreas.some(area => area.code === areaCode)) {
                 alert("Ce code de zone existe déjà");
                 return;
@@ -2115,7 +2221,6 @@
                 usersData[employeeUsername].assignedAreas.push(area);
             }
             
-            // Initialiser le stockage pour cette zone
             if (!zoneReports[areaCode]) {
                 zoneReports[areaCode] = {
                     name: areaName,
@@ -2186,13 +2291,11 @@
             areaAssignedDate.textContent = formatDate(area.date);
             selectedAreaInfo.style.display = 'block';
             
-            // Mettre à jour les statuts
             statusZone.textContent = area.name;
             statusZoneAfter.textContent = area.name;
             summaryZone.textContent = area.name;
             summaryZoneAfter.textContent = area.name;
             
-            // Vérifier si on peut envoyer les photos AVANT
             checkSendBeforeStatus();
             
             updateStatusBar(`Zone sélectionnée : ${area.name}`);
@@ -2204,7 +2307,6 @@
                 return;
             }
             
-            // Grouper par employé
             const areasByEmployee = {};
             assignedAreas.forEach(area => {
                 if (!areasByEmployee[area.employee]) {
@@ -2266,10 +2368,8 @@
             const area = assignedAreas[areaIndex];
             const areaCode = area.code;
             
-            // Supprimer de la liste générale
             assignedAreas.splice(areaIndex, 1);
             
-            // Supprimer de la liste de l'utilisateur
             if (usersData[area.employee] && usersData[area.employee].assignedAreas) {
                 const userAreaIndex = usersData[area.employee].assignedAreas.findIndex(a => a.id === areaId);
                 if (userAreaIndex !== -1) {
@@ -2277,12 +2377,10 @@
                 }
             }
             
-            // Supprimer tous les rapports de cette zone
             if (zoneReports[areaCode]) {
                 delete zoneReports[areaCode];
             }
             
-            // Si l'employé actuel a cette zone sélectionnée, la désélectionner
             if (currentUser && currentUser.username === area.employee && selectedArea && selectedArea.id === areaId) {
                 selectedArea = null;
                 selectedAreaInfo.style.display = 'none';
@@ -2306,7 +2404,6 @@
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) return;
             
-            // Créer un objet avec toutes les données de la zone
             const zoneFile = {
                 zoneCode: zoneCode,
                 zoneName: zoneData.name,
@@ -2328,17 +2425,14 @@
                 }))
             };
             
-            // Convertir en JSON
             const jsonData = JSON.stringify(zoneFile, null, 2);
             const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
-            // Créer un lien de téléchargement
             const link = document.createElement('a');
             link.href = url;
             link.download = `NoteCam_Zone_${zoneCode}_${new Date().toISOString().split('T')[0]}.json`;
             
-            // Déclencher le téléchargement automatiquement
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -2359,7 +2453,6 @@
         function displayFullReports() {
             reportDetailsContainer.innerHTML = '';
             
-            // Compter le nombre total de rapports
             let totalReports = 0;
             Object.values(zoneReports).forEach(zone => {
                 totalReports += zone.reports.length;
@@ -2376,7 +2469,6 @@
                 return;
             }
             
-            // Afficher les zones avec leurs rapports
             Object.entries(zoneReports).forEach(([zoneCode, zoneData]) => {
                 if (zoneData.reports.length === 0) return;
                 
@@ -2451,7 +2543,6 @@
                 return;
             }
             
-            // Afficher les 5 derniers rapports
             let allReports = [];
             Object.values(zoneReports).forEach(zone => {
                 zone.reports.forEach(report => {
@@ -2459,10 +2550,8 @@
                 });
             });
             
-            // Trier par date (plus récent d'abord)
             allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
             
-            // Prendre les 5 premiers
             const recentReports = allReports.slice(0, 5);
             
             recentReports.forEach(report => {
@@ -2502,7 +2591,6 @@
             const report = zoneData.reports.find(r => r.id === reportId);
             if (!report) return;
             
-            // Afficher les détails du rapport
             const modal = document.createElement('div');
             modal.style.position = 'fixed';
             modal.style.top = '0';
@@ -2517,7 +2605,6 @@
             
             let photosHTML = '';
             
-            // Photos AVANT
             if (report.beforePhotos && report.beforePhotos.length > 0) {
                 photosHTML += '<h4 style="color: #1a5fb4; margin: 20px 0 10px;">Photos AVANT</h4>';
                 photosHTML += '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">';
@@ -2532,7 +2619,6 @@
                 photosHTML += '</div>';
             }
             
-            // Photos APRÈS
             if (report.afterPhotos && report.afterPhotos.length > 0) {
                 photosHTML += '<h4 style="color: #1a5fb4; margin: 20px 0 10px;">Photos APRÈS</h4>';
                 photosHTML += '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">';
@@ -2621,7 +2707,6 @@
             const report = zoneData.reports.find(r => r.id === reportId);
             if (!report) return;
             
-            // Créer un objet rapport
             const reportData = {
                 reportId: report.id,
                 employee: report.employeeName,
@@ -2635,12 +2720,10 @@
                 afterPhotosCount: report.afterPhotos?.length || 0
             };
             
-            // Convertir en JSON
             const jsonData = JSON.stringify(reportData, null, 2);
             const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
-            // Créer un lien de téléchargement
             const link = document.createElement('a');
             link.href = url;
             link.download = `NoteCam_Rapport_${report.employeeName}_${report.areaCode}_${new Date().toISOString().split('T')[0]}.json`;
@@ -2650,7 +2733,6 @@
         }
 
         function exportAllData() {
-            // Exporter toutes les données
             const exportData = {
                 exportedAt: new Date().toISOString(),
                 users: Object.keys(usersData).length,
