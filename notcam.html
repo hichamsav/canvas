@@ -224,7 +224,7 @@
 
         .info-container {
             display: flex;
-            height: 95px;
+            height: 110px;
             position: relative;
             overflow: hidden;
             width: 100%;
@@ -253,8 +253,8 @@
         }
 
         .info-line {
-            margin: 0.5px 0;
-            font-size: 15px;
+            margin: 1px 0;
+            font-size: 14px;
             line-height: 1.2;
             color: #000000;
             font-family: 'Courier New', monospace;
@@ -966,6 +966,7 @@
                             <div class="info-line" id="infoElevation">Élévation : 9.34±11.02 m</div>
                             <div class="info-line" id="infoPrecision">Précision : 13.28 m</div>
                             <div class="info-line" id="infoTime">Temps : 03/01/2026 15:44</div>
+                            <div class="info-line" id="infoNote">Note : ZN001</div>
                         </div>
                         <div class="logo-column">
                             <div class="note-code-container">
@@ -1078,6 +1079,7 @@
         const infoElevation = document.getElementById('infoElevation');
         const infoPrecision = document.getElementById('infoPrecision');
         const infoTime = document.getElementById('infoTime');
+        const infoNote = document.getElementById('infoNote');
         const noteCode = document.getElementById('noteCode');
 
         // Données de localisation
@@ -1156,8 +1158,10 @@
         function updateNoteCode() {
             if (selectedArea && selectedArea.code) {
                 noteCode.textContent = selectedArea.code;
+                infoNote.textContent = `Note : ${selectedArea.code}`;
             } else {
                 noteCode.textContent = "ZN000";
+                infoNote.textContent = "Note : ZN000";
             }
         }
 
@@ -1273,6 +1277,41 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             return container;
         }
 
+        // ========== إضافة المعلومات إلى الصورة ==========
+        function addInfoToImage(context, width, height) {
+            context.save();
+            
+            const lineHeight = 16;
+            const totalHeight = lineHeight * 6 + 8;
+            const boxWidth = width * 0.18;
+            const boxX = 2;
+            const boxY = height - totalHeight - 2;
+            
+            // خلفية بيضاء للمعلومات
+            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            context.fillRect(boxX, boxY, boxWidth, totalHeight);
+            
+            context.font = 'bold 14px "Courier New", monospace';
+            context.fillStyle = '#000000';
+            context.textAlign = 'left';
+            context.textBaseline = 'top';
+            
+            const startY = boxY + 4;
+            
+            // معلومات الموقع
+            context.fillText(infoLatitude.textContent, boxX + 5, startY);
+            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
+            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
+            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
+            context.fillText(infoNote.textContent, boxX + 5, startY + (lineHeight * 5));
+            
+            // Note ورقمها + Powered by NoteCam
+            drawLogoOnImage(context, width - 10, boxY + totalHeight - 5, noteCode.textContent);
+            
+            context.restore();
+        }
+
         // ========== Mettre à jour المعلومات في الصورة ==========
         function drawLogoOnImage(context, x, y, areaCode) {
             context.save();
@@ -1305,40 +1344,6 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             context.fillStyle = 'rgba(255, 255, 255, 0.9)';
             context.font = 'bold 11px "Courier New", monospace';
             context.fillText('Powered by NoteCam', x, y + 15);
-            
-            context.restore();
-        }
-
-        // ========== إضافة المعلومات إلى الصورة ==========
-        function addInfoToImage(context, width, height) {
-            context.save();
-            
-            const lineHeight = 16;
-            const totalHeight = lineHeight * 5 + 6;
-            const boxWidth = width * 0.18;
-            const boxX = 2;
-            const boxY = height - totalHeight - 2;
-            
-            // خلفية بيضاء للمعلومات
-            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(boxX, boxY, boxWidth, totalHeight);
-            
-            context.font = 'bold 15px "Courier New", monospace';
-            context.fillStyle = '#000000';
-            context.textAlign = 'left';
-            context.textBaseline = 'top';
-            
-            const startY = boxY + 3;
-            
-            // معلومات الموقع
-            context.fillText(document.getElementById('infoLatitude').textContent, boxX + 5, startY);
-            context.fillText(document.getElementById('infoLongitude').textContent, boxX + 5, startY + lineHeight);
-            context.fillText(document.getElementById('infoElevation').textContent, boxX + 5, startY + (lineHeight * 2));
-            context.fillText(document.getElementById('infoPrecision').textContent, boxX + 5, startY + (lineHeight * 3));
-            context.fillText(document.getElementById('infoTime').textContent, boxX + 5, startY + (lineHeight * 4));
-            
-            // Note ورقمها + Powered by NoteCam
-            drawLogoOnImage(context, width - 10, boxY + totalHeight - 5, document.getElementById('noteCode').textContent);
             
             context.restore();
         }
