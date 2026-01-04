@@ -386,41 +386,83 @@
             box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
         }
 
-        /* Information de localisation */
-        .location-info {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            padding: 15px;
-            border-radius: 10px;
+        /* Information de localisation - EXACTEMENT COMME DANS L'IMAGE */
+        .info-panel {
+            background: #000000;
+            width: 100%;
+            position: relative;
+            padding: 8px 0;
             margin: 20px 0;
-            border: 2px solid #e1e8ed;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .location-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
+        .info-container {
+            display: flex;
+            height: 110px;
+            position: relative;
+            overflow: hidden;
+            width: 100%;
         }
 
-        .location-item {
-            background: #ffffff;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #1a5fb4;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        .info-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 18%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.5);
+            z-index: 1;
         }
 
-        .location-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-            font-weight: 600;
+        .info-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding-left: 10px;
+            height: 100%;
+            z-index: 2;
+            position: relative;
+            width: 18%;
         }
 
-        .location-value {
+        .info-line {
+            margin: 1px 0;
             font-size: 14px;
-            color: #333;
-            font-weight: 700;
+            line-height: 1.2;
+            color: #000000;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            letter-spacing: 0.1px;
+            white-space: nowrap;
+        }
+
+        .logo-column {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            justify-content: flex-end;
+            width: 82%;
+            height: 100%;
+            position: relative;
+            z-index: 3;
+            padding-right: 10px;
+            padding-bottom: 15px;
+        }
+
+        .powered-by {
+            font-size: 16px;
+            color: #ff0000 !important;
+            font-family: 'Arial Black', 'Arial Bold', sans-serif;
+            font-weight: 900;
+            text-align: right;
+            letter-spacing: 0.5px;
+            line-height: 1.1;
+            background: none;
+            padding: 0;
+            margin: 0;
+            white-space: nowrap;
+            text-transform: uppercase;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
         }
 
         /* Bouton d'envoi */
@@ -561,6 +603,15 @@
             box-shadow: 0 4px 12px rgba(26, 95, 180, 0.3);
         }
 
+        /* Contrôles sous le nombre */
+        .controls-under-number {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 15px 0 25px 0;
+            flex-wrap: wrap;
+        }
+
         /* Animations */
         @keyframes captureFlash {
             0% { opacity: 0; }
@@ -604,8 +655,16 @@
                 padding: 10px 15px;
             }
             
-            .location-grid {
-                grid-template-columns: 1fr;
+            .info-line {
+                font-size: 12px;
+            }
+            
+            .powered-by {
+                font-size: 12px;
+            }
+            
+            .info-container {
+                height: 90px;
             }
         }
 
@@ -630,6 +689,18 @@
             
             .number-buttons {
                 grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .info-line {
+                font-size: 10px;
+            }
+            
+            .powered-by {
+                font-size: 10px;
+            }
+            
+            .info-container {
+                height: 80px;
             }
         }
 
@@ -801,6 +872,19 @@
                     </div>
                 </div>
 
+                <!-- Les 3 boutons sous le nombre -->
+                <div class="controls-under-number">
+                    <button class="control-btn primary" id="toggleCamera">
+                        <i class="fas fa-video"></i> Activer la caméra
+                    </button>
+                    <button class="control-btn danger" id="clearPhotos">
+                        <i class="fas fa-trash"></i> Effacer les photos
+                    </button>
+                    <button class="control-btn" id="refreshLocation">
+                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
+                    </button>
+                </div>
+
                 <!-- Section PHOTOS -->
                 <div class="photos-container">
                     <div class="photos-title">
@@ -826,47 +910,22 @@
                     </div>
                 </div>
 
-                <!-- Information de localisation -->
-                <div class="location-info">
-                    <div class="location-grid">
-                        <div class="location-item">
-                            <div class="location-label">Latitude</div>
-                            <div class="location-value" id="infoLatitude">33.603016</div>
+                <!-- Information de localisation - EXACTEMENT COMME DANS L'IMAGE -->
+                <div class="info-panel">
+                    <div class="info-container">
+                        <div class="info-background"></div>
+                        <div class="info-column">
+                            <div class="info-line" id="infoLatitude">Latitude : 33.603016</div>
+                            <div class="info-line" id="infoLongitude">Longitude : -7.636873</div>
+                            <div class="info-line" id="infoElevation">Élévation : 9.34±11.02 m</div>
+                            <div class="info-line" id="infoPrecision">Précision : 13.28 m</div>
+                            <div class="info-line" id="infoTime">Temps : 03/01/2026 15:44</div>
+                            <div class="info-line" id="infoNote">Note : ZN001</div>
                         </div>
-                        <div class="location-item">
-                            <div class="location-label">Longitude</div>
-                            <div class="location-value" id="infoLongitude">-7.636873</div>
-                        </div>
-                        <div class="location-item">
-                            <div class="location-label">Élévation</div>
-                            <div class="location-value" id="infoElevation">9.34±11.02 m</div>
-                        </div>
-                        <div class="location-item">
-                            <div class="location-label">Précision</div>
-                            <div class="location-value" id="infoPrecision">13.28 m</div>
-                        </div>
-                        <div class="location-item">
-                            <div class="location-label">Temps</div>
-                            <div class="location-value" id="infoTime">03/01/2026 15:44</div>
-                        </div>
-                        <div class="location-item">
-                            <div class="location-label">Note</div>
-                            <div class="location-value" id="infoNote">ZN001</div>
+                        <div class="logo-column">
+                            <div class="powered-by">Powered by Notecam</div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Contrôles -->
-                <div class="controls-compact">
-                    <button class="control-btn primary" id="toggleCamera">
-                        <i class="fas fa-video"></i> Activer la caméra
-                    </button>
-                    <button class="control-btn danger" id="clearPhotos">
-                        <i class="fas fa-trash"></i> Effacer les photos
-                    </button>
-                    <button class="control-btn" id="refreshLocation">
-                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
-                    </button>
                 </div>
 
                 <!-- Bouton d'envoi du rapport -->
@@ -980,7 +1039,7 @@
         const refreshLocationBtn = document.getElementById('refreshLocation');
         const captureFlash = document.getElementById('captureFlash');
         
-        // Éléments d'information géographique
+        // Éléments d'information géographique (version originale)
         const infoLatitude = document.getElementById('infoLatitude');
         const infoLongitude = document.getElementById('infoLongitude');
         const infoElevation = document.getElementById('infoElevation');
@@ -1024,18 +1083,29 @@
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
             
-            infoLatitude.textContent = location.lat.toFixed(6);
-            infoLongitude.textContent = location.lng.toFixed(6);
-            infoElevation.textContent = location.elev + " m";
-            infoPrecision.textContent = location.prec.toFixed(2) + " m";
-            infoTime.textContent = formatTime();
+            // Mise à jour EXACTEMENT comme dans l'image originale
+            infoLatitude.textContent = `Latitude : ${location.lat.toFixed(6)}`;
+            infoLongitude.textContent = `Longitude : ${location.lng.toFixed(6)}`;
+            infoElevation.textContent = `Élévation : ${location.elev} m`;
+            infoPrecision.textContent = `Précision : ${location.prec.toFixed(2)} m`;
+            infoTime.textContent = `Temps : ${formatTime()}`;
             
             // Mettre à jour la note avec le code de zone
             if (selectedArea && selectedArea.code) {
-                infoNote.textContent = selectedArea.code;
+                infoNote.textContent = `Note : ${selectedArea.code}`;
             } else {
-                infoNote.textContent = "ZN000";
+                infoNote.textContent = `Note : ZN000`;
             }
+        }
+
+        function updateTimeInfo() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            infoTime.textContent = `Temps : ${day}/${month}/${year} ${hours}:${minutes}`;
         }
 
         // ========== Initialisation ==========
@@ -1043,7 +1113,6 @@
             loadFromLocalStorage();
             updateStatusBar("Prêt à l'utilisation");
             updateLocationInfo();
-            updateTimeInfo();
             
             setInterval(updateTimeInfo, 60000);
             setInterval(updateLocationInfo, 10000);
@@ -1142,19 +1211,29 @@
                     captureFlash.style.animation = '';
                 }, 300);
                 
-                // Capturer l'image
-                const canvas = document.createElement('canvas');
+                // Créer un élément vidéo temporaire
                 const video = document.createElement('video');
                 video.srcObject = videoStream;
-                await video.play();
                 
+                // Attendre que la vidéo soit prête
+                await new Promise((resolve) => {
+                    video.onloadedmetadata = () => {
+                        video.play();
+                        resolve();
+                    };
+                });
+                
+                // Créer un canvas pour capturer l'image
+                const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 const context = canvas.getContext('2d');
+                
+                // Dessiner la vidéo sur le canvas
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
-                // Ajouter les informations sur l'image
-                addInfoToImage(context, canvas.width, canvas.height);
+                // Ajouter les informations géographiques EXACTEMENT comme dans l'image
+                addOriginalInfoToImage(context, canvas.width, canvas.height);
                 
                 // Convertir en URL
                 canvas.toBlob((blob) => {
@@ -1178,7 +1257,8 @@
                     // Mettre à jour l'affichage
                     const photoBox = document.querySelector(`.photo-box[data-index="${index}"][data-type="${type}"]`);
                     photoBox.classList.add('captured');
-                    photoBox.querySelector('.photo-preview').src = imageUrl;
+                    const preview = photoBox.querySelector('.photo-preview');
+                    preview.src = imageUrl;
                     
                     // Mettre à jour le compteur
                     updatePhotoCount();
@@ -1193,53 +1273,54 @@
             }
         }
 
-        function addInfoToImage(context, width, height) {
+        function addOriginalInfoToImage(context, width, height) {
             context.save();
             
-            // Informations à ajouter
-            const info = [
-                `Latitude: ${infoLatitude.textContent}`,
-                `Longitude: ${infoLongitude.textContent}`,
-                `Altitude: ${infoElevation.textContent}`,
-                `Précision: ${infoPrecision.textContent}`,
-                `Date: ${infoTime.textContent}`,
-                `Zone: ${infoNote.textContent}`
-            ];
+            // Paramètres exacts comme dans l'image originale
+            const lineHeight = 16;
+            const totalHeight = lineHeight * 6 + 8;
+            const boxWidth = width * 0.18;
+            const boxX = 2;
+            const boxY = height - totalHeight - 2;
             
-            const fontSize = 16;
-            const padding = 10;
-            const lineHeight = fontSize + 5;
+            // Fond blanc semi-transparent pour les informations
+            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            context.font = `bold ${fontSize}px 'Segoe UI', sans-serif`;
-            context.fillStyle = '#ffffff';
-            context.strokeStyle = '#000000';
-            context.lineWidth = 3;
+            // Police et couleur du texte
+            context.font = 'bold 14px "Courier New", monospace';
+            context.fillStyle = '#000000';
+            context.textAlign = 'left';
             context.textBaseline = 'top';
             
-            // Ajouter un fond semi-transparent
-            const textWidth = Math.max(...info.map(line => context.measureText(line).width));
-            const textHeight = info.length * lineHeight;
+            const startY = boxY + 4;
             
-            context.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            context.fillRect(padding, padding, textWidth + 20, textHeight + 20);
+            // Dessiner chaque ligne d'information
+            const infoLines = [
+                infoLatitude.textContent,
+                infoLongitude.textContent,
+                infoElevation.textContent,
+                infoPrecision.textContent,
+                infoTime.textContent,
+                infoNote.textContent
+            ];
             
-            // Ajouter le texte
-            context.fillStyle = '#ffffff';
-            info.forEach((line, i) => {
-                context.strokeText(line, padding + 10, padding + 10 + (i * lineHeight));
-                context.fillText(line, padding + 10, padding + 10 + (i * lineHeight));
+            infoLines.forEach((line, i) => {
+                context.fillText(line, boxX + 5, startY + (i * lineHeight));
             });
             
-            // Ajouter le logo NoteCam
-            context.font = `bold 24px 'Segoe UI', sans-serif`;
-            const logoText = 'NoteCam';
-            const logoWidth = context.measureText(logoText).width;
+            // Ajouter "Powered by Notecam" en bas à droite (EXACTEMENT comme dans l'image)
+            context.textAlign = 'right';
+            context.font = '900 16px "Arial Black", sans-serif';
+            context.fillStyle = '#ff0000';
             
-            context.fillStyle = 'rgba(0, 0, 0, 0.7)';
-            context.fillRect(width - logoWidth - 40, height - 50, logoWidth + 20, 40);
+            // Ajouter un léger ombrage
+            context.shadowColor = 'rgba(0, 0, 0, 0.7)';
+            context.shadowBlur = 2;
+            context.shadowOffsetX = 1;
+            context.shadowOffsetY = 1;
             
-            context.fillStyle = '#ff6b6b';
-            context.fillText(logoText, width - logoWidth - 30, height - 40);
+            context.fillText('Powered by Notecam', width - 11, boxY + totalHeight - 12);
             
             context.restore();
         }
@@ -1266,7 +1347,10 @@
             // Réinitialiser les boîtes
             document.querySelectorAll('.photo-box').forEach(box => {
                 box.classList.remove('captured');
-                box.querySelector('.photo-preview').src = '';
+                const preview = box.querySelector('.photo-preview');
+                if (preview) {
+                    preview.src = '';
+                }
             });
             
             updatePhotoCount();
@@ -1642,8 +1726,8 @@
             
             summaryZone.textContent = area.name;
             
-            // Mettre à jour la note
-            infoNote.textContent = area.code;
+            // Mettre à jour la note dans les informations géographiques
+            infoNote.textContent = `Note : ${area.code}`;
             
             // Vérifier si le rapport peut être envoyé
             checkSendReportStatus();
@@ -1740,7 +1824,7 @@
                 selectedArea = null;
                 selectedAreaInfo.style.display = 'none';
                 if (areaSelect) areaSelect.value = '';
-                infoNote.textContent = "ZN000";
+                infoNote.textContent = "Note : ZN000";
                 summaryZone.textContent = "-";
             }
             
@@ -1766,16 +1850,16 @@
                 number: selectedNumber,
                 date: new Date().toISOString(),
                 location: {
-                    lat: parseFloat(infoLatitude.textContent),
-                    lng: parseFloat(infoLongitude.textContent),
-                    elev: infoElevation.textContent.replace(' m', ''),
-                    prec: parseFloat(infoPrecision.textContent.replace(' m', ''))
+                    lat: parseFloat(infoLatitude.textContent.split(': ')[1]),
+                    lng: parseFloat(infoLongitude.textContent.split(': ')[1]),
+                    elev: infoElevation.textContent.split(': ')[1],
+                    prec: parseFloat(infoPrecision.textContent.split(': ')[1])
                 },
                 beforePhotos: beforePhotos.filter(p => p !== null),
                 afterPhotos: afterPhotos.filter(p => p !== null),
                 area: selectedArea.name,
                 areaCode: selectedArea.code,
-                noteCode: infoNote.textContent
+                noteCode: infoNote.textContent.split(': ')[1]
             };
             
             // Ajouter aux rapports de la zone
@@ -2173,15 +2257,6 @@
                 totalReports += zone.reports.length;
             });
             document.getElementById('reportsCount').textContent = totalReports;
-        }
-
-        function updateTimeInfo() {
-            // Mettre à jour l'heure toutes les minutes
-            const now = new Date();
-            const timeString = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
-            document.querySelectorAll('.current-time').forEach(el => {
-                el.textContent = timeString;
-            });
         }
 
         // ========== Initialiser l'application ==========
