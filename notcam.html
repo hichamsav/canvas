@@ -405,9 +405,6 @@
             transform: none;
         }
 
-        /* Information de localisation - seulement dans les images */
-        /* Cette classe n'est plus affichée dans l'interface utilisateur */
-
         /* Bouton d'envoi */
         .send-report-container {
             text-align: center;
@@ -511,7 +508,7 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
 
-        /* Zone de saisie du nombre */
+        /* Zone de saisie du nombre (toujours visible) */
         .number-selection {
             background: #ffffff;
             padding: 20px;
@@ -541,7 +538,7 @@
             text-align: center;
         }
 
-        .number-btn:hover {
+        .number-btn:hover:not(:disabled) {
             background: #e3f2fd;
             border-color: #1a5fb4;
             transform: translateY(-2px);
@@ -552,6 +549,11 @@
             color: white;
             border-color: #1a5fb4;
             box-shadow: 0 4px 12px rgba(26, 95, 180, 0.3);
+        }
+
+        .number-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
 
         /* État des photos */
@@ -738,11 +740,40 @@
             color: #666;
             margin-top: 5px;
         }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ea043;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
     <div class="app-container">
         <!-- Barre d'état -->
         <div class="status-bar" id="statusBar">
@@ -861,27 +892,6 @@
                     <!-- Zones de l'employé -->
                 </div>
 
-                <!-- Saisie du numéro de 0-8 -->
-                <div class="number-selection">
-                    <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
-                        <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 :
-                    </label>
-                    <div class="number-buttons">
-                        <button class="number-btn" data-number="0">0</button>
-                        <button class="number-btn" data-number="1">1</button>
-                        <button class="number-btn" data-number="2">2</button>
-                        <button class="number-btn" data-number="3">3</button>
-                        <button class="number-btn" data-number="4">4</button>
-                        <button class="number-btn" data-number="5">5</button>
-                        <button class="number-btn" data-number="6">6</button>
-                        <button class="number-btn" data-number="7">7</button>
-                        <button class="number-btn" data-number="8">8</button>
-                    </div>
-                    <div style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;">
-                        Nombre sélectionné : <span id="selectedNumberDisplay" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
-                    </div>
-                </div>
-
                 <!-- Indicateur de progression -->
                 <div class="progress-indicator">
                     <div class="progress-step" id="step1">1</div>
@@ -891,21 +901,8 @@
                     <span id="step1Label">Photos AVANT</span> → <span id="step2Label">Photos APRÈS</span>
                 </div>
 
-                <!-- Les 3 boutons sous le nombre -->
-                <div class="controls-under-number">
-                    <button class="control-btn primary" id="toggleCamera">
-                        <i class="fas fa-video"></i> Activer la caméra
-                    </button>
-                    <button class="control-btn danger" id="clearPhotos">
-                        <i class="fas fa-trash"></i> Effacer les photos
-                    </button>
-                    <button class="control-btn" id="refreshLocation">
-                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
-                    </button>
-                </div>
-
-                <!-- Section PHOTOS AVANT -->
-                <div class="photos-container">
+                <!-- Section PHOTOS AVANT (visible au début) -->
+                <div class="photos-container" id="beforePhotosContainer">
                     <div class="photos-title">
                         <span><i class="fas fa-camera"></i> PHOTOS AVANT (Cliquez sur chaque case pour capturer)</span>
                         <span class="badge badge-blue" id="beforePhotosCount">0/5</span>
@@ -927,6 +924,40 @@
                     <div class="photo-boxes-container" id="photoBoxesContainer">
                         <!-- Les 5 cases seront générées dynamiquement -->
                     </div>
+                </div>
+
+                <!-- Saisie du nombre (toujours visible) -->
+                <div class="number-selection" id="numberSelection">
+                    <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
+                        <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 :
+                    </label>
+                    <div class="number-buttons">
+                        <button class="number-btn" data-number="0">0</button>
+                        <button class="number-btn" data-number="1">1</button>
+                        <button class="number-btn" data-number="2">2</button>
+                        <button class="number-btn" data-number="3">3</button>
+                        <button class="number-btn" data-number="4">4</button>
+                        <button class="number-btn" data-number="5">5</button>
+                        <button class="number-btn" data-number="6">6</button>
+                        <button class="number-btn" data-number="7">7</button>
+                        <button class="number-btn" data-number="8">8</button>
+                    </div>
+                    <div style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;">
+                        Nombre sélectionné : <span id="selectedNumberDisplay" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
+                    </div>
+                </div>
+
+                <!-- Les 3 boutons (toujours visibles) -->
+                <div class="controls-under-number">
+                    <button class="control-btn primary" id="toggleCamera">
+                        <i class="fas fa-video"></i> Activer la caméra
+                    </button>
+                    <button class="control-btn danger" id="clearPhotos">
+                        <i class="fas fa-trash"></i> Effacer les photos
+                    </button>
+                    <button class="control-btn" id="refreshLocation">
+                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
+                    </button>
                 </div>
 
                 <!-- Bouton d'envoi des photos AVANT -->
@@ -1038,7 +1069,7 @@
     <div class="capture-flash" id="captureFlash"></div>
 
     <script>
-        // Données stockées avec gestion par zone
+        // ========== DONNÉES SYSTÈME ==========
         let usersData = {
             admin: {
                 password: "admin123",
@@ -1074,8 +1105,8 @@
         let beforePhotos = [null, null, null, null, null];
         let afterPhotos = [null, null, null, null, null];
         
-        // Rapports temporaires
-        let tempReports = {};
+        // Rapport temporaire
+        let tempReport = null;
         
         // Éléments DOM
         const statusBar = document.getElementById('statusBar');
@@ -1097,7 +1128,9 @@
         const assignedAreasList = document.getElementById('assignedAreasList');
         const photoBoxesContainer = document.getElementById('photoBoxesContainer');
         const afterPhotoBoxesContainer = document.getElementById('afterPhotoBoxesContainer');
+        const beforePhotosContainer = document.getElementById('beforePhotosContainer');
         const afterPhotosContainer = document.getElementById('afterPhotosContainer');
+        const numberSelection = document.getElementById('numberSelection');
         const selectedNumberDisplay = document.getElementById('selectedNumberDisplay');
         const beforePhotosCount = document.getElementById('beforePhotosCount');
         const afterPhotosCount = document.getElementById('afterPhotosCount');
@@ -1111,6 +1144,7 @@
         const clearPhotosBtn = document.getElementById('clearPhotos');
         const refreshLocationBtn = document.getElementById('refreshLocation');
         const captureFlash = document.getElementById('captureFlash');
+        const notification = document.getElementById('notification');
         
         // Éléments de statut
         const statusNumber = document.getElementById('statusNumber');
@@ -1148,7 +1182,17 @@
             time: ""
         };
 
-        // ========== Fonctions utilitaires ==========
+        // ========== FONCTIONS UTILITAIRES ==========
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.style.background = type === 'success' ? '#2ea043' : '#ff6b6b';
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
         function formatDate(dateString) {
             const date = new Date(dateString);
             const day = String(date.getDate()).padStart(2, '0');
@@ -1185,10 +1229,11 @@
                 time: formatTime()
             };
             
+            showNotification("Localisation actualisée", "success");
             updateStatusBar("Localisation actualisée");
         }
 
-        // ========== Initialisation ==========
+        // ========== INITIALISATION ==========
         function initializeApp() {
             loadFromLocalStorage();
             updateStatusBar("Prêt à l'utilisation");
@@ -1327,7 +1372,7 @@
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
                 
                 // Ajouter les informations géographiques comme dans l'image originale
-                addOriginalInfoToImage(context, canvas.width, canvas.height, type);
+                addOriginalInfoToImage(context, canvas.width, canvas.height);
                 
                 // Convertir en URL
                 canvas.toBlob((blob) => {
@@ -1371,7 +1416,7 @@
             }
         }
 
-        function addOriginalInfoToImage(context, width, height, type) {
+        function addOriginalInfoToImage(context, width, height) {
             context.save();
             
             // Paramètres exacts comme dans l'image originale
@@ -1420,9 +1465,8 @@
             context.shadowOffsetX = 1;
             context.shadowOffsetY = 1;
             
-            // Ajouter le type (AVANT ou APRÈS)
-            const typeText = type === 'before' ? 'AVANT' : 'APRÈS';
-            context.fillText(`Powered by Notecam - ${typeText}`, width - 11, boxY + totalHeight - 12);
+            // SEULEMENT "Powered by Notecam" - PAS de AVANT/APRÈS
+            context.fillText('Powered by Notecam', width - 11, boxY + totalHeight - 12);
             
             context.restore();
         }
@@ -1485,6 +1529,7 @@
             checkSendBeforeStatus();
             checkSendAfterStatus();
             
+            showNotification("Toutes les photos ont été effacées", "success");
             updateStatusBar('Toutes les photos effacées');
         }
 
@@ -1506,7 +1551,7 @@
             return canSend;
         }
 
-        // ========== Gestion des étapes ==========
+        // ========== GESTION DES ÉTAPES ==========
         function updateStepDisplay() {
             // Mettre à jour les indicateurs de progression
             if (currentStep === 1) {
@@ -1538,11 +1583,8 @@
             }
             
             // Créer un rapport temporaire pour les photos AVANT
-            const reportId = Date.now();
-            const zoneCode = selectedArea.code;
-            
-            tempReports[reportId] = {
-                id: reportId,
+            tempReport = {
+                id: Date.now(),
                 employee: currentUser.username,
                 employeeName: currentUser.name,
                 number: selectedNumber,
@@ -1555,43 +1597,36 @@
                 status: 'before_only'
             };
             
-            // Stocker temporairement dans localStorage
-            localStorage.setItem('tempReport_' + reportId, JSON.stringify(tempReports[reportId]));
+            // Stocker temporairement
+            localStorage.setItem('tempReport', JSON.stringify(tempReport));
             
-            // Afficher le bouton APRÈS et masquer le formulaire AVANT
-            apresButtonContainer.style.display = 'block';
+            // Masquer la section AVANT et montrer le bouton APRÈS
+            beforePhotosContainer.style.display = 'none';
             sendBeforeContainer.style.display = 'none';
+            apresButtonContainer.style.display = 'block';
             
-            // Mettre à jour le statut
-            updateStatusBar("Photos AVANT envoyées avec succès");
-            alert("Photos AVANT envoyées avec succès ! Vous pouvez maintenant prendre les photos APRÈS.");
-            
-            // Mettre à jour l'étape
-            currentStep = 2;
-            updateStepDisplay();
-            
-            // Réinitialiser les photos AVANT pour l'affichage (mais garder en mémoire)
-            document.querySelectorAll('.photo-box[data-type="before"]').forEach(box => {
-                box.classList.remove('captured');
-                const preview = box.querySelector('.photo-preview');
-                if (preview) {
-                    preview.src = '';
-                }
-            });
-            
-            // Désactiver la sélection du nombre et de la zone
+            // Désactiver la modification du nombre et de la zone
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.disabled = true;
             });
             document.getElementById('areaSelect').disabled = true;
+            
+            // Mettre à jour le statut
+            showNotification("Photos AVANT envoyées avec succès !", "success");
+            updateStatusBar("Photos AVANT envoyées avec succès");
+            
+            // Mettre à jour l'étape
+            currentStep = 2;
+            updateStepDisplay();
         }
 
         function showAfterPhotos() {
-            // Afficher la section des photos APRÈS
-            afterPhotosContainer.style.display = 'block';
+            // Masquer le bouton APRÈS et montrer la section APRÈS
             apresButtonContainer.style.display = 'none';
+            afterPhotosContainer.style.display = 'block';
             sendAfterContainer.style.display = 'block';
             
+            showNotification("Prêt à capturer les photos APRÈS", "success");
             updateStatusBar("Prêt à capturer les photos APRÈS");
         }
 
@@ -1601,14 +1636,10 @@
                 return;
             }
             
-            // Récupérer le rapport temporaire
-            const reportId = Object.keys(tempReports)[0];
-            if (!reportId) {
+            if (!tempReport) {
                 alert("Erreur : rapport temporaire non trouvé");
                 return;
             }
-            
-            const tempReport = tempReports[reportId];
             
             // Créer le rapport complet
             const report = {
@@ -1665,17 +1696,36 @@
             generateZoneFile(zoneCode);
             
             // Supprimer le rapport temporaire
-            delete tempReports[reportId];
-            localStorage.removeItem('tempReport_' + reportId);
+            tempReport = null;
+            localStorage.removeItem('tempReport');
             
             // Réinitialiser le formulaire complet
             resetForm();
             
-            alert("Rapport complet envoyé avec succès !");
+            // Notifier le superviseur
+            notifySupervisor(report);
+            
+            showNotification("Rapport complet envoyé avec succès !", "success");
             updateStatusBar("Rapport complet envoyé et fichier généré");
             
             // Mettre à jour les compteurs
             updateCounters();
+        }
+
+        function notifySupervisor(report) {
+            // Cette fonction simule la notification au superviseur
+            console.log("📢 Notification au superviseur :", report);
+            
+            // En production, on pourrait utiliser :
+            // - WebSockets
+            // - Server-Sent Events
+            // - Polling régulier
+            // - Notifications push
+            
+            // Pour cette démo, on met juste à jour l'interface
+            if (adminPanel.style.display === 'block') {
+                displayMiniReports();
+            }
         }
 
         function resetForm() {
@@ -1720,8 +1770,9 @@
             statusAfter.classList.remove('completed');
             
             // Réafficher le formulaire AVANT
-            sendBeforeContainer.style.display = 'block';
+            beforePhotosContainer.style.display = 'block';
             afterPhotosContainer.style.display = 'none';
+            sendBeforeContainer.style.display = 'block';
             sendAfterContainer.style.display = 'none';
             apresButtonContainer.style.display = 'none';
             
@@ -1732,10 +1783,11 @@
             // Mettre à jour l'étape
             updateStepDisplay();
             
+            showNotification("Formulaire réinitialisé - Prêt pour un nouveau rapport", "success");
             updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
         }
 
-        // ========== Gestion de la caméra ==========
+        // ========== GESTION DE LA CAMÉRA ==========
         async function toggleCamera() {
             if (!isCameraActive) {
                 try {
@@ -1752,10 +1804,12 @@
                     
                     isCameraActive = true;
                     toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash"></i> Désactiver la caméra';
+                    showNotification("Caméra activée", "success");
                     updateStatusBar("Caméra activée - Prêt à capturer");
                     
                 } catch (error) {
                     console.error('Erreur de caméra :', error);
+                    showNotification("Erreur de caméra", "error");
                     updateStatusBar("Erreur de caméra");
                     alert('Impossible d\'activer la caméra. Vérifiez les autorisations.');
                 }
@@ -1767,11 +1821,12 @@
                 
                 isCameraActive = false;
                 toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
+                showNotification("Caméra désactivée", "success");
                 updateStatusBar("Caméra désactivée");
             }
         }
 
-        // ========== Gestion des données ==========
+        // ========== GESTION DES DONNÉES ==========
         function loadFromLocalStorage() {
             try {
                 const savedData = localStorage.getItem('noteCamSystemData');
@@ -1783,18 +1838,21 @@
                     zoneReports = data.zoneReports || {};
                 }
                 
-                // Charger les rapports temporaires
-                Object.keys(localStorage).forEach(key => {
-                    if (key.startsWith('tempReport_')) {
-                        try {
-                            const report = JSON.parse(localStorage.getItem(key));
-                            const reportId = key.replace('tempReport_', '');
-                            tempReports[reportId] = report;
-                        } catch (e) {
-                            console.error('Erreur de chargement du rapport temporaire:', e);
+                // Charger le rapport temporaire
+                const savedTempReport = localStorage.getItem('tempReport');
+                if (savedTempReport) {
+                    try {
+                        tempReport = JSON.parse(savedTempReport);
+                        // Si un rapport temporaire existe, on reprend à l'étape 2
+                        if (tempReport) {
+                            currentStep = 2;
+                            selectedNumber = tempReport.number;
+                            selectedArea = assignedAreas.find(area => area.code === tempReport.areaCode);
                         }
+                    } catch (e) {
+                        console.error('Erreur de chargement du rapport temporaire:', e);
                     }
-                });
+                }
                 
                 const savedUser = localStorage.getItem('currentUser');
                 if (savedUser) {
@@ -1815,7 +1873,7 @@
             localStorage.setItem('noteCamSystemData', JSON.stringify(data));
         }
 
-        // ========== Fonctions d'authentification ==========
+        // ========== AUTHENTIFICATION ==========
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -1847,9 +1905,22 @@
                     employeeName.textContent = `Employé : ${user.name}`;
                     loadEmployeeAreas();
                     populateAreaSelect();
+                    
+                    // Si un rapport temporaire existe, on ajuste l'interface
+                    if (tempReport) {
+                        beforePhotosContainer.style.display = 'none';
+                        sendBeforeContainer.style.display = 'none';
+                        afterPhotosContainer.style.display = 'block';
+                        sendAfterContainer.style.display = 'block';
+                        currentStep = 2;
+                        updateStepDisplay();
+                    }
                 }
                 
+                showNotification(`Connexion réussie - Bienvenue ${user.name}`, "success");
+                
             } else {
+                showNotification("Nom d'utilisateur ou mot de passe incorrect", "error");
                 alert("Nom d'utilisateur ou mot de passe incorrect");
             }
         }
@@ -1866,6 +1937,16 @@
                     employeeName.textContent = `Employé : ${currentUser.name}`;
                     loadEmployeeAreas();
                     populateAreaSelect();
+                    
+                    // Si un rapport temporaire existe, on ajuste l'interface
+                    if (tempReport) {
+                        beforePhotosContainer.style.display = 'none';
+                        sendBeforeContainer.style.display = 'none';
+                        afterPhotosContainer.style.display = 'block';
+                        sendAfterContainer.style.display = 'block';
+                        currentStep = 2;
+                        updateStepDisplay();
+                    }
                 }
                 
                 updateStatusBar(`Bienvenue ${currentUser.name}`);
@@ -1890,10 +1971,11 @@
             }
             
             localStorage.removeItem('currentUser');
+            showNotification("Déconnexion réussie", "success");
             updateStatusBar("Déconnexion réussie");
         }
 
-        // ========== Gestion des employés ==========
+        // ========== GESTION DES EMPLOYÉS ==========
         function addEmployee() {
             const username = document.getElementById('empUsername').value;
             const password = document.getElementById('empPassword').value;
@@ -1927,6 +2009,7 @@
             document.getElementById('empPassword').value = '';
             document.getElementById('empName').value = '';
             
+            showNotification("Employé ajouté avec succès", "success");
             alert("Employé ajouté avec succès");
         }
 
@@ -1993,10 +2076,11 @@
             updateCounters();
             saveToLocalStorage();
             
+            showNotification("Employé supprimé avec succès", "success");
             alert("Employé supprimé avec succès");
         }
 
-        // ========== Gestion des zones ==========
+        // ========== GESTION DES ZONES ==========
         function assignArea() {
             const employeeUsername = employeeSelect.value;
             const areaName = document.getElementById('areaName').value;
@@ -2048,6 +2132,7 @@
             document.getElementById('areaName').value = '';
             document.getElementById('areaCode').value = '';
             
+            showNotification("Zone attribuée avec succès", "success");
             alert("Zone attribuée avec succès");
         }
 
@@ -2212,10 +2297,11 @@
             displayAssignedAreasList();
             updateCounters();
             
+            showNotification("Zone supprimée avec succès", "success");
             alert("Zone supprimée avec succès");
         }
 
-        // ========== Gestion des rapports ==========
+        // ========== GESTION DES RAPPORTS ==========
         function generateZoneFile(zoneCode) {
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) return;
@@ -2343,6 +2429,69 @@
                 `;
                 
                 reportDetailsContainer.appendChild(zoneCard);
+            });
+        }
+
+        function displayMiniReports() {
+            reportsListMini.innerHTML = '';
+            
+            let totalReports = 0;
+            Object.values(zoneReports).forEach(zone => {
+                totalReports += zone.reports.length;
+            });
+            
+            if (totalReports === 0) {
+                reportsListMini.innerHTML = `
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-inbox" style="font-size: 48px; color: #e1e8ed; margin-bottom: 15px;"></i>
+                        <h4 style="color: #666; margin-bottom: 10px;">Aucun rapport reçu</h4>
+                        <p style="color: #999; font-size: 14px;">Les rapports apparaîtront ici lorsque les employés les enverront</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Afficher les 5 derniers rapports
+            let allReports = [];
+            Object.values(zoneReports).forEach(zone => {
+                zone.reports.forEach(report => {
+                    allReports.push({...report, zoneData: zone});
+                });
+            });
+            
+            // Trier par date (plus récent d'abord)
+            allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            // Prendre les 5 premiers
+            const recentReports = allReports.slice(0, 5);
+            
+            recentReports.forEach(report => {
+                const beforeCount = report.beforePhotos?.length || 0;
+                const afterCount = report.afterPhotos?.length || 0;
+                
+                const reportCard = document.createElement('div');
+                reportCard.className = 'report-card';
+                
+                reportCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <div style="font-weight: 700; color: #1a5fb4; font-size: 16px;">${report.employeeName}</div>
+                            <div style="font-size: 12px; color: #666;">${formatDate(report.date)}</div>
+                        </div>
+                        <span style="background: #e3f2fd; padding: 5px 12px; border-radius: 15px; font-size: 14px; color: #1a5fb4; font-weight: 700;">
+                            ${report.number}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 15px; font-size: 12px; color: #666; margin-bottom: 10px;">
+                        <span><i class="fas fa-map-marker-alt"></i> ${report.area}</span>
+                        <span><i class="fas fa-images"></i> ${beforeCount + afterCount} photos</span>
+                    </div>
+                    <button class="control-btn primary" style="width: 100%; padding: 8px;" onclick="viewReportDetails('${report.areaCode}', ${report.id})">
+                        <i class="fas fa-eye"></i> Voir le rapport complet
+                    </button>
+                `;
+                
+                reportsListMini.appendChild(reportCard);
             });
         }
 
@@ -2521,10 +2670,11 @@
             
             URL.revokeObjectURL(url);
             
+            showNotification("Toutes les données exportées", "success");
             updateStatusBar("Toutes les données exportées");
         }
 
-        // ========== Fonctions d'interface ==========
+        // ========== INTERFACE ==========
         function updateEmployeeSelect() {
             employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
             employees.forEach(emp => {
@@ -2538,6 +2688,7 @@
         function updateAdminDashboard() {
             displayEmployees();
             displayAssignedAreasList();
+            displayMiniReports();
             updateCounters();
         }
 
@@ -2552,7 +2703,7 @@
             document.getElementById('reportsCount').textContent = totalReports;
         }
 
-        // ========== Initialiser l'application ==========
+        // ========== INITIALISER L'APPLICATION ==========
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
