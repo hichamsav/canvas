@@ -276,42 +276,7 @@
             padding-bottom: 5px;
         }
 
-        /* تنسيق Note ورقمها */
-        .note-code-container {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            margin-bottom: 5px;
-        }
-
-        .note-label {
-            font-size: 14px;
-            color: rgba(255, 0, 0, 0.9);
-            font-family: 'Arial Black', sans-serif;
-            font-weight: 900;
-            letter-spacing: 0.2px;
-            line-height: 1;
-            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
-            background: none;
-            padding: 0;
-            margin: 0 0 2px 0;
-            white-space: nowrap;
-        }
-
-        .note-value {
-            font-size: 16px;
-            color: rgba(255, 0, 0, 0.9);
-            font-family: 'Arial Black', sans-serif;
-            font-weight: 900;
-            letter-spacing: 0.3px;
-            line-height: 1;
-            text-shadow: 0.5px 0.5px 1px rgba(0, 0, 0, 0.3);
-            background: none;
-            padding: 0;
-            margin: 0;
-            white-space: nowrap;
-        }
-
+        /* تنسيق Powered by NoteCam */
         .powered-by {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.9);
@@ -969,10 +934,6 @@
                             <div class="info-line" id="infoNote">Note : ZN001</div>
                         </div>
                         <div class="logo-column">
-                            <div class="note-code-container">
-                                <div class="note-label">Note</div>
-                                <div class="note-value" id="noteCode">ZN001</div>
-                            </div>
                             <div class="powered-by">Powered by NoteCam</div>
                         </div>
                     </div>
@@ -1080,7 +1041,6 @@
         const infoPrecision = document.getElementById('infoPrecision');
         const infoTime = document.getElementById('infoTime');
         const infoNote = document.getElementById('infoNote');
-        const noteCode = document.getElementById('noteCode');
 
         // Données de localisation
         const sampleLocations = [
@@ -1093,7 +1053,6 @@
         function formatDate(dateString) {
             const date = new Date(dateString);
             
-            // Format simple avec chiffres anglais
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
@@ -1157,12 +1116,48 @@
         // ========== Mettre à jour le code Note ==========
         function updateNoteCode() {
             if (selectedArea && selectedArea.code) {
-                noteCode.textContent = selectedArea.code;
                 infoNote.textContent = `Note : ${selectedArea.code}`;
             } else {
-                noteCode.textContent = "ZN000";
                 infoNote.textContent = "Note : ZN000";
             }
+        }
+
+        // ========== إضافة المعلومات إلى الصورة ==========
+        function addInfoToImage(context, width, height) {
+            context.save();
+            
+            const lineHeight = 16;
+            const totalHeight = lineHeight * 6 + 8;
+            const boxWidth = width * 0.18;
+            const boxX = 2;
+            const boxY = height - totalHeight - 2;
+            
+            // خلفية بيضاء للمعلومات
+            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            context.fillRect(boxX, boxY, boxWidth, totalHeight);
+            
+            context.font = 'bold 14px "Courier New", monospace';
+            context.fillStyle = '#000000';
+            context.textAlign = 'left';
+            context.textBaseline = 'top';
+            
+            const startY = boxY + 4;
+            
+            // معلومات الموقع
+            context.fillText(infoLatitude.textContent, boxX + 5, startY);
+            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
+            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
+            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
+            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
+            context.fillText(infoNote.textContent, boxX + 5, startY + (lineHeight * 5));
+            
+            // إضافة شعار "Powered by NoteCam" فقط
+            context.textAlign = 'right';
+            context.font = 'bold 11px "Courier New", monospace';
+            context.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            context.fillText('Powered by NoteCam', width - 10, boxY + totalHeight - 5);
+            
+            context.restore();
         }
 
         // ========== Téléchargement de toutes les images du rapport ==========
@@ -1220,7 +1215,7 @@ Nom d'utilisateur : ${report.employee}
 Nombre saisi : ${report.number}
 Zone : ${report.area || 'Non spécifiée'}
 Code de zone : ${report.areaCode || 'Non spécifié'}
-Code Note : ${report.noteCode || report.areaCode || 'Non spécifié'}
+Note : ${report.noteCode || report.areaCode || 'Non spécifié'}
 Date d'envoi : ${formatReportDate(report.date)}
 Latitude : ${report.location.lat.toFixed(6)}
 Longitude : ${report.location.lng.toFixed(6)}
@@ -1275,77 +1270,6 @@ Date de création : ${formatReportDate(new Date().toISOString())}
             container.appendChild(downloadReportBtn);
             
             return container;
-        }
-
-        // ========== إضافة المعلومات إلى الصورة ==========
-        function addInfoToImage(context, width, height) {
-            context.save();
-            
-            const lineHeight = 16;
-            const totalHeight = lineHeight * 6 + 8;
-            const boxWidth = width * 0.18;
-            const boxX = 2;
-            const boxY = height - totalHeight - 2;
-            
-            // خلفية بيضاء للمعلومات
-            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(boxX, boxY, boxWidth, totalHeight);
-            
-            context.font = 'bold 14px "Courier New", monospace';
-            context.fillStyle = '#000000';
-            context.textAlign = 'left';
-            context.textBaseline = 'top';
-            
-            const startY = boxY + 4;
-            
-            // معلومات الموقع
-            context.fillText(infoLatitude.textContent, boxX + 5, startY);
-            context.fillText(infoLongitude.textContent, boxX + 5, startY + lineHeight);
-            context.fillText(infoElevation.textContent, boxX + 5, startY + (lineHeight * 2));
-            context.fillText(infoPrecision.textContent, boxX + 5, startY + (lineHeight * 3));
-            context.fillText(infoTime.textContent, boxX + 5, startY + (lineHeight * 4));
-            context.fillText(infoNote.textContent, boxX + 5, startY + (lineHeight * 5));
-            
-            // Note ورقمها + Powered by NoteCam
-            drawLogoOnImage(context, width - 10, boxY + totalHeight - 5, noteCode.textContent);
-            
-            context.restore();
-        }
-
-        // ========== Mettre à jour المعلومات في الصورة ==========
-        function drawLogoOnImage(context, x, y, areaCode) {
-            context.save();
-            
-            // إعداد الظل
-            context.shadowColor = 'rgba(0, 0, 0, 0.4)';
-            context.shadowBlur = 2;
-            context.shadowOffsetX = 1;
-            context.shadowOffsetY = 1;
-            
-            // "Note" باللون الأحمر
-            context.font = '900 16px "Arial Black", sans-serif';
-            context.fillStyle = 'rgba(255, 0, 0, 0.9)';
-            context.textAlign = 'right';
-            context.textBaseline = 'alphabetic';
-            
-            const noteText = "Note";
-            context.fillText(noteText, x, y - 20);
-            
-            // رقم المنطقة باللون الأحمر (أسفل Note مباشرة)
-            context.font = '900 18px "Arial Black", sans-serif';
-            const areaCodeText = areaCode || 'ZN000';
-            context.fillText(areaCodeText, x, y);
-            
-            // "Powered by NoteCam" باللون الأبيض (أسفل رقم المنطقة)
-            context.shadowColor = 'rgba(255, 255, 255, 0.2)';
-            context.shadowBlur = 1;
-            context.shadowOffsetX = 0;
-            context.shadowOffsetY = 0;
-            context.fillStyle = 'rgba(255, 255, 255, 0.9)';
-            context.font = 'bold 11px "Courier New", monospace';
-            context.fillText('Powered by NoteCam', x, y + 15);
-            
-            context.restore();
         }
 
         // Initialisation de l'application
@@ -1767,7 +1691,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                 area: selectedArea.name,
                 areaCode: selectedArea.code,
                 areaId: selectedArea.id,
-                noteCode: noteCode.textContent
+                noteCode: infoNote.textContent.split(': ')[1] || selectedArea.code
             };
             
             reports.push(report);
@@ -1834,7 +1758,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             <strong>Zone :</strong> ${report.area}
                         </div>
                         <div class="detail-item">
-                            <strong>Code Note :</strong> ${report.noteCode || report.areaCode}
+                            <strong>Note :</strong> ${report.noteCode || report.areaCode}
                         </div>
                         <div class="detail-item">
                             <strong>Date :</strong> ${formatReportDate(report.date)}
@@ -1910,7 +1834,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                                 <div class="info-value">${report.areaCode || 'Non spécifié'}</div>
                             </div>
                             <div class="info-item">
-                                <div class="info-label">Code Note</div>
+                                <div class="info-label">Note</div>
                                 <div class="info-value">${report.noteCode || report.areaCode || 'Non spécifié'}</div>
                             </div>
                             <div class="info-item">
@@ -2008,7 +1932,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             <div class="info-value">${report.areaCode || 'Non spécifié'}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">Code Note</div>
+                            <div class="info-label">Note</div>
                             <div class="info-value">${report.noteCode || report.areaCode || 'Non spécifié'}</div>
                         </div>
                         <div class="info-item">
@@ -2184,7 +2108,7 @@ Date de création : ${formatReportDate(new Date().toISOString())}
                             elev: infoElevation.textContent.split(': ')[1],
                             prec: parseFloat(infoPrecision.textContent.split(': ')[1])
                         },
-                        noteCode: noteCode.textContent
+                        noteCode: infoNote.textContent.split(': ')[1]
                     };
                     
                     addImageToGallery(imageUrl, blob, timestamp);
