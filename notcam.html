@@ -1406,6 +1406,9 @@
             // Initialiser les compteurs
             updateCounters();
             
+            // ✅ تحديث قائمة الموظفين مباشرة عند التهيئة
+            updateEmployeeSelect();
+            
             // Configurer les boutons de nombre
             setupNumberButtons();
             
@@ -2772,6 +2775,7 @@
             displayAssignedAreasList();
             displayMiniReports();
             updateCounters();
+            updateEmployeeSelect(); // ✅ تم إضافة هذا السطر
         }
 
         function updateCounters() {
