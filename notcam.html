@@ -827,26 +827,14 @@
             Système NoteCam ● Prêt ●
         </div>
 
-        <!-- Page de connexion -->
+        <!-- Page de connexion (SANS informations de connexion visibles) -->
         <div class="login-container" id="loginPage">
             <h2>Connexion</h2>
             <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur">
             <input type="password" id="password" class="login-input" placeholder="Mot de passe">
             <button class="login-btn" onclick="login()">Se connecter</button>
             
-            <div style="margin-top: 25px; padding: 15px; background: #f0f8ff; border-radius: 8px; border: 1px solid #e1e8ed;">
-                <h3 style="color: #1a5fb4; font-size: 16px; margin-bottom: 10px;">Utilisateurs disponibles :</h3>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
-                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e1e8ed;">
-                        <strong>Superviseur :</strong><br>
-                        admin / admin123
-                    </div>
-                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e1e8ed;">
-                        <strong>Employés :</strong><br>
-                        user1 à user11 / pass123
-                    </div>
-                </div>
-            </div>
+            <!-- PAS D'INFORMATIONS DE CONNEXION VISIBLES POUR LA SÉCURITÉ -->
         </div>
 
         <!-- Panneau du superviseur -->
@@ -1152,10 +1140,6 @@
         }
 
         let usersData = JSON.parse(JSON.stringify(defaultUsersData));
-        let employees = Object.entries(usersData)
-            .filter(([username, data]) => data.role === "employee")
-            .map(([username, data]) => ({ username, name: data.name }));
-        
         let assignedAreas = [];
         let zoneReports = {};
 
@@ -1952,7 +1936,6 @@
                 if (savedData) {
                     const data = JSON.parse(savedData);
                     usersData = {...defaultUsersData, ...data.usersData};
-                    employees = data.employees || employees;
                     assignedAreas = data.assignedAreas || assignedAreas;
                     zoneReports = data.zoneReports || {};
                 }
@@ -1984,7 +1967,6 @@
         function saveToLocalStorage() {
             const data = {
                 usersData,
-                employees,
                 assignedAreas,
                 zoneReports
             };
@@ -2125,8 +2107,6 @@
                 assignedAreas: []
             };
             
-            employees.push({username, name});
-            
             updateEmployeeSelect();
             displayEmployees();
             updateCounters();
@@ -2143,50 +2123,50 @@
         function displayEmployees() {
             employeesList.innerHTML = '';
             
-            if (employees.length === 0) {
-                employeesList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucun employé enregistré</p>';
-                return;
-            }
+            let employeeCount = 0;
             
-            employees.forEach(emp => {
-                const employeeCard = document.createElement('div');
-                employeeCard.className = 'employee-card';
-                
-                const areasCount = (usersData[emp.username]?.assignedAreas || []).length;
-                
-                employeeCard.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: start;">
-                        <div>
-                            <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
-                                ${emp.name}
+            // عرض جميع الموظفين من usersData
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === "employee") {
+                    employeeCount++;
+                    const employeeCard = document.createElement('div');
+                    employeeCard.className = 'employee-card';
+                    
+                    const areasCount = (data.assignedAreas || []).length;
+                    
+                    employeeCard.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
+                                    ${data.name}
+                                </div>
+                                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                                    Nom d'utilisateur : ${username}
+                                </div>
+                                <div style="display: flex; gap: 15px;">
+                                    <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4;">
+                                        <i class="fas fa-map-marker-alt"></i> ${areasCount} zones
+                                    </span>
+                                </div>
                             </div>
-                            <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
-                                Nom d'utilisateur : ${emp.username}
-                            </div>
-                            <div style="display: flex; gap: 15px;">
-                                <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4;">
-                                    <i class="fas fa-map-marker-alt"></i> ${areasCount} zones
-                                </span>
-                            </div>
+                            <button class="control-btn danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEmployee('${username}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
-                        <button class="control-btn danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEmployee('${emp.username}')">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
-                `;
-                
-                employeesList.appendChild(employeeCard);
+                    `;
+                    
+                    employeesList.appendChild(employeeCard);
+                }
             });
+            
+            if (employeeCount === 0) {
+                employeesList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucun employé enregistré</p>';
+            }
         }
 
         function deleteEmployee(username) {
             if (!confirm(`Voulez-vous vraiment supprimer l'employé ${username} ?`)) {
                 return;
-            }
-            
-            const index = employees.findIndex(emp => emp.username === username);
-            if (index !== -1) {
-                employees.splice(index, 1);
             }
             
             if (usersData[username]) {
@@ -2753,7 +2733,6 @@
             const exportData = {
                 exportedAt: new Date().toISOString(),
                 users: Object.keys(usersData).length,
-                employees: employees.length,
                 zones: assignedAreas.length,
                 zoneReports: zoneReports
             };
@@ -2776,11 +2755,15 @@
         // ========== INTERFACE ==========
         function updateEmployeeSelect() {
             employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
-            employees.forEach(emp => {
-                const option = document.createElement('option');
-                option.value = emp.username;
-                option.textContent = `${emp.name} (${emp.username})`;
-                employeeSelect.appendChild(option);
+            
+            // عرض جميع المستخدمين من نوع "employee" من usersData
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === "employee") {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.textContent = `${data.name} (${username})`;
+                    employeeSelect.appendChild(option);
+                }
             });
         }
 
@@ -2792,7 +2775,14 @@
         }
 
         function updateCounters() {
-            document.getElementById('employeesCount').textContent = employees.length;
+            // حساب عدد الموظفين
+            let employeeCount = 0;
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === "employee") {
+                    employeeCount++;
+                }
+            });
+            document.getElementById('employeesCount').textContent = employeeCount;
             document.getElementById('areasCount').textContent = assignedAreas.length;
             
             let totalReports = 0;
