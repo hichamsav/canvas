@@ -813,16 +813,6 @@
                 opacity: 1;
             }
         }
-        
-        /* Saisie du nombre pour APRÈS */
-        .number-selection-after {
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border: 2px solid #ff6b6b;
-            box-shadow: 0 4px 6px rgba(255, 107, 107, 0.1);
-        }
     </style>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -997,12 +987,12 @@
                     </div>
                 </div>
 
-                <!-- Saisie du nombre pour AVANT -->
-                <div class="number-selection" id="numberSelectionBefore">
+                <!-- Saisie du nombre -->
+                <div class="number-selection" id="numberSelection">
                     <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
-                        <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 pour AVANT :
+                        <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 :
                     </label>
-                    <div class="number-buttons" id="numberButtonsBefore">
+                    <div class="number-buttons">
                         <button class="number-btn" data-number="0">0</button>
                         <button class="number-btn" data-number="1">1</button>
                         <button class="number-btn" data-number="2">2</button>
@@ -1014,7 +1004,7 @@
                         <button class="number-btn" data-number="8">8</button>
                     </div>
                     <div style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;">
-                        Nombre sélectionné : <span id="selectedNumberDisplayBefore" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
+                        Nombre sélectionné : <span id="selectedNumberDisplay" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
                     </div>
                 </div>
 
@@ -1023,7 +1013,7 @@
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
                             <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-hashtag"></i> Nombre AVANT : <strong id="summaryNumberBefore">-</strong>
+                                <i class="fas fa-hashtag"></i> Nombre : <strong id="summaryNumber">-</strong>
                             </span>
                             <span style="color: #666; font-size: 14px;">
                                 <i class="fas fa-map-marker-alt"></i> Zone : <strong id="summaryZone">-</strong>
@@ -1074,11 +1064,11 @@
                 </div>
 
                 <!-- Saisie du nombre pour APRÈS -->
-                <div class="number-selection number-selection-after" id="numberSelectionAfter" style="display: none;">
-                    <label style="display: block; margin-bottom: 12px; color: #ff6b6b; font-weight: 700; font-size: 16px;">
+                <div class="number-selection" id="numberSelectionAfter" style="display: none;">
+                    <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
                         <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 pour APRÈS :
                     </label>
-                    <div class="number-buttons" id="numberButtonsAfter">
+                    <div class="number-buttons">
                         <button class="number-btn" data-number="0">0</button>
                         <button class="number-btn" data-number="1">1</button>
                         <button class="number-btn" data-number="2">2</button>
@@ -1090,7 +1080,7 @@
                         <button class="number-btn" data-number="8">8</button>
                     </div>
                     <div style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;">
-                        Nombre sélectionné : <span id="selectedNumberDisplayAfter" style="font-weight: 700; color: #ff6b6b;">Aucun</span>
+                        Nombre sélectionné : <span id="selectedNumberDisplayAfter" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
                     </div>
                 </div>
 
@@ -1099,7 +1089,7 @@
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
                             <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-hashtag"></i> Nombre APRÈS : <strong id="summaryNumberAfter">-</strong>
+                                <i class="fas fa-hashtag"></i> Nombre : <strong id="summaryNumberAfter">-</strong>
                             </span>
                             <span style="color: #666; font-size: 14px;">
                                 <i class="fas fa-map-marker-alt"></i> Zone : <strong id="summaryZoneAfter">-</strong>
@@ -1176,7 +1166,7 @@
         let videoStream = null;
         let isCameraActive = false;
         let selectedArea = null;
-        let selectedNumberBefore = null;
+        let selectedNumber = null;
         let selectedNumberAfter = null;
         let currentStep = 1;
         
@@ -1209,9 +1199,9 @@
         const afterPhotoBoxesContainer = document.getElementById('afterPhotoBoxesContainer');
         const beforePhotosContainer = document.getElementById('beforePhotosContainer');
         const afterPhotosContainer = document.getElementById('afterPhotosContainer');
-        const numberSelectionBefore = document.getElementById('numberSelectionBefore');
+        const numberSelection = document.getElementById('numberSelection');
         const numberSelectionAfter = document.getElementById('numberSelectionAfter');
-        const selectedNumberDisplayBefore = document.getElementById('selectedNumberDisplayBefore');
+        const selectedNumberDisplay = document.getElementById('selectedNumberDisplay');
         const selectedNumberDisplayAfter = document.getElementById('selectedNumberDisplayAfter');
         const beforePhotosCount = document.getElementById('beforePhotosCount');
         const afterPhotosCount = document.getElementById('afterPhotosCount');
@@ -1235,7 +1225,7 @@
         const statusNumberAfter = document.getElementById('statusNumberAfter');
         const statusZoneAfter = document.getElementById('statusZoneAfter');
         const statusAfter = document.getElementById('statusAfter');
-        const summaryNumberBefore = document.getElementById('summaryNumberBefore');
+        const summaryNumber = document.getElementById('summaryNumber');
         const summaryZone = document.getElementById('summaryZone');
         const summaryBeforePhotos = document.getElementById('summaryBeforePhotos');
         const summaryNumberAfter = document.getElementById('summaryNumberAfter');
@@ -1445,15 +1435,15 @@
 
         function setupNumberButtons() {
             // Boutons pour AVANT
-            document.querySelectorAll('#numberButtonsBefore .number-btn').forEach(btn => {
+            document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const number = this.getAttribute('data-number');
-                    selectNumberBefore(number);
+                    selectNumber(number);
                 });
             });
             
             // Boutons pour APRÈS
-            document.querySelectorAll('#numberButtonsAfter .number-btn').forEach(btn => {
+            document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const number = this.getAttribute('data-number');
                     selectNumberAfter(number);
@@ -1461,10 +1451,10 @@
             });
         }
 
-        function selectNumberBefore(number) {
-            selectedNumberBefore = number;
+        function selectNumber(number) {
+            selectedNumber = number;
             
-            document.querySelectorAll('#numberButtonsBefore .number-btn').forEach(btn => {
+            document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
                 if (btn.getAttribute('data-number') === number) {
                     btn.classList.add('selected');
                 } else {
@@ -1472,19 +1462,19 @@
                 }
             });
             
-            selectedNumberDisplayBefore.textContent = number;
+            selectedNumberDisplay.textContent = number;
             statusNumber.textContent = number;
-            summaryNumberBefore.textContent = number;
+            summaryNumber.textContent = number;
             
             checkSendBeforeStatus();
             
-            updateStatusBar(`Nombre AVANT sélectionné : ${number}`);
+            updateStatusBar(`Nombre sélectionné : ${number}`);
         }
 
         function selectNumberAfter(number) {
             selectedNumberAfter = number;
             
-            document.querySelectorAll('#numberButtonsAfter .number-btn').forEach(btn => {
+            document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
                 if (btn.getAttribute('data-number') === number) {
                     btn.classList.add('selected');
                 } else {
@@ -1570,7 +1560,7 @@
                 const context = canvas.getContext('2d');
                 
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                addInfoToImage(context, canvas.width, canvas.height, type);
+                addInfoToImage(context, canvas.width, canvas.height);
                 
                 canvas.toBlob((blob) => {
                     const imageUrl = URL.createObjectURL(blob);
@@ -1610,7 +1600,7 @@
             }
         }
 
-        function addInfoToImage(context, width, height, type) {
+        function addInfoToImage(context, width, height) {
             context.save();
             
             const lineHeight = 16;
@@ -1636,7 +1626,7 @@
                 `Élévation : ${currentLocation.elev} m`,
                 `Précision : ${currentLocation.prec.toFixed(2)} m`,
                 `Temps : ${currentLocation.time}`,
-                `Note : ${noteCode} | ${type.toUpperCase()}`
+                `Note : ${noteCode}`
             ];
             
             infoLines.forEach((line, i) => {
@@ -1645,7 +1635,7 @@
             
             context.textAlign = 'right';
             context.font = '900 16px "Arial Black", sans-serif';
-            context.fillStyle = type === 'before' ? '#1a5fb4' : '#ff6b6b';
+            context.fillStyle = '#ff0000';
             
             context.shadowColor = 'rgba(0, 0, 0, 0.7)';
             context.shadowBlur = 2;
@@ -1715,7 +1705,7 @@
 
         function checkSendBeforeStatus() {
             const beforeCount = beforePhotos.filter(p => p !== null).length;
-            const canSend = selectedNumberBefore !== null && 
+            const canSend = selectedNumber !== null && 
                           selectedArea !== null && 
                           beforeCount === 5;
             
@@ -1767,7 +1757,7 @@
                 id: Date.now(),
                 employee: currentUser.username,
                 employeeName: currentUser.name,
-                numberBefore: selectedNumberBefore,
+                numberBefore: selectedNumber,
                 date: new Date().toISOString(),
                 location: {...currentLocation},
                 beforePhotos: beforePhotos.filter(p => p !== null),
@@ -1809,7 +1799,7 @@
                 id: beforeReport.id,
                 employee: currentUser.username,
                 employeeName: currentUser.name,
-                numberBefore: selectedNumberBefore,
+                numberBefore: selectedNumber,
                 date: new Date().toISOString(),
                 location: {...currentLocation},
                 beforePhotos: beforePhotos.filter(p => p !== null),
@@ -1824,7 +1814,7 @@
             // Masquer AVANT, montrer APRÈS
             beforePhotosContainer.style.display = 'none';
             sendBeforeContainer.style.display = 'none';
-            numberSelectionBefore.style.display = 'none';
+            numberSelection.style.display = 'none';
             apresButtonContainer.style.display = 'block';
             
             showNotification("Photos AVANT envoyées avec succès !", "success");
@@ -1844,7 +1834,7 @@
             sendAfterContainer.style.display = 'block';
             
             // Afficher le nombre AVANT déjà envoyé
-            completedBeforeNumber.textContent = selectedNumberBefore;
+            completedBeforeNumber.textContent = selectedNumber;
             
             showNotification("Prêt à capturer les photos APRÈS", "success");
             updateStatusBar("Prêt à capturer les photos APRÈS");
@@ -1931,7 +1921,7 @@
         }
 
         function resetForm() {
-            selectedNumberBefore = null;
+            selectedNumber = null;
             selectedNumberAfter = null;
             beforePhotos = [null, null, null, null, null];
             afterPhotos = [null, null, null, null, null];
@@ -1942,11 +1932,11 @@
                 btn.classList.remove('selected');
             });
             
-            selectedNumberDisplayBefore.textContent = "Aucun";
+            selectedNumberDisplay.textContent = "Aucun";
             selectedNumberDisplayAfter.textContent = "Aucun";
             statusNumber.textContent = "-";
             statusNumberAfter.textContent = "-";
-            summaryNumberBefore.textContent = "-";
+            summaryNumber.textContent = "-";
             summaryNumberAfter.textContent = "-";
             completedBeforeNumber.textContent = "-";
             
@@ -1977,7 +1967,7 @@
             sendBeforeContainer.style.display = 'block';
             sendAfterContainer.style.display = 'none';
             apresButtonContainer.style.display = 'none';
-            numberSelectionBefore.style.display = 'block';
+            numberSelection.style.display = 'block';
             numberSelectionAfter.style.display = 'none';
             
             // Réinitialiser boutons
@@ -2007,7 +1997,7 @@
                         tempReport = JSON.parse(savedTempReport);
                         if (tempReport) {
                             currentStep = 2;
-                            selectedNumberBefore = tempReport.numberBefore;
+                            selectedNumber = tempReport.numberBefore;
                             selectedArea = assignedAreas.find(area => area.code === tempReport.areaCode);
                         }
                     } catch (e) {
@@ -2073,7 +2063,7 @@
                     if (tempReport) {
                         beforePhotosContainer.style.display = 'none';
                         sendBeforeContainer.style.display = 'none';
-                        numberSelectionBefore.style.display = 'none';
+                        numberSelection.style.display = 'none';
                         afterPhotosContainer.style.display = 'block';
                         numberSelectionAfter.style.display = 'block';
                         sendAfterContainer.style.display = 'block';
@@ -2082,7 +2072,7 @@
                         updateStepDisplay();
                         
                         // Afficher le nombre AVANT déjà envoyé
-                        completedBeforeNumber.textContent = selectedNumberBefore;
+                        completedBeforeNumber.textContent = selectedNumber;
                         selectedNumberDisplayAfter.textContent = "Aucun";
                     }
                 }
@@ -2115,7 +2105,7 @@
                     if (tempReport) {
                         beforePhotosContainer.style.display = 'none';
                         sendBeforeContainer.style.display = 'none';
-                        numberSelectionBefore.style.display = 'none';
+                        numberSelection.style.display = 'none';
                         afterPhotosContainer.style.display = 'block';
                         numberSelectionAfter.style.display = 'block';
                         sendAfterContainer.style.display = 'block';
@@ -2123,7 +2113,7 @@
                         currentStep = 2;
                         updateStepDisplay();
                         
-                        completedBeforeNumber.textContent = selectedNumberBefore;
+                        completedBeforeNumber.textContent = selectedNumber;
                         selectedNumberDisplayAfter.textContent = "Aucun";
                     }
                 }
@@ -2141,7 +2131,7 @@
             
             currentUser = null;
             selectedArea = null;
-            selectedNumberBefore = null;
+            selectedNumber = null;
             selectedNumberAfter = null;
             
             loginPage.style.display = 'block';
