@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Système NoteCam - Superviseur et Employés</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
-        /* Styles de base */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +28,6 @@
             overflow-x: hidden;
         }
 
-        /* Conteneur de l'application */
         .app-container {
             width: 100%;
             max-width: 1200px;
@@ -35,7 +38,6 @@
             border: 1px solid #e1e8ed;
         }
 
-        /* Barre d'état */
         .status-bar {
             background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
             padding: 12px 20px;
@@ -48,7 +50,6 @@
             letter-spacing: 0.5px;
         }
 
-        /* Styles de connexion */
         .login-container {
             background: #ffffff;
             padding: 40px;
@@ -105,7 +106,68 @@
             box-shadow: 0 5px 15px rgba(26, 95, 180, 0.3);
         }
 
-        /* Panneaux */
+        /* Loader */
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #1a5fb4;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            flex-direction: column;
+        }
+
+        .loading-overlay p {
+            margin-top: 20px;
+            color: #1a5fb4;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #2ea043;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
         .admin-panel, .employee-panel, .reports-panel {
             display: none;
         }
@@ -148,7 +210,6 @@
             background: #2ea043;
         }
 
-        /* Sections du tableau de bord */
         .dashboard-section {
             padding: 25px;
             margin: 15px;
@@ -167,7 +228,6 @@
             font-weight: 700;
         }
 
-        /* Gestion des employés */
         .employee-form {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -228,7 +288,6 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Zone de l'employé - Interface compacte */
         .employee-area {
             padding: 20px;
         }
@@ -277,7 +336,6 @@
             box-shadow: 0 3px 10px rgba(26, 95, 180, 0.1);
         }
 
-        /* Contrôles sous la zone sélectionnée */
         .controls-under-area {
             display: flex;
             justify-content: center;
@@ -321,7 +379,6 @@
             border: none;
         }
 
-        /* Indicateur de caméra */
         .camera-status {
             display: flex;
             align-items: center;
@@ -355,16 +412,6 @@
             100% { opacity: 1; }
         }
 
-        .camera-text {
-            font-weight: 600;
-            color: #2ea043;
-        }
-
-        .camera-status.active .camera-text {
-            color: #1a5fb4;
-        }
-
-        /* Conteneur des images */
         .photos-container {
             margin: 25px 0;
         }
@@ -458,7 +505,6 @@
             display: none;
         }
 
-        /* Section APRES - comme bouton */
         .section-divider {
             text-align: center;
             margin: 30px 0;
@@ -492,7 +538,6 @@
             transform: none;
         }
 
-        /* Bouton d'envoi */
         .send-report-container {
             text-align: center;
             margin: 30px 0;
@@ -535,7 +580,6 @@
             background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
         }
 
-        /* Rapports */
         .reports-container {
             margin-top: 25px;
         }
@@ -555,7 +599,6 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
 
-        /* Zone de saisie du nombre (toujours visible) */
         .number-selection {
             background: #ffffff;
             padding: 20px;
@@ -603,7 +646,6 @@
             cursor: not-allowed;
         }
 
-        /* État des photos */
         .photos-status {
             display: flex;
             justify-content: space-between;
@@ -638,7 +680,6 @@
             color: #2ea043;
         }
 
-        /* Animations */
         @keyframes captureFlash {
             0% { opacity: 0; }
             50% { opacity: 1; }
@@ -657,7 +698,66 @@
             opacity: 0;
         }
 
-        /* Responsive */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .badge-blue {
+            background: #1a5fb4;
+            color: white;
+        }
+
+        .badge-green {
+            background: #2ea043;
+            color: white;
+        }
+
+        .badge-red {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .progress-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .progress-step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e1e8ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #666;
+        }
+
+        .progress-step.active {
+            background: #1a5fb4;
+            color: white;
+        }
+
+        .progress-step.completed {
+            background: #2ea043;
+            color: white;
+        }
+
+        .progress-label {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
         @media (max-width: 768px) {
             .photo-boxes-container {
                 flex-direction: column;
@@ -725,116 +825,39 @@
                 max-width: 250px;
             }
         }
-
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-left: 8px;
-        }
-
-        .badge-blue {
-            background: #1a5fb4;
-            color: white;
-        }
-
-        .badge-green {
-            background: #2ea043;
-            color: white;
-        }
-
-        .badge-red {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        /* Indicateur de progression */
-        .progress-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .progress-step {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #e1e8ed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #666;
-        }
-
-        .progress-step.active {
-            background: #1a5fb4;
-            color: white;
-        }
-
-        .progress-step.completed {
-            background: #2ea043;
-            color: white;
-        }
-
-        .progress-label {
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
-        }
-
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #2ea043;
-            color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
     </style>
+    
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loader"></div>
+        <p>Connexion à la base de données...</p>
+    </div>
+
     <!-- Notification -->
     <div class="notification" id="notification"></div>
 
     <div class="app-container">
         <!-- Barre d'état -->
         <div class="status-bar" id="statusBar">
-            Système NoteCam ● Prêt ●
+            Système NoteCam ● Connexion...
         </div>
 
-        <!-- Page de connexion (SANS informations de connexion visibles) -->
+        <!-- Page de connexion -->
         <div class="login-container" id="loginPage">
             <h2>Connexion</h2>
             <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur">
             <input type="password" id="password" class="login-input" placeholder="Mot de passe">
             <button class="login-btn" onclick="login()">Se connecter</button>
             
-            <!-- PAS D'INFORMATIONS DE CONNEXION VISIBLES POUR LA SÉCURITÉ -->
+            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 13px; color: #666;">
+                <p><strong>Comptes de test:</strong></p>
+                <p>Superviseur: <code>admin / admin123</code></p>
+                <p>Employés: <code>user1 à user11 / pass123</code></p>
+            </div>
         </div>
 
         <!-- Panneau du superviseur -->
@@ -856,7 +879,7 @@
                     <button class="action-btn" onclick="addEmployee()">Ajouter un employé</button>
                 </div>
                 <div class="employee-list" id="employeesList">
-                    <!-- Liste des employés apparaîtra ici -->
+                    <!-- Liste des employés -->
                 </div>
             </div>
 
@@ -872,7 +895,6 @@
                     <button class="action-btn" onclick="assignArea()">Attribuer la zone</button>
                 </div>
                 
-                <!-- Liste des zones attribuées -->
                 <div class="areas-list" id="assignedAreasList">
                     <!-- Liste des zones attribuées -->
                 </div>
@@ -890,7 +912,7 @@
                     </button>
                 </div>
                 <div class="reports-container" id="reportsListMini">
-                    <!-- Rapports miniatures apparaîtront ici -->
+                    <!-- Rapports miniatures -->
                 </div>
             </div>
         </div>
@@ -904,7 +926,6 @@
                 <button class="logout-btn" onclick="logout()">Déconnexion</button>
             </div>
 
-            <!-- Information sur les zones assignées -->
             <div class="employee-area">
                 <div class="area-selection">
                     <label>Sélectionnez la zone de travail :</label>
@@ -912,7 +933,6 @@
                         <option value="">Choisissez une zone</option>
                     </select>
                     
-                    <!-- Information de la zone sélectionnée -->
                     <div class="selected-area-display" id="selectedAreaInfo" style="display: none;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
@@ -929,7 +949,6 @@
                     </div>
                 </div>
 
-                <!-- Indicateur de caméra (automatique) -->
                 <div class="camera-status" id="cameraStatus">
                     <div class="camera-icon">
                         <i class="fas fa-video"></i>
@@ -937,7 +956,6 @@
                     <div class="camera-text">Caméra en cours d'activation...</div>
                 </div>
 
-                <!-- Les 3 boutons sous la zone sélectionnée -->
                 <div class="controls-under-area">
                     <button class="control-btn primary" id="toggleCamera" style="display: none;">
                         <i class="fas fa-video"></i> Activer la caméra
@@ -950,12 +968,6 @@
                     </button>
                 </div>
 
-                <!-- Liste des zones disponibles -->
-                <div class="areas-list" id="employeeAreasList">
-                    <!-- Zones de l'employé -->
-                </div>
-
-                <!-- Indicateur de progression -->
                 <div class="progress-indicator">
                     <div class="progress-step" id="step1">1</div>
                     <div class="progress-step" id="step2">2</div>
@@ -964,7 +976,6 @@
                     <span id="step1Label">Photos AVANT</span> → <span id="step2Label">Photos APRÈS</span>
                 </div>
 
-                <!-- Section PHOTOS AVANT (visible au début) -->
                 <div class="photos-container" id="beforePhotosContainer">
                     <div class="photos-title">
                         <span><i class="fas fa-camera"></i> PHOTOS AVANT (Cliquez sur chaque case pour capturer)</span>
@@ -989,7 +1000,6 @@
                     </div>
                 </div>
 
-                <!-- Saisie du nombre (toujours visible) -->
                 <div class="number-selection" id="numberSelection">
                     <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
                         <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 :
@@ -1010,7 +1020,6 @@
                     </div>
                 </div>
 
-                <!-- Bouton d'envoi des photos AVANT -->
                 <div class="send-report-container" id="sendBeforeContainer">
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -1033,14 +1042,12 @@
                     </div>
                 </div>
 
-                <!-- Bouton APRÈS pour passer à l'étape suivante -->
                 <div class="section-divider" id="apresButtonContainer" style="display: none;">
                     <button class="apres-button" id="apresButton" onclick="showAfterPhotos()">
                         <i class="fas fa-arrow-right"></i> PASSER AUX PHOTOS APRÈS
                     </button>
                 </div>
 
-                <!-- Section PHOTOS APRÈS (cachée au début) -->
                 <div class="photos-container" id="afterPhotosContainer" style="display: none;">
                     <div class="photos-title">
                         <span><i class="fas fa-camera-retro"></i> PHOTOS APRÈS (Cliquez sur chaque case pour capturer)</span>
@@ -1065,7 +1072,6 @@
                     </div>
                 </div>
 
-                <!-- Bouton d'envoi des photos APRÈS -->
                 <div class="send-report-container" id="sendAfterContainer" style="display: none;">
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -1110,7 +1116,7 @@
             </div>
 
             <div class="report-details-container" id="reportDetailsContainer">
-                <!-- Rapports complets apparaîtront ici -->
+                <!-- Rapports complets -->
             </div>
         </div>
     </div>
@@ -1119,103 +1125,35 @@
     <div class="capture-flash" id="captureFlash"></div>
 
     <script>
-        // ========== DONNÉES SYSTÈME ==========
-        // Données utilisateurs par défaut avec 11 employés
-        const defaultUsersData = {
-            admin: {
-                password: "admin123",
-                role: "admin",
-                name: "Superviseur Principal"
-            }
+        // ========== CONFIGURATION FIREBASE ==========
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJHATLa34sB6dF_uqOXMeKXV2VXF1cOvU",
+            authDomain: "notcam-d2ee9.firebaseapp.com",
+            databaseURL: "https://notcam-d2ee9-default-rtdb.firebaseio.com",
+            projectId: "notcam-d2ee9",
+            storageBucket: "notcam-d2ee9.firebasestorage.app",
+            messagingSenderId: "408140358418",
+            appId: "1:408140358418:web:1e2acb1c7de915092249cb",
+            measurementId: "G-8WP7T9M7V4"
         };
 
-        // إضافة 11 مستخدمين (من user1 إلى user11)
-        for (let i = 1; i <= 11; i++) {
-            defaultUsersData[`user${i}`] = {
-                password: "pass123", // نفس كلمة السر للجميع
-                role: "employee",
-                name: `Employé ${i}`,
-                assignedAreas: []
-            };
-        }
+        // Initialiser Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        let usersData = JSON.parse(JSON.stringify(defaultUsersData));
+        // ========== VARIABLES GLOBALES ==========
+        let usersData = {};
         let assignedAreas = [];
         let zoneReports = {};
-
-        // Variables système
         let currentUser = null;
         let videoStream = null;
         let isCameraActive = false;
         let selectedArea = null;
         let selectedNumber = null;
         let currentStep = 1;
-        
-        // Photos avant et après
         let beforePhotos = [null, null, null, null, null];
         let afterPhotos = [null, null, null, null, null];
-        
-        // Rapport temporaire
         let tempReport = null;
-        
-        // Éléments DOM
-        const statusBar = document.getElementById('statusBar');
-        const loginPage = document.getElementById('loginPage');
-        const adminPanel = document.getElementById('adminPanel');
-        const employeePanel = document.getElementById('employeePanel');
-        const reportsPanel = document.getElementById('reportsPanel');
-        const employeesList = document.getElementById('employeesList');
-        const employeeSelect = document.getElementById('employeeSelect');
-        const reportsListMini = document.getElementById('reportsListMini');
-        const reportDetailsContainer = document.getElementById('reportDetailsContainer');
-        const employeeName = document.getElementById('employeeName');
-        const selectedAreaInfo = document.getElementById('selectedAreaInfo');
-        const selectedAreaName = document.getElementById('selectedAreaName');
-        const selectedAreaCode = document.getElementById('selectedAreaCode');
-        const areaAssignedDate = document.getElementById('areaAssignedDate');
-        const areaSelect = document.getElementById('areaSelect');
-        const employeeAreasList = document.getElementById('employeeAreasList');
-        const assignedAreasList = document.getElementById('assignedAreasList');
-        const photoBoxesContainer = document.getElementById('photoBoxesContainer');
-        const afterPhotoBoxesContainer = document.getElementById('afterPhotoBoxesContainer');
-        const beforePhotosContainer = document.getElementById('beforePhotosContainer');
-        const afterPhotosContainer = document.getElementById('afterPhotosContainer');
-        const numberSelection = document.getElementById('numberSelection');
-        const selectedNumberDisplay = document.getElementById('selectedNumberDisplay');
-        const beforePhotosCount = document.getElementById('beforePhotosCount');
-        const afterPhotosCount = document.getElementById('afterPhotosCount');
-        const sendBeforeBtn = document.getElementById('sendBeforeBtn');
-        const sendAfterBtn = document.getElementById('sendAfterBtn');
-        const sendBeforeContainer = document.getElementById('sendBeforeContainer');
-        const sendAfterContainer = document.getElementById('sendAfterContainer');
-        const apresButtonContainer = document.getElementById('apresButtonContainer');
-        const apresButton = document.getElementById('apresButton');
-        const toggleCameraBtn = document.getElementById('toggleCamera');
-        const clearPhotosBtn = document.getElementById('clearPhotos');
-        const refreshLocationBtn = document.getElementById('refreshLocation');
-        const captureFlash = document.getElementById('captureFlash');
-        const notification = document.getElementById('notification');
-        const cameraStatus = document.getElementById('cameraStatus');
-        
-        // Éléments de statut
-        const statusNumber = document.getElementById('statusNumber');
-        const statusZone = document.getElementById('statusZone');
-        const statusBefore = document.getElementById('statusBefore');
-        const statusNumberAfter = document.getElementById('statusNumberAfter');
-        const statusZoneAfter = document.getElementById('statusZoneAfter');
-        const statusAfter = document.getElementById('statusAfter');
-        const summaryNumber = document.getElementById('summaryNumber');
-        const summaryZone = document.getElementById('summaryZone');
-        const summaryBeforePhotos = document.getElementById('summaryBeforePhotos');
-        const summaryNumberAfter = document.getElementById('summaryNumberAfter');
-        const summaryZoneAfter = document.getElementById('summaryZoneAfter');
-        const summaryAfterPhotos = document.getElementById('summaryAfterPhotos');
-        
-        // Éléments de progression
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const step1Label = document.getElementById('step1Label');
-        const step2Label = document.getElementById('step2Label');
 
         // Données de localisation
         const sampleLocations = [
@@ -1224,7 +1162,6 @@
             {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
         ];
 
-        // Variables de localisation courante
         let currentLocation = {
             lat: 33.603016,
             lng: -7.636873,
@@ -1233,8 +1170,104 @@
             time: ""
         };
 
+        // ========== FONCTIONS FIREBASE ==========
+        async function initializeFirebaseData() {
+            try {
+                const usersSnapshot = await database.ref('users').once('value');
+                
+                if (!usersSnapshot.exists()) {
+                    await createDefaultData();
+                }
+                
+                await loadAllData();
+                
+                document.getElementById('loadingOverlay').style.display = 'none';
+                showNotification("Système connecté avec succès", "success");
+                updateStatusBar("Système prêt");
+                
+            } catch (error) {
+                console.error('Erreur Firebase:', error);
+                showNotification("Erreur de connexion à la base de données", "error");
+                document.getElementById('loadingOverlay').style.display = 'none';
+            }
+        }
+
+        async function createDefaultData() {
+            const defaultUsers = {
+                admin: {
+                    password: "admin123",
+                    role: "admin",
+                    name: "Superviseur Principal",
+                    assignedAreas: []
+                }
+            };
+
+            for (let i = 1; i <= 11; i++) {
+                defaultUsers[`user${i}`] = {
+                    password: "pass123",
+                    role: "employee",
+                    name: `Employé ${i}`,
+                    assignedAreas: []
+                };
+            }
+
+            await database.ref('users').set(defaultUsers);
+            await database.ref('assignedAreas').set([]);
+            await database.ref('zoneReports').set({});
+            
+            console.log("Données par défaut créées dans Firebase");
+        }
+
+        async function loadAllData() {
+            try {
+                const [usersSnapshot, areasSnapshot, reportsSnapshot] = await Promise.all([
+                    database.ref('users').once('value'),
+                    database.ref('assignedAreas').once('value'),
+                    database.ref('zoneReports').once('value')
+                ]);
+                
+                usersData = usersSnapshot.val() || {};
+                assignedAreas = areasSnapshot.val() || [];
+                zoneReports = reportsSnapshot.val() || {};
+                
+                console.log("Données chargées depuis Firebase");
+                
+            } catch (error) {
+                console.error('Erreur de chargement des données:', error);
+                throw error;
+            }
+        }
+
+        async function saveUsersData() {
+            try {
+                await database.ref('users').set(usersData);
+            } catch (error) {
+                console.error('Erreur de sauvegarde des utilisateurs:', error);
+                showNotification("Erreur de sauvegarde", "error");
+            }
+        }
+
+        async function saveAssignedAreas() {
+            try {
+                await database.ref('assignedAreas').set(assignedAreas);
+            } catch (error) {
+                console.error('Erreur de sauvegarde des zones:', error);
+                showNotification("Erreur de sauvegarde", "error");
+            }
+        }
+
+        async function saveZoneReports() {
+            try {
+                await database.ref('zoneReports').set(zoneReports);
+            } catch (error) {
+                console.error('Erreur de sauvegarde des rapports:', error);
+                showNotification("Erreur de sauvegarde", "error");
+            }
+        }
+
         // ========== FONCTIONS UTILITAIRES ==========
         function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.style.background = type === 'success' ? '#2ea043' : '#ff6b6b';
             notification.style.display = 'block';
@@ -1242,6 +1275,13 @@
             setTimeout(() => {
                 notification.style.display = 'none';
             }, 3000);
+        }
+
+        function updateStatusBar(message) {
+            const statusBar = document.getElementById('statusBar');
+            if (statusBar) {
+                statusBar.textContent = `Système NoteCam ● ${message} ●`;
+            }
         }
 
         function formatDate(dateString) {
@@ -1264,10 +1304,6 @@
             return `${day}/${month}/${year} ${hours}:${minutes}`;
         }
 
-        function updateStatusBar(message) {
-            statusBar.textContent = `Système NoteCam ● ${message} ●`;
-        }
-
         function updateLocationInfo() {
             const randomIndex = Math.floor(Math.random() * sampleLocations.length);
             const location = sampleLocations[randomIndex];
@@ -1287,19 +1323,16 @@
         // ========== GESTION AUTOMATIQUE DE LA CAMÉRA ==========
         async function activateCameraAutomatically() {
             try {
-                cameraStatus.innerHTML = `
+                document.getElementById('cameraStatus').innerHTML = `
                     <div class="camera-icon">
                         <i class="fas fa-video"></i>
                     </div>
                     <div class="camera-text">Activation automatique de la caméra...</div>
                 `;
                 
-                // Désactiver le bouton manuel
-                toggleCameraBtn.style.display = 'none';
-                
+                document.getElementById('toggleCamera').style.display = 'none';
                 updateStatusBar("Activation automatique de la caméra...");
                 
-                // Demander l'accès à la caméra
                 videoStream = await navigator.mediaDevices.getUserMedia({
                     video: {
                         width: { ideal: 1280 },
@@ -1311,9 +1344,8 @@
                 
                 isCameraActive = true;
                 
-                // Mettre à jour l'interface
-                cameraStatus.classList.add('active');
-                cameraStatus.innerHTML = `
+                document.getElementById('cameraStatus').classList.add('active');
+                document.getElementById('cameraStatus').innerHTML = `
                     <div class="camera-icon">
                         <i class="fas fa-video"></i>
                     </div>
@@ -1326,11 +1358,10 @@
             } catch (error) {
                 console.error('Erreur d\'activation automatique de la caméra :', error);
                 
-                // En cas d'erreur, montrer le bouton manuel
-                toggleCameraBtn.style.display = 'block';
-                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer manuellement la caméra';
+                document.getElementById('toggleCamera').style.display = 'block';
+                document.getElementById('toggleCamera').innerHTML = '<i class="fas fa-video"></i> Activer manuellement la caméra';
                 
-                cameraStatus.innerHTML = `
+                document.getElementById('cameraStatus').innerHTML = `
                     <div class="camera-icon" style="color: #ff6b6b;">
                         <i class="fas fa-video-slash"></i>
                     </div>
@@ -1342,7 +1373,6 @@
             }
         }
 
-        // Fonction manuelle de secours
         async function toggleCameraManually() {
             if (!isCameraActive) {
                 try {
@@ -1358,9 +1388,9 @@
                     });
                     
                     isCameraActive = true;
-                    toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash"></i> Désactiver la caméra';
-                    cameraStatus.classList.add('active');
-                    cameraStatus.innerHTML = `
+                    document.getElementById('toggleCamera').innerHTML = '<i class="fas fa-video-slash"></i> Désactiver la caméra';
+                    document.getElementById('cameraStatus').classList.add('active');
+                    document.getElementById('cameraStatus').innerHTML = `
                         <div class="camera-icon">
                             <i class="fas fa-video"></i>
                         </div>
@@ -1383,9 +1413,9 @@
                 }
                 
                 isCameraActive = false;
-                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
-                cameraStatus.classList.remove('active');
-                cameraStatus.innerHTML = `
+                document.getElementById('toggleCamera').innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
+                document.getElementById('cameraStatus').classList.remove('active');
+                document.getElementById('cameraStatus').innerHTML = `
                     <div class="camera-icon">
                         <i class="fas fa-video-slash"></i>
                     </div>
@@ -1399,31 +1429,17 @@
 
         // ========== INITIALISATION ==========
         function initializeApp() {
-            loadFromLocalStorage();
-            updateStatusBar("Prêt à l'utilisation");
+            updateStatusBar("Connexion à la base de données...");
+            
+            initializeFirebaseData();
             updateLocationInfo();
-            
-            // Initialiser les compteurs
-            updateCounters();
-            
-            // ✅ تحديث قائمة الموظفين مباشرة عند التهيئة
-            updateEmployeeSelect();
-            
-            // Configurer les boutons de nombre
             setupNumberButtons();
-            
-            // Configurer les boîtes de photos
             setupPhotoBoxes();
             
-            // Écouteurs d'événements
-            toggleCameraBtn.addEventListener('click', toggleCameraManually);
-            clearPhotosBtn.addEventListener('click', clearAllPhotos);
-            refreshLocationBtn.addEventListener('click', updateLocationInfo);
+            document.getElementById('toggleCamera').addEventListener('click', toggleCameraManually);
+            document.getElementById('clearPhotos').addEventListener('click', clearAllPhotos);
+            document.getElementById('refreshLocation').addEventListener('click', updateLocationInfo);
             
-            // Vérifier l'utilisateur connecté
-            checkLoggedInUser();
-            
-            // Mettre à jour l'état initial
             updateStepDisplay();
         }
 
@@ -1439,7 +1455,6 @@
         function selectNumber(number) {
             selectedNumber = number;
             
-            // Mettre à jour l'affichage
             document.querySelectorAll('.number-btn').forEach(btn => {
                 if (btn.getAttribute('data-number') === number) {
                     btn.classList.add('selected');
@@ -1448,29 +1463,25 @@
                 }
             });
             
-            selectedNumberDisplay.textContent = number;
-            statusNumber.textContent = number;
-            statusNumberAfter.textContent = number;
-            summaryNumber.textContent = number;
-            summaryNumberAfter.textContent = number;
+            document.getElementById('selectedNumberDisplay').textContent = number;
+            document.getElementById('statusNumber').textContent = number;
+            document.getElementById('statusNumberAfter').textContent = number;
+            document.getElementById('summaryNumber').textContent = number;
+            document.getElementById('summaryNumberAfter').textContent = number;
             
-            // Vérifier si on peut envoyer les photos AVANT
             checkSendBeforeStatus();
-            
             updateStatusBar(`Nombre sélectionné : ${number}`);
         }
 
         function setupPhotoBoxes() {
-            // Créer 5 boîtes pour les photos AVANT
             for (let i = 1; i <= 5; i++) {
                 const photoBox = createPhotoBox(i, 'before');
-                photoBoxesContainer.appendChild(photoBox);
+                document.getElementById('photoBoxesContainer').appendChild(photoBox);
             }
             
-            // Créer 5 boîtes pour les photos APRÈS
             for (let i = 1; i <= 5; i++) {
                 const photoBox = createPhotoBox(i, 'after');
-                afterPhotoBoxesContainer.appendChild(photoBox);
+                document.getElementById('afterPhotoBoxesContainer').appendChild(photoBox);
             }
         }
 
@@ -1499,7 +1510,6 @@
                 return;
             }
             
-            // Vérifier si on est dans la bonne étape
             if (type === 'before' && currentStep !== 1) {
                 alert("Vous devez d'abord envoyer les photos AVANT avant de capturer plus de photos");
                 return;
@@ -1511,17 +1521,14 @@
             }
             
             try {
-                // Effet flash
-                captureFlash.style.animation = 'captureFlash 300ms ease-out';
+                document.getElementById('captureFlash').style.animation = 'captureFlash 300ms ease-out';
                 setTimeout(() => {
-                    captureFlash.style.animation = '';
+                    document.getElementById('captureFlash').style.animation = '';
                 }, 300);
                 
-                // Créer un élément vidéo temporaire
                 const video = document.createElement('video');
                 video.srcObject = videoStream;
                 
-                // Attendre que la vidéo soit prête
                 await new Promise((resolve) => {
                     video.onloadedmetadata = () => {
                         video.play();
@@ -1529,23 +1536,17 @@
                     };
                 });
                 
-                // Créer un canvas pour capturer l'image
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
                 const context = canvas.getContext('2d');
                 
-                // Dessiner la vidéo sur le canvas
                 context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                
-                // Ajouter les informations géographiques
                 addInfoToImage(context, canvas.width, canvas.height);
                 
-                // Convertir en URL
                 canvas.toBlob((blob) => {
                     const imageUrl = URL.createObjectURL(blob);
                     
-                    // Stocker la photo
                     if (type === 'before') {
                         beforePhotos[index] = {
                             url: imageUrl,
@@ -1564,15 +1565,12 @@
                         };
                     }
                     
-                    // Mettre à jour l'affichage
                     const photoBox = document.querySelector(`.photo-box[data-index="${index}"][data-type="${type}"]`);
                     photoBox.classList.add('captured');
                     const preview = photoBox.querySelector('.photo-preview');
                     preview.src = imageUrl;
                     
-                    // Mettre à jour le compteur
                     updatePhotoCount(type);
-                    
                     updateStatusBar(`Photo ${type} ${index + 1} capturée`);
                     
                 }, 'image/jpeg', 0.9);
@@ -1586,26 +1584,21 @@
         function addInfoToImage(context, width, height) {
             context.save();
             
-            // Paramètres exacts
             const lineHeight = 16;
             const totalHeight = lineHeight * 6 + 8;
             const boxWidth = width * 0.18;
             const boxX = 2;
             const boxY = height - totalHeight - 2;
             
-            // Fond blanc semi-transparent
             context.fillStyle = 'rgba(255, 255, 255, 0.5)';
             context.fillRect(boxX, boxY, boxWidth, totalHeight);
             
-            // Police et couleur du texte
             context.font = 'bold 14px "Courier New", monospace';
             context.fillStyle = '#000000';
             context.textAlign = 'left';
             context.textBaseline = 'top';
             
             const startY = boxY + 4;
-            
-            // Informations à afficher
             const noteCode = selectedArea ? selectedArea.code : "ZN000";
             const infoLines = [
                 `Latitude : ${currentLocation.lat.toFixed(6)}`,
@@ -1616,17 +1609,14 @@
                 `Note : ${noteCode}`
             ];
             
-            // Dessiner chaque ligne
             infoLines.forEach((line, i) => {
                 context.fillText(line, boxX + 5, startY + (i * lineHeight));
             });
             
-            // Ajouter "Powered by Notecam"
             context.textAlign = 'right';
             context.font = '900 16px "Arial Black", sans-serif';
             context.fillStyle = '#ff0000';
             
-            // Ombre
             context.shadowColor = 'rgba(0, 0, 0, 0.7)';
             context.shadowBlur = 2;
             context.shadowOffsetX = 1;
@@ -1640,27 +1630,27 @@
         function updatePhotoCount(type) {
             if (type === 'before') {
                 const beforeCount = beforePhotos.filter(p => p !== null).length;
-                beforePhotosCount.textContent = `${beforeCount}/5`;
-                statusBefore.textContent = `${beforeCount}/5`;
-                summaryBeforePhotos.textContent = `${beforeCount}/5`;
+                document.getElementById('beforePhotosCount').textContent = `${beforeCount}/5`;
+                document.getElementById('statusBefore').textContent = `${beforeCount}/5`;
+                document.getElementById('summaryBeforePhotos').textContent = `${beforeCount}/5`;
                 
                 if (beforeCount === 5) {
-                    statusBefore.classList.add('completed');
+                    document.getElementById('statusBefore').classList.add('completed');
                 } else {
-                    statusBefore.classList.remove('completed');
+                    document.getElementById('statusBefore').classList.remove('completed');
                 }
                 
                 checkSendBeforeStatus();
             } else {
                 const afterCount = afterPhotos.filter(p => p !== null).length;
-                afterPhotosCount.textContent = `${afterCount}/5`;
-                statusAfter.textContent = `${afterCount}/5`;
-                summaryAfterPhotos.textContent = `${afterCount}/5`;
+                document.getElementById('afterPhotosCount').textContent = `${afterCount}/5`;
+                document.getElementById('statusAfter').textContent = `${afterCount}/5`;
+                document.getElementById('summaryAfterPhotos').textContent = `${afterCount}/5`;
                 
                 if (afterCount === 5) {
-                    statusAfter.classList.add('completed');
+                    document.getElementById('statusAfter').classList.add('completed');
                 } else {
-                    statusAfter.classList.remove('completed');
+                    document.getElementById('statusAfter').classList.remove('completed');
                 }
                 
                 checkSendAfterStatus();
@@ -1675,7 +1665,6 @@
             beforePhotos = [null, null, null, null, null];
             afterPhotos = [null, null, null, null, null];
             
-            // Réinitialiser les boîtes
             document.querySelectorAll('.photo-box').forEach(box => {
                 box.classList.remove('captured');
                 const preview = box.querySelector('.photo-preview');
@@ -1687,7 +1676,6 @@
             updatePhotoCount('before');
             updatePhotoCount('after');
             
-            // Réinitialiser les boutons
             checkSendBeforeStatus();
             checkSendAfterStatus();
             
@@ -1701,7 +1689,7 @@
                           selectedArea !== null && 
                           beforeCount === 5;
             
-            sendBeforeBtn.disabled = !canSend;
+            document.getElementById('sendBeforeBtn').disabled = !canSend;
             return canSend;
         }
 
@@ -1709,30 +1697,30 @@
             const afterCount = afterPhotos.filter(p => p !== null).length;
             const canSend = afterCount === 5;
             
-            sendAfterBtn.disabled = !canSend;
+            document.getElementById('sendAfterBtn').disabled = !canSend;
             return canSend;
         }
 
         // ========== GESTION DES ÉTAPES ==========
         function updateStepDisplay() {
             if (currentStep === 1) {
-                step1.classList.add('active');
-                step2.classList.remove('active');
-                step1Label.style.fontWeight = '700';
-                step2Label.style.fontWeight = '400';
+                document.getElementById('step1').classList.add('active');
+                document.getElementById('step2').classList.remove('active');
+                document.getElementById('step1Label').style.fontWeight = '700';
+                document.getElementById('step2Label').style.fontWeight = '400';
             } else {
-                step1.classList.remove('active');
-                step1.classList.add('completed');
-                step2.classList.add('active');
-                step1Label.style.fontWeight = '400';
-                step2Label.style.fontWeight = '700';
+                document.getElementById('step1').classList.remove('active');
+                document.getElementById('step1').classList.add('completed');
+                document.getElementById('step2').classList.add('active');
+                document.getElementById('step1Label').style.fontWeight = '400';
+                document.getElementById('step2Label').style.fontWeight = '700';
             }
             
             if (selectedArea) {
-                statusZone.textContent = selectedArea.name;
-                statusZoneAfter.textContent = selectedArea.name;
-                summaryZone.textContent = selectedArea.name;
-                summaryZoneAfter.textContent = selectedArea.name;
+                document.getElementById('statusZone').textContent = selectedArea.name;
+                document.getElementById('statusZoneAfter').textContent = selectedArea.name;
+                document.getElementById('summaryZone').textContent = selectedArea.name;
+                document.getElementById('summaryZoneAfter').textContent = selectedArea.name;
             }
         }
 
@@ -1742,7 +1730,6 @@
                 return;
             }
             
-            // Créer rapport temporaire
             tempReport = {
                 id: Date.now(),
                 employee: currentUser.username,
@@ -1759,12 +1746,10 @@
             
             localStorage.setItem('tempReport', JSON.stringify(tempReport));
             
-            // Masquer AVANT, montrer APRÈS
-            beforePhotosContainer.style.display = 'none';
-            sendBeforeContainer.style.display = 'none';
-            apresButtonContainer.style.display = 'block';
+            document.getElementById('beforePhotosContainer').style.display = 'none';
+            document.getElementById('sendBeforeContainer').style.display = 'none';
+            document.getElementById('apresButtonContainer').style.display = 'block';
             
-            // Désactiver modifications
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.disabled = true;
             });
@@ -1778,15 +1763,15 @@
         }
 
         function showAfterPhotos() {
-            apresButtonContainer.style.display = 'none';
-            afterPhotosContainer.style.display = 'block';
-            sendAfterContainer.style.display = 'block';
+            document.getElementById('apresButtonContainer').style.display = 'none';
+            document.getElementById('afterPhotosContainer').style.display = 'block';
+            document.getElementById('sendAfterContainer').style.display = 'block';
             
             showNotification("Prêt à capturer les photos APRÈS", "success");
             updateStatusBar("Prêt à capturer les photos APRÈS");
         }
 
-        function sendAfterPhotos() {
+        async function sendAfterPhotos() {
             if (!checkSendAfterStatus()) {
                 alert("Veuillez capturer les 5 photos APRÈS avant d'envoyer");
                 return;
@@ -1797,7 +1782,6 @@
                 return;
             }
             
-            // Créer rapport complet
             const report = {
                 id: tempReport.id,
                 employee: tempReport.employee,
@@ -1813,7 +1797,6 @@
                 status: 'complete'
             };
             
-            // Ajouter aux rapports
             const zoneCode = selectedArea.code;
             if (!zoneReports[zoneCode]) {
                 zoneReports[zoneCode] = {
@@ -1825,7 +1808,6 @@
             
             zoneReports[zoneCode].reports.push(report);
             
-            // Ajouter photos
             report.beforePhotos.forEach((photo, index) => {
                 zoneReports[zoneCode].photos.push({
                     type: 'before',
@@ -1846,560 +1828,18 @@
                 });
             });
             
-            saveToLocalStorage();
-            
-            // Générer fichier
+            await saveZoneReports();
             generateZoneFile(zoneCode);
             
-            // Supprimer temporaire
             tempReport = null;
             localStorage.removeItem('tempReport');
-            
-            // Réinitialiser
             resetForm();
-            
-            // Notifier superviseur
-            notifySupervisor(report);
             
             showNotification("Rapport complet envoyé avec succès !", "success");
             updateStatusBar("Rapport complet envoyé et fichier généré");
-            
             updateCounters();
         }
 
-        function notifySupervisor(report) {
-            console.log("📢 Notification au superviseur :", report);
-            
-            if (adminPanel.style.display === 'block') {
-                displayMiniReports();
-            }
-        }
-
-        function resetForm() {
-            selectedNumber = null;
-            beforePhotos = [null, null, null, null, null];
-            afterPhotos = [null, null, null, null, null];
-            currentStep = 1;
-            
-            // Réinitialiser interface
-            document.querySelectorAll('.number-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                btn.disabled = false;
-            });
-            
-            document.getElementById('areaSelect').disabled = false;
-            selectedNumberDisplay.textContent = "Aucun";
-            statusNumber.textContent = "-";
-            statusNumberAfter.textContent = "-";
-            summaryNumber.textContent = "-";
-            summaryNumberAfter.textContent = "-";
-            
-            // Réinitialiser photos
-            document.querySelectorAll('.photo-box').forEach(box => {
-                box.classList.remove('captured');
-                const preview = box.querySelector('.photo-preview');
-                if (preview) {
-                    preview.src = '';
-                }
-            });
-            
-            // Réinitialiser compteurs
-            beforePhotosCount.textContent = "0/5";
-            afterPhotosCount.textContent = "0/5";
-            statusBefore.textContent = "0/5";
-            statusAfter.textContent = "0/5";
-            summaryBeforePhotos.textContent = "0/5";
-            summaryAfterPhotos.textContent = "0/5";
-            
-            // Réinitialiser styles
-            statusBefore.classList.remove('completed');
-            statusAfter.classList.remove('completed');
-            
-            // Réafficher AVANT
-            beforePhotosContainer.style.display = 'block';
-            afterPhotosContainer.style.display = 'none';
-            sendBeforeContainer.style.display = 'block';
-            sendAfterContainer.style.display = 'none';
-            apresButtonContainer.style.display = 'none';
-            
-            // Réinitialiser boutons
-            sendBeforeBtn.disabled = true;
-            sendAfterBtn.disabled = true;
-            
-            updateStepDisplay();
-            
-            showNotification("Formulaire réinitialisé - Prêt pour un nouveau rapport", "success");
-            updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
-        }
-
-        // ========== GESTION DES DONNÉES ==========
-        function loadFromLocalStorage() {
-            try {
-                const savedData = localStorage.getItem('noteCamSystemData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    usersData = {...defaultUsersData, ...data.usersData};
-                    assignedAreas = data.assignedAreas || assignedAreas;
-                    zoneReports = data.zoneReports || {};
-                }
-                
-                // Charger rapport temporaire
-                const savedTempReport = localStorage.getItem('tempReport');
-                if (savedTempReport) {
-                    try {
-                        tempReport = JSON.parse(savedTempReport);
-                        if (tempReport) {
-                            currentStep = 2;
-                            selectedNumber = tempReport.number;
-                            selectedArea = assignedAreas.find(area => area.code === tempReport.areaCode);
-                        }
-                    } catch (e) {
-                        console.error('Erreur de chargement du rapport temporaire:', e);
-                    }
-                }
-                
-                const savedUser = localStorage.getItem('currentUser');
-                if (savedUser) {
-                    currentUser = JSON.parse(savedUser);
-                }
-            } catch (error) {
-                console.error('Erreur de chargement des données :', error);
-            }
-        }
-
-        function saveToLocalStorage() {
-            const data = {
-                usersData,
-                assignedAreas,
-                zoneReports
-            };
-            localStorage.setItem('noteCamSystemData', JSON.stringify(data));
-        }
-
-        // ========== AUTHENTIFICATION ==========
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (!username || !password) {
-                alert("Veuillez saisir le nom d'utilisateur et le mot de passe");
-                return;
-            }
-            
-            const user = usersData[username];
-            
-            if (user && user.password === password) {
-                currentUser = {username, ...user};
-                updateStatusBar(`Bienvenue ${user.name}`);
-                
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                loginPage.style.display = 'none';
-                
-                if (user.role === 'admin') {
-                    adminPanel.style.display = 'block';
-                    employeePanel.style.display = 'none';
-                    reportsPanel.style.display = 'none';
-                    updateAdminDashboard();
-                } else {
-                    adminPanel.style.display = 'none';
-                    employeePanel.style.display = 'block';
-                    reportsPanel.style.display = 'none';
-                    employeeName.textContent = `Employé : ${user.name}`;
-                    loadEmployeeAreas();
-                    populateAreaSelect();
-                    
-                    // Activer automatiquement la caméra pour les employés
-                    setTimeout(() => {
-                        activateCameraAutomatically();
-                    }, 1000);
-                    
-                    // Si rapport temporaire existe
-                    if (tempReport) {
-                        beforePhotosContainer.style.display = 'none';
-                        sendBeforeContainer.style.display = 'none';
-                        afterPhotosContainer.style.display = 'block';
-                        sendAfterContainer.style.display = 'block';
-                        currentStep = 2;
-                        updateStepDisplay();
-                    }
-                }
-                
-                showNotification(`Connexion réussie - Bienvenue ${user.name}`, "success");
-                
-            } else {
-                showNotification("Nom d'utilisateur ou mot de passe incorrect", "error");
-                alert("Nom d'utilisateur ou mot de passe incorrect");
-            }
-        }
-
-        function checkLoggedInUser() {
-            if (currentUser) {
-                loginPage.style.display = 'none';
-                
-                if (currentUser.role === 'admin') {
-                    adminPanel.style.display = 'block';
-                    updateAdminDashboard();
-                } else {
-                    employeePanel.style.display = 'block';
-                    employeeName.textContent = `Employé : ${currentUser.name}`;
-                    loadEmployeeAreas();
-                    populateAreaSelect();
-                    
-                    // Activer automatiquement la caméra pour les employés
-                    setTimeout(() => {
-                        activateCameraAutomatically();
-                    }, 1000);
-                    
-                    if (tempReport) {
-                        beforePhotosContainer.style.display = 'none';
-                        sendBeforeContainer.style.display = 'none';
-                        afterPhotosContainer.style.display = 'block';
-                        sendAfterContainer.style.display = 'block';
-                        currentStep = 2;
-                        updateStepDisplay();
-                    }
-                }
-                
-                updateStatusBar(`Bienvenue ${currentUser.name}`);
-            }
-        }
-
-        function logout() {
-            // Arrêter la caméra si active
-            if (isCameraActive && videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-                isCameraActive = false;
-            }
-            
-            currentUser = null;
-            selectedArea = null;
-            selectedNumber = null;
-            
-            loginPage.style.display = 'block';
-            adminPanel.style.display = 'none';
-            employeePanel.style.display = 'none';
-            reportsPanel.style.display = 'none';
-            
-            localStorage.removeItem('currentUser');
-            showNotification("Déconnexion réussie", "success");
-            updateStatusBar("Déconnexion réussie");
-        }
-
-        // ========== GESTION DES EMPLOYÉS ==========
-        function addEmployee() {
-            const username = document.getElementById('empUsername').value;
-            const password = document.getElementById('empPassword').value;
-            const name = document.getElementById('empName').value;
-            
-            if (!username || !password || !name) {
-                alert("Veuillez remplir tous les champs");
-                return;
-            }
-            
-            if (usersData[username]) {
-                alert("Le nom d'utilisateur existe déjà");
-                return;
-            }
-            
-            usersData[username] = {
-                password: password,
-                role: "employee",
-                name: name,
-                assignedAreas: []
-            };
-            
-            updateEmployeeSelect();
-            displayEmployees();
-            updateCounters();
-            saveToLocalStorage();
-            
-            document.getElementById('empUsername').value = '';
-            document.getElementById('empPassword').value = '';
-            document.getElementById('empName').value = '';
-            
-            showNotification("Employé ajouté avec succès", "success");
-            alert("Employé ajouté avec succès");
-        }
-
-        function displayEmployees() {
-            employeesList.innerHTML = '';
-            
-            let employeeCount = 0;
-            
-            // عرض جميع الموظفين من usersData
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    employeeCount++;
-                    const employeeCard = document.createElement('div');
-                    employeeCard.className = 'employee-card';
-                    
-                    const areasCount = (data.assignedAreas || []).length;
-                    
-                    employeeCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
-                                    ${data.name}
-                                </div>
-                                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
-                                    Nom d'utilisateur : ${username}
-                                </div>
-                                <div style="display: flex; gap: 15px;">
-                                    <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4;">
-                                        <i class="fas fa-map-marker-alt"></i> ${areasCount} zones
-                                    </span>
-                                </div>
-                            </div>
-                            <button class="control-btn danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEmployee('${username}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    `;
-                    
-                    employeesList.appendChild(employeeCard);
-                }
-            });
-            
-            if (employeeCount === 0) {
-                employeesList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucun employé enregistré</p>';
-            }
-        }
-
-        function deleteEmployee(username) {
-            if (!confirm(`Voulez-vous vraiment supprimer l'employé ${username} ?`)) {
-                return;
-            }
-            
-            if (usersData[username]) {
-                delete usersData[username];
-            }
-            
-            assignedAreas = assignedAreas.filter(area => area.employee !== username);
-            
-            updateEmployeeSelect();
-            displayEmployees();
-            updateCounters();
-            saveToLocalStorage();
-            
-            showNotification("Employé supprimé avec succès", "success");
-            alert("Employé supprimé avec succès");
-        }
-
-        // ========== GESTION DES ZONES ==========
-        function assignArea() {
-            const employeeUsername = employeeSelect.value;
-            const areaName = document.getElementById('areaName').value;
-            const areaCode = document.getElementById('areaCode').value;
-            
-            if (!employeeUsername || !areaName || !areaCode) {
-                alert("Veuillez remplir tous les champs");
-                return;
-            }
-            
-            if (assignedAreas.some(area => area.code === areaCode)) {
-                alert("Ce code de zone existe déjà");
-                return;
-            }
-            
-            const area = {
-                id: Date.now(),
-                employee: employeeUsername,
-                name: areaName,
-                code: areaCode,
-                date: new Date().toISOString(),
-                isActive: true
-            };
-            
-            assignedAreas.push(area);
-            
-            if (usersData[employeeUsername]) {
-                if (!usersData[employeeUsername].assignedAreas) {
-                    usersData[employeeUsername].assignedAreas = [];
-                }
-                usersData[employeeUsername].assignedAreas.push(area);
-            }
-            
-            if (!zoneReports[areaCode]) {
-                zoneReports[areaCode] = {
-                    name: areaName,
-                    reports: [],
-                    photos: []
-                };
-            }
-            
-            saveToLocalStorage();
-            
-            displayAssignedAreasList();
-            updateCounters();
-            
-            document.getElementById('areaName').value = '';
-            document.getElementById('areaCode').value = '';
-            
-            showNotification("Zone attribuée avec succès", "success");
-            alert("Zone attribuée avec succès");
-        }
-
-        function loadEmployeeAreas() {
-            if (!currentUser || !currentUser.assignedAreas) {
-                selectedAreaInfo.style.display = 'none';
-                return;
-            }
-            
-            const areas = currentUser.assignedAreas;
-            if (areas.length > 0) {
-                if (!selectedArea) {
-                    selectArea(areas[0]);
-                }
-            } else {
-                selectedAreaInfo.style.display = 'none';
-            }
-        }
-
-        function populateAreaSelect() {
-            if (!currentUser || !currentUser.assignedAreas) {
-                areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
-                return;
-            }
-            
-            areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
-            
-            const areas = currentUser.assignedAreas;
-            areas.forEach(area => {
-                const option = document.createElement('option');
-                option.value = area.id;
-                option.textContent = `${area.name} (${area.code})`;
-                areaSelect.appendChild(option);
-            });
-            
-            areaSelect.onchange = function() {
-                const areaId = parseInt(this.value);
-                if (areaId) {
-                    const area = currentUser.assignedAreas.find(a => a.id === areaId);
-                    if (area) {
-                        selectArea(area);
-                    }
-                }
-            };
-        }
-
-        function selectArea(area) {
-            selectedArea = area;
-            selectedAreaName.textContent = area.name;
-            selectedAreaCode.textContent = area.code;
-            areaAssignedDate.textContent = formatDate(area.date);
-            selectedAreaInfo.style.display = 'block';
-            
-            statusZone.textContent = area.name;
-            statusZoneAfter.textContent = area.name;
-            summaryZone.textContent = area.name;
-            summaryZoneAfter.textContent = area.name;
-            
-            checkSendBeforeStatus();
-            
-            updateStatusBar(`Zone sélectionnée : ${area.name}`);
-        }
-
-        function displayAssignedAreasList() {
-            if (assignedAreas.length === 0) {
-                assignedAreasList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucune zone attribuée</p>';
-                return;
-            }
-            
-            const areasByEmployee = {};
-            assignedAreas.forEach(area => {
-                if (!areasByEmployee[area.employee]) {
-                    areasByEmployee[area.employee] = [];
-                }
-                areasByEmployee[area.employee].push(area);
-            });
-            
-            assignedAreasList.innerHTML = '';
-            
-            Object.keys(areasByEmployee).forEach(employeeUsername => {
-                const employee = usersData[employeeUsername];
-                if (!employee) return;
-                
-                const employeeSection = document.createElement('div');
-                employeeSection.className = 'employee-card';
-                
-                let areasHTML = '';
-                areasByEmployee[employeeUsername].forEach(area => {
-                    const reportCount = zoneReports[area.code]?.reports?.length || 0;
-                    
-                    areasHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #ffffff; border-radius: 8px; margin: 5px 0; border: 1px solid #e1e8ed;">
-                            <div>
-                                <div style="font-weight: 700; color: #333;">${area.name}</div>
-                                <div style="font-size: 12px; color: #666;">Code: ${area.code} • ${formatDate(area.date)}</div>
-                            </div>
-                            <div style="display: flex; gap: 5px; align-items: center;">
-                                <span style="background: #f0fff4; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #2ea043;">
-                                    ${reportCount} rapports
-                                </span>
-                                <button class="control-btn danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteArea(${area.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                employeeSection.innerHTML = `
-                    <div style="color: #1a5fb4; font-weight: 700; margin-bottom: 10px; font-size: 16px;">
-                        ${employee.name} <span style="font-size: 12px; color: #666;">(${employeeUsername})</span>
-                    </div>
-                    ${areasHTML}
-                `;
-                
-                assignedAreasList.appendChild(employeeSection);
-            });
-        }
-
-        function deleteArea(areaId) {
-            if (!confirm("Voulez-vous vraiment supprimer cette zone ?")) {
-                return;
-            }
-            
-            const areaIndex = assignedAreas.findIndex(a => a.id === areaId);
-            if (areaIndex === -1) return;
-            
-            const area = assignedAreas[areaIndex];
-            const areaCode = area.code;
-            
-            assignedAreas.splice(areaIndex, 1);
-            
-            if (usersData[area.employee] && usersData[area.employee].assignedAreas) {
-                const userAreaIndex = usersData[area.employee].assignedAreas.findIndex(a => a.id === areaId);
-                if (userAreaIndex !== -1) {
-                    usersData[area.employee].assignedAreas.splice(userAreaIndex, 1);
-                }
-            }
-            
-            if (zoneReports[areaCode]) {
-                delete zoneReports[areaCode];
-            }
-            
-            if (currentUser && currentUser.username === area.employee && selectedArea && selectedArea.id === areaId) {
-                selectedArea = null;
-                selectedAreaInfo.style.display = 'none';
-                if (areaSelect) areaSelect.value = '';
-                statusZone.textContent = "-";
-                statusZoneAfter.textContent = "-";
-                summaryZone.textContent = "-";
-                summaryZoneAfter.textContent = "-";
-            }
-            
-            saveToLocalStorage();
-            displayAssignedAreasList();
-            updateCounters();
-            
-            showNotification("Zone supprimée avec succès", "success");
-            alert("Zone supprimée avec succès");
-        }
-
-        // ========== GESTION DES RAPPORTS ==========
         function generateZoneFile(zoneCode) {
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) return;
@@ -2439,19 +1879,384 @@
             URL.revokeObjectURL(url);
         }
 
-        function viewAllReports() {
-            adminPanel.style.display = 'none';
-            reportsPanel.style.display = 'block';
-            displayFullReports();
+        function resetForm() {
+            selectedNumber = null;
+            beforePhotos = [null, null, null, null, null];
+            afterPhotos = [null, null, null, null, null];
+            currentStep = 1;
+            
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                btn.disabled = false;
+            });
+            
+            document.getElementById('areaSelect').disabled = false;
+            document.getElementById('selectedNumberDisplay').textContent = "Aucun";
+            document.getElementById('statusNumber').textContent = "-";
+            document.getElementById('statusNumberAfter').textContent = "-";
+            document.getElementById('summaryNumber').textContent = "-";
+            document.getElementById('summaryNumberAfter').textContent = "-";
+            
+            document.querySelectorAll('.photo-box').forEach(box => {
+                box.classList.remove('captured');
+                const preview = box.querySelector('.photo-preview');
+                if (preview) {
+                    preview.src = '';
+                }
+            });
+            
+            document.getElementById('beforePhotosCount').textContent = "0/5";
+            document.getElementById('afterPhotosCount').textContent = "0/5";
+            document.getElementById('statusBefore').textContent = "0/5";
+            document.getElementById('statusAfter').textContent = "0/5";
+            document.getElementById('summaryBeforePhotos').textContent = "0/5";
+            document.getElementById('summaryAfterPhotos').textContent = "0/5";
+            
+            document.getElementById('statusBefore').classList.remove('completed');
+            document.getElementById('statusAfter').classList.remove('completed');
+            
+            document.getElementById('beforePhotosContainer').style.display = 'block';
+            document.getElementById('afterPhotosContainer').style.display = 'none';
+            document.getElementById('sendBeforeContainer').style.display = 'block';
+            document.getElementById('sendAfterContainer').style.display = 'none';
+            document.getElementById('apresButtonContainer').style.display = 'none';
+            
+            document.getElementById('sendBeforeBtn').disabled = true;
+            document.getElementById('sendAfterBtn').disabled = true;
+            
+            updateStepDisplay();
+            showNotification("Formulaire réinitialisé - Prêt pour un nouveau rapport", "success");
+            updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
         }
 
-        function backToAdminPanel() {
-            adminPanel.style.display = 'block';
-            reportsPanel.style.display = 'none';
+        // ========== GESTION DES EMPLOYÉS ==========
+        async function addEmployee() {
+            const username = document.getElementById('empUsername').value;
+            const password = document.getElementById('empPassword').value;
+            const name = document.getElementById('empName').value;
+            
+            if (!username || !password || !name) {
+                alert("Veuillez remplir tous les champs");
+                return;
+            }
+            
+            if (usersData[username]) {
+                alert("Le nom d'utilisateur existe déjà");
+                return;
+            }
+            
+            usersData[username] = {
+                password: password,
+                role: "employee",
+                name: name,
+                assignedAreas: []
+            };
+            
+            await saveUsersData();
+            updateEmployeeSelect();
+            displayEmployees();
+            updateCounters();
+            
+            document.getElementById('empUsername').value = '';
+            document.getElementById('empPassword').value = '';
+            document.getElementById('empName').value = '';
+            
+            showNotification("Employé ajouté avec succès", "success");
         }
 
-        function displayFullReports() {
-            reportDetailsContainer.innerHTML = '';
+        async function deleteEmployee(username) {
+            if (!confirm(`Voulez-vous vraiment supprimer l'employé ${username} ?`)) {
+                return;
+            }
+            
+            if (usersData[username]) {
+                delete usersData[username];
+            }
+            
+            assignedAreas = assignedAreas.filter(area => area.employee !== username);
+            
+            await Promise.all([
+                saveUsersData(),
+                saveAssignedAreas()
+            ]);
+            
+            updateEmployeeSelect();
+            displayEmployees();
+            updateCounters();
+            
+            showNotification("Employé supprimé avec succès", "success");
+        }
+
+        // ========== GESTION DES ZONES ==========
+        async function assignArea() {
+            const employeeUsername = document.getElementById('employeeSelect').value;
+            const areaName = document.getElementById('areaName').value;
+            const areaCode = document.getElementById('areaCode').value;
+            
+            if (!employeeUsername || !areaName || !areaCode) {
+                alert("Veuillez remplir tous les champs");
+                return;
+            }
+            
+            if (assignedAreas.some(area => area.code === areaCode)) {
+                alert("Ce code de zone existe déjà");
+                return;
+            }
+            
+            const area = {
+                id: Date.now(),
+                employee: employeeUsername,
+                name: areaName,
+                code: areaCode,
+                date: new Date().toISOString(),
+                isActive: true
+            };
+            
+            assignedAreas.push(area);
+            
+            if (usersData[employeeUsername]) {
+                if (!usersData[employeeUsername].assignedAreas) {
+                    usersData[employeeUsername].assignedAreas = [];
+                }
+                usersData[employeeUsername].assignedAreas.push(area);
+                
+                await Promise.all([
+                    saveAssignedAreas(),
+                    saveUsersData()
+                ]);
+            }
+            
+            if (!zoneReports[areaCode]) {
+                zoneReports[areaCode] = {
+                    name: areaName,
+                    reports: [],
+                    photos: []
+                };
+                await saveZoneReports();
+            }
+            
+            displayAssignedAreasList();
+            updateCounters();
+            
+            document.getElementById('areaName').value = '';
+            document.getElementById('areaCode').value = '';
+            
+            showNotification("Zone attribuée avec succès", "success");
+        }
+
+        async function deleteArea(areaId) {
+            if (!confirm("Voulez-vous vraiment supprimer cette zone ?")) {
+                return;
+            }
+            
+            const areaIndex = assignedAreas.findIndex(a => a.id === areaId);
+            if (areaIndex === -1) return;
+            
+            const area = assignedAreas[areaIndex];
+            const areaCode = area.code;
+            
+            assignedAreas.splice(areaIndex, 1);
+            
+            if (usersData[area.employee] && usersData[area.employee].assignedAreas) {
+                const userAreaIndex = usersData[area.employee].assignedAreas.findIndex(a => a.id === areaId);
+                if (userAreaIndex !== -1) {
+                    usersData[area.employee].assignedAreas.splice(userAreaIndex, 1);
+                }
+            }
+            
+            await Promise.all([
+                saveAssignedAreas(),
+                saveUsersData()
+            ]);
+            
+            showNotification("Zone supprimée avec succès", "success");
+            displayAssignedAreasList();
+            updateCounters();
+        }
+
+        // ========== AUTHENTIFICATION ==========
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                alert("Veuillez saisir le nom d'utilisateur et le mot de passe");
+                return;
+            }
+            
+            const user = usersData[username];
+            
+            if (user && user.password === password) {
+                currentUser = {
+                    username: username,
+                    ...user
+                };
+                
+                updateStatusBar(`Bienvenue ${user.name}`);
+                
+                document.getElementById('loginPage').style.display = 'none';
+                
+                if (user.role === 'admin') {
+                    document.getElementById('adminPanel').style.display = 'block';
+                    document.getElementById('employeePanel').style.display = 'none';
+                    updateAdminDashboard();
+                } else {
+                    document.getElementById('adminPanel').style.display = 'none';
+                    document.getElementById('employeePanel').style.display = 'block';
+                    document.getElementById('employeeName').textContent = `Employé : ${user.name}`;
+                    loadEmployeeAreas();
+                    populateAreaSelect();
+                    
+                    setTimeout(() => {
+                        activateCameraAutomatically();
+                    }, 1000);
+                    
+                    if (tempReport) {
+                        document.getElementById('beforePhotosContainer').style.display = 'none';
+                        document.getElementById('sendBeforeContainer').style.display = 'none';
+                        document.getElementById('afterPhotosContainer').style.display = 'block';
+                        document.getElementById('sendAfterContainer').style.display = 'block';
+                        currentStep = 2;
+                        updateStepDisplay();
+                    }
+                }
+                
+                showNotification(`Connexion réussie - Bienvenue ${user.name}`, "success");
+                
+            } else {
+                showNotification("Nom d'utilisateur ou mot de passe incorrect", "error");
+            }
+        }
+
+        function logout() {
+            if (isCameraActive && videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+                isCameraActive = false;
+            }
+            
+            currentUser = null;
+            selectedArea = null;
+            selectedNumber = null;
+            
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('employeePanel').style.display = 'none';
+            document.getElementById('reportsPanel').style.display = 'none';
+            
+            showNotification("Déconnexion réussie", "success");
+            updateStatusBar("Déconnexion réussie");
+        }
+
+        function loadEmployeeAreas() {
+            if (!currentUser || !usersData[currentUser.username] || !usersData[currentUser.username].assignedAreas) {
+                document.getElementById('selectedAreaInfo').style.display = 'none';
+                return;
+            }
+            
+            const areas = usersData[currentUser.username].assignedAreas;
+            if (areas && areas.length > 0) {
+                if (!selectedArea) {
+                    selectArea(areas[0]);
+                }
+            } else {
+                document.getElementById('selectedAreaInfo').style.display = 'none';
+            }
+        }
+
+        function populateAreaSelect() {
+            if (!currentUser || !usersData[currentUser.username] || !usersData[currentUser.username].assignedAreas) {
+                document.getElementById('areaSelect').innerHTML = '<option value="">Choisissez une zone</option>';
+                return;
+            }
+            
+            const areaSelect = document.getElementById('areaSelect');
+            areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
+            
+            const areas = usersData[currentUser.username].assignedAreas;
+            areas.forEach(area => {
+                const option = document.createElement('option');
+                option.value = area.id;
+                option.textContent = `${area.name} (${area.code})`;
+                areaSelect.appendChild(option);
+            });
+            
+            areaSelect.onchange = function() {
+                const areaId = parseInt(this.value);
+                if (areaId) {
+                    const area = areas.find(a => a.id === areaId);
+                    if (area) {
+                        selectArea(area);
+                    }
+                }
+            };
+        }
+
+        function selectArea(area) {
+            selectedArea = area;
+            document.getElementById('selectedAreaName').textContent = area.name;
+            document.getElementById('selectedAreaCode').textContent = area.code;
+            document.getElementById('areaAssignedDate').textContent = formatDate(area.date);
+            document.getElementById('selectedAreaInfo').style.display = 'block';
+            
+            document.getElementById('statusZone').textContent = area.name;
+            document.getElementById('statusZoneAfter').textContent = area.name;
+            document.getElementById('summaryZone').textContent = area.name;
+            document.getElementById('summaryZoneAfter').textContent = area.name;
+            
+            checkSendBeforeStatus();
+            updateStatusBar(`Zone sélectionnée : ${area.name}`);
+        }
+
+        // ========== INTERFACE ADMIN ==========
+        function updateEmployeeSelect() {
+            const employeeSelect = document.getElementById('employeeSelect');
+            if (!employeeSelect) return;
+            
+            employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
+            
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === "employee") {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.textContent = `${data.name} (${username})`;
+                    employeeSelect.appendChild(option);
+                }
+            });
+        }
+
+        function updateAdminDashboard() {
+            displayEmployees();
+            displayAssignedAreasList();
+            displayMiniReports();
+            updateCounters();
+        }
+
+        function updateCounters() {
+            let employeeCount = 0;
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === "employee") {
+                    employeeCount++;
+                }
+            });
+            
+            const employeesCount = document.getElementById('employeesCount');
+            const areasCount = document.getElementById('areasCount');
+            const reportsCount = document.getElementById('reportsCount');
+            
+            if (employeesCount) employeesCount.textContent = employeeCount;
+            if (areasCount) areasCount.textContent = assignedAreas.length;
+            
+            let totalReports = 0;
+            Object.values(zoneReports).forEach(zone => {
+                totalReports += zone.reports.length;
+            });
+            if (reportsCount) reportsCount.textContent = totalReports;
+        }
+
+        function displayMiniReports() {
+            const reportsListMini = document.getElementById('reportsListMini');
+            if (!reportsListMini) return;
             
             let totalReports = 0;
             Object.values(zoneReports).forEach(zone => {
@@ -2459,7 +2264,79 @@
             });
             
             if (totalReports === 0) {
-                reportDetailsContainer.innerHTML = `
+                reportsListMini.innerHTML = `
+                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">
+                        <i class="fas fa-inbox" style="font-size: 48px; color: #e1e8ed; margin-bottom: 15px;"></i>
+                        <h4 style="color: #666; margin-bottom: 10px;">Aucun rapport reçu</h4>
+                        <p style="color: #999; font-size: 14px;">Les rapports apparaîtront ici lorsque les employés les enverront</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let allReports = [];
+            Object.values(zoneReports).forEach(zone => {
+                zone.reports.forEach(report => {
+                    allReports.push({...report, zoneData: zone});
+                });
+            });
+            
+            allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            const recentReports = allReports.slice(0, 5);
+            
+            reportsListMini.innerHTML = '';
+            recentReports.forEach(report => {
+                const beforeCount = report.beforePhotos?.length || 0;
+                const afterCount = report.afterPhotos?.length || 0;
+                
+                const reportCard = document.createElement('div');
+                reportCard.className = 'report-card';
+                reportCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div>
+                            <div style="font-weight: 700; color: #1a5fb4; font-size: 16px;">${report.employeeName}</div>
+                            <div style="font-size: 12px; color: #666;">${formatDate(report.date)}</div>
+                        </div>
+                        <span style="background: #e3f2fd; padding: 5px 12px; border-radius: 15px; font-size: 14px; color: #1a5fb4; font-weight: 700;">
+                            ${report.number}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 15px; font-size: 12px; color: #666; margin-bottom: 10px;">
+                        <span><i class="fas fa-map-marker-alt"></i> ${report.area}</span>
+                        <span><i class="fas fa-images"></i> ${beforeCount + afterCount} photos</span>
+                    </div>
+                    <button class="control-btn primary" style="width: 100%; padding: 8px;" onclick="viewReportDetails('${report.areaCode}', ${report.id})">
+                        <i class="fas fa-eye"></i> Voir le rapport complet
+                    </button>
+                `;
+                reportsListMini.appendChild(reportCard);
+            });
+        }
+
+        function viewAllReports() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('reportsPanel').style.display = 'block';
+            displayFullReports();
+        }
+
+        function backToAdminPanel() {
+            document.getElementById('adminPanel').style.display = 'block';
+            document.getElementById('reportsPanel').style.display = 'none';
+        }
+
+        function displayFullReports() {
+            const container = document.getElementById('reportDetailsContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            let totalReports = 0;
+            Object.values(zoneReports).forEach(zone => {
+                totalReports += zone.reports.length;
+            });
+            
+            if (totalReports === 0) {
+                container.innerHTML = `
                     <div class="employee-card" style="text-align: center; padding: 40px;">
                         <i class="fas fa-file-alt" style="font-size: 48px; color: #e1e8ed; margin-bottom: 20px;"></i>
                         <h3 style="color: #666; margin-bottom: 15px;">Aucun rapport</h3>
@@ -2519,68 +2396,7 @@
                     </div>
                     ${reportsHTML}
                 `;
-                
-                reportDetailsContainer.appendChild(zoneCard);
-            });
-        }
-
-        function displayMiniReports() {
-            reportsListMini.innerHTML = '';
-            
-            let totalReports = 0;
-            Object.values(zoneReports).forEach(zone => {
-                totalReports += zone.reports.length;
-            });
-            
-            if (totalReports === 0) {
-                reportsListMini.innerHTML = `
-                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">
-                        <i class="fas fa-inbox" style="font-size: 48px; color: #e1e8ed; margin-bottom: 15px;"></i>
-                        <h4 style="color: #666; margin-bottom: 10px;">Aucun rapport reçu</h4>
-                        <p style="color: #999; font-size: 14px;">Les rapports apparaîtront ici lorsque les employés les enverront</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let allReports = [];
-            Object.values(zoneReports).forEach(zone => {
-                zone.reports.forEach(report => {
-                    allReports.push({...report, zoneData: zone});
-                });
-            });
-            
-            allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            const recentReports = allReports.slice(0, 5);
-            
-            recentReports.forEach(report => {
-                const beforeCount = report.beforePhotos?.length || 0;
-                const afterCount = report.afterPhotos?.length || 0;
-                
-                const reportCard = document.createElement('div');
-                reportCard.className = 'report-card';
-                
-                reportCard.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div>
-                            <div style="font-weight: 700; color: #1a5fb4; font-size: 16px;">${report.employeeName}</div>
-                            <div style="font-size: 12px; color: #666;">${formatDate(report.date)}</div>
-                        </div>
-                        <span style="background: #e3f2fd; padding: 5px 12px; border-radius: 15px; font-size: 14px; color: #1a5fb4; font-weight: 700;">
-                            ${report.number}
-                        </span>
-                    </div>
-                    <div style="display: flex; gap: 15px; font-size: 12px; color: #666; margin-bottom: 10px;">
-                        <span><i class="fas fa-map-marker-alt"></i> ${report.area}</span>
-                        <span><i class="fas fa-images"></i> ${beforeCount + afterCount} photos</span>
-                    </div>
-                    <button class="control-btn primary" style="width: 100%; padding: 8px;" onclick="viewReportDetails('${report.areaCode}', ${report.id})">
-                        <i class="fas fa-eye"></i> Voir le rapport complet
-                    </button>
-                `;
-                
-                reportsListMini.appendChild(reportCard);
+                container.appendChild(zoneCard);
             });
         }
 
@@ -2692,7 +2508,6 @@
                     </div>
                 </div>
             `;
-            
             document.body.appendChild(modal);
         }
 
@@ -2728,7 +2543,6 @@
             link.href = url;
             link.download = `NoteCam_Rapport_${report.employeeName}_${report.areaCode}_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
             URL.revokeObjectURL(url);
         }
 
@@ -2748,52 +2562,10 @@
             link.href = url;
             link.download = `NoteCam_Export_Complet_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
             URL.revokeObjectURL(url);
             
             showNotification("Toutes les données exportées", "success");
             updateStatusBar("Toutes les données exportées");
-        }
-
-        // ========== INTERFACE ==========
-        function updateEmployeeSelect() {
-            employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
-            
-            // عرض جميع المستخدمين من نوع "employee" من usersData
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    const option = document.createElement('option');
-                    option.value = username;
-                    option.textContent = `${data.name} (${username})`;
-                    employeeSelect.appendChild(option);
-                }
-            });
-        }
-
-        function updateAdminDashboard() {
-            displayEmployees();
-            displayAssignedAreasList();
-            displayMiniReports();
-            updateCounters();
-            updateEmployeeSelect(); // ✅ تم إضافة هذا السطر
-        }
-
-        function updateCounters() {
-            // حساب عدد الموظفين
-            let employeeCount = 0;
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    employeeCount++;
-                }
-            });
-            document.getElementById('employeesCount').textContent = employeeCount;
-            document.getElementById('areasCount').textContent = assignedAreas.length;
-            
-            let totalReports = 0;
-            Object.values(zoneReports).forEach(zone => {
-                totalReports += zone.reports.length;
-            });
-            document.getElementById('reportsCount').textContent = totalReports;
         }
 
         // ========== INITIALISER L'APPLICATION ==========
