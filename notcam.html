@@ -834,7 +834,19 @@
             <input type="password" id="password" class="login-input" placeholder="Mot de passe">
             <button class="login-btn" onclick="login()">Se connecter</button>
             
-            <!-- Pas d'informations de connexion visibles pour la sécurité -->
+            <div style="margin-top: 25px; padding: 15px; background: #f0f8ff; border-radius: 8px; border: 1px solid #e1e8ed;">
+                <h3 style="color: #1a5fb4; font-size: 16px; margin-bottom: 10px;">Utilisateurs disponibles :</h3>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px;">
+                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e1e8ed;">
+                        <strong>Superviseur :</strong><br>
+                        admin / admin123
+                    </div>
+                    <div style="background: #ffffff; padding: 8px; border-radius: 6px; border: 1px solid #e1e8ed;">
+                        <strong>Employés :</strong><br>
+                        user1 à user11 / pass123
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Panneau du superviseur -->
@@ -1120,25 +1132,30 @@
 
     <script>
         // ========== DONNÉES SYSTÈME ==========
-        // Données utilisateurs par défaut
+        // Données utilisateurs par défaut avec 11 employés
         const defaultUsersData = {
             admin: {
                 password: "admin123",
                 role: "admin",
                 name: "Superviseur Principal"
-            },
-            user1: {
-                password: "pass123",
-                role: "employee",
-                name: "Employé Un",
-                assignedAreas: []
             }
         };
 
+        // إضافة 11 مستخدمين (من user1 إلى user11)
+        for (let i = 1; i <= 11; i++) {
+            defaultUsersData[`user${i}`] = {
+                password: "pass123", // نفس كلمة السر للجميع
+                role: "employee",
+                name: `Employé ${i}`,
+                assignedAreas: []
+            };
+        }
+
         let usersData = JSON.parse(JSON.stringify(defaultUsersData));
-        let employees = [
-            {username: "user1", name: "Employé Un"}
-        ];
+        let employees = Object.entries(usersData)
+            .filter(([username, data]) => data.role === "employee")
+            .map(([username, data]) => ({ username, name: data.name }));
+        
         let assignedAreas = [];
         let zoneReports = {};
 
