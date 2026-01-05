@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système NoteCam - Superviseur et Employés</title>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <title>Système NoteCam - Complet</title>
     
     <style>
+        /* ========== RESET & BASE ========== */
         * {
             margin: 0;
             padding: 0;
@@ -17,29 +14,14 @@
         }
 
         body {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f8ff 100%);
-            color: #333333;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 15px;
-            overflow-x: hidden;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
         }
 
-        .app-container {
-            width: 100%;
-            max-width: 1200px;
-            background: #ffffff;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 100, 200, 0.15);
-            border: 1px solid #e1e8ed;
-        }
-
-        /* شاشة التحميل */
-        .loading-overlay {
+        /* ========== LOADING SCREEN ========== */
+        #loadingScreen {
             position: fixed;
             top: 0;
             left: 0;
@@ -47,19 +29,20 @@
             height: 100%;
             background: linear-gradient(135deg, #1a5fb4 0%, #2ea043 100%);
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 10000;
-            flex-direction: column;
             color: white;
+            z-index: 10000;
+            transition: opacity 0.3s;
         }
 
         .loader {
             border: 5px solid rgba(255, 255, 255, 0.3);
-            border-top: 5px solid #ffffff;
+            border-top: 5px solid white;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             animation: spin 1s linear infinite;
             margin-bottom: 20px;
         }
@@ -69,138 +52,65 @@
             100% { transform: rotate(360deg); }
         }
 
-        .loading-text {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .loading-subtext {
-            font-size: 14px;
-            opacity: 0.8;
-            text-align: center;
-            max-width: 300px;
-        }
-
-        /* شاشة الخطأ */
-        .error-overlay {
+        /* ========== NOTIFICATION ========== */
+        .notification {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            flex-direction: column;
-            text-align: center;
-            padding: 20px;
-        }
-
-        .error-icon {
-            font-size: 60px;
-            color: #ff6b6b;
-            margin-bottom: 20px;
-        }
-
-        .error-title {
-            font-size: 24px;
-            color: #333;
-            font-weight: 700;
-            margin-bottom: 10px;
-        }
-
-        .error-message {
-            font-size: 16px;
-            color: #666;
-            margin-bottom: 20px;
-            max-width: 400px;
-        }
-
-        .retry-btn {
-            padding: 12px 30px;
-            background: #1a5fb4;
-            color: white;
-            border: none;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
             border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .retry-btn:hover {
-            background: #2ea043;
-            transform: translateY(-2px);
-        }
-
-        /* وضع عدم الاتصال */
-        .offline-badge {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            background: #ff6b6b;
             color: white;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 12px;
             font-weight: 600;
             z-index: 9999;
             display: none;
-            animation: pulse 2s infinite;
+            animation: slideIn 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
+        .notification.success { background: #2ea043; }
+        .notification.error { background: #ff6b6b; }
+        .notification.info { background: #1a5fb4; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        /* Barre d'état */
-        .status-bar {
-            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
-            padding: 12px 20px;
-            font-size: 13px;
-            color: #ffffff;
-            text-align: center;
-            border-bottom: 3px solid #ff6b6b;
-            width: 100%;
-            font-weight: 600;
-            letter-spacing: 0.5px;
+        /* ========== LOGIN PAGE ========== */
+        #loginPage {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a5fb4 0%, #2ea043 100%);
         }
 
-        /* Page de connexion */
         .login-container {
-            background: #ffffff;
+            background: white;
             padding: 40px;
-            border-radius: 12px;
-            margin: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            border: 2px solid #e1e8ed;
         }
 
-        .login-container h2 {
-            margin-bottom: 25px;
+        .login-title {
             color: #1a5fb4;
+            margin-bottom: 30px;
             font-size: 28px;
-            font-weight: 700;
         }
 
         .login-input {
             width: 100%;
-            padding: 14px;
-            margin: 12px 0;
-            background: #f8f9fa;
+            padding: 15px;
+            margin: 10px 0;
             border: 2px solid #e1e8ed;
             border-radius: 8px;
-            color: #333;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 15px;
-            transition: all 0.3s ease;
+            font-size: 16px;
+            transition: all 0.3s;
         }
 
         .login-input:focus {
@@ -211,17 +121,16 @@
 
         .login-btn {
             width: 100%;
-            padding: 14px;
+            padding: 15px;
             background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
             color: white;
             border: none;
             border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Segoe UI', sans-serif;
             font-size: 16px;
             font-weight: 600;
-            margin-top: 15px;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
         }
 
         .login-btn:hover {
@@ -229,259 +138,199 @@
             box-shadow: 0 5px 15px rgba(26, 95, 180, 0.3);
         }
 
-        /* Notification */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #2ea043;
+        .login-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .login-info code {
+            background: #e3f2fd;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #1a5fb4;
+        }
+
+        /* ========== STATUS BAR ========== */
+        .status-bar {
+            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
             color: white;
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-            z-index: 10000;
-            display: none;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Panneaux */
-        .admin-panel, .employee-panel, .reports-panel {
-            display: none;
-        }
-
-        .panel-header {
-            background: linear-gradient(90deg, #ffffff 0%, #f8f9fa 100%);
-            padding: 18px 25px;
-            border-bottom: 2px solid #e1e8ed;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        /* ========== PANELS ========== */
+        .panel {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .panel-header {
+            background: white;
+            padding: 20px;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
         .panel-title {
-            font-size: 22px;
             color: #1a5fb4;
+            font-size: 24px;
             font-weight: 700;
         }
 
-        .logout-btn, .back-btn {
+        .btn {
             padding: 10px 20px;
-            background: #ff6b6b;
-            color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
-            font-family: 'Segoe UI', sans-serif;
-            margin-left: 10px;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
         }
 
-        .logout-btn:hover, .back-btn:hover {
+        .btn-primary {
+            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        .back-btn {
-            background: #2ea043;
+        /* ========== DASHBOARD SECTIONS ========== */
+        .dashboard {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
         }
 
-        /* Sections du tableau de bord */
-        .dashboard-section {
+        .section {
+            background: white;
+            border-radius: 10px;
             padding: 25px;
-            margin: 15px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border: 2px solid #e1e8ed;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border: 1px solid #e1e8ed;
         }
 
-        .dashboard-section h3 {
-            margin-bottom: 20px;
+        .section-title {
             color: #1a5fb4;
-            border-bottom: 2px solid #e1e8ed;
+            margin-bottom: 20px;
             padding-bottom: 10px;
+            border-bottom: 2px solid #e1e8ed;
             font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            background: #1a5fb4;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
             font-weight: 700;
         }
 
-        /* Gestion des employés */
-        .employee-form {
+        .badge-green { background: #2ea043; }
+        .badge-red { background: #ff6b6b; }
+
+        /* ========== FORMS ========== */
+        .form-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
-        .form-input {
+        .form-input, .form-select {
             padding: 12px;
-            background: #ffffff;
             border: 2px solid #e1e8ed;
             border-radius: 8px;
-            color: #333;
-            font-family: 'Segoe UI', sans-serif;
             font-size: 15px;
-            transition: all 0.3s ease;
+            width: 100%;
+            transition: all 0.3s;
         }
 
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             border-color: #1a5fb4;
             outline: none;
             box-shadow: 0 0 0 3px rgba(26, 95, 180, 0.1);
         }
 
-        .action-btn {
-            padding: 12px 20px;
-            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-family: 'Segoe UI', sans-serif;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(26, 95, 180, 0.3);
-        }
-
+        /* ========== EMPLOYEE CARDS ========== */
         .employee-list {
-            margin-top: 25px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
         }
 
         .employee-card {
-            background: #ffffff;
-            padding: 18px;
-            margin: 12px 0;
+            background: white;
             border-radius: 10px;
+            padding: 20px;
             border-left: 5px solid #1a5fb4;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
         }
 
         .employee-card:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        /* Zone de l'employé */
-        .employee-area {
+        /* ========== EMPLOYEE PANEL ========== */
+        .employee-dashboard {
             padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         .area-selection {
-            margin: 20px 0;
-            padding: 20px;
-            background: #ffffff;
+            background: white;
+            padding: 25px;
             border-radius: 10px;
-            border: 2px solid #e1e8ed;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
 
-        .area-selection label {
-            display: block;
-            margin-bottom: 12px;
-            color: #1a5fb4;
-            font-weight: 700;
-            font-size: 16px;
-        }
-
-        .area-select {
-            width: 100%;
-            padding: 14px;
-            background: #ffffff;
-            border: 2px solid #e1e8ed;
-            border-radius: 8px;
-            color: #333;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .area-select:focus {
-            border-color: #1a5fb4;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(26, 95, 180, 0.1);
-        }
-
-        .selected-area-display {
+        .selected-area {
             background: linear-gradient(135deg, #f8f9fa 0%, #e3f2fd 100%);
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
             border: 2px solid #1a5fb4;
-            box-shadow: 0 3px 10px rgba(26, 95, 180, 0.1);
+            display: none;
         }
 
-        /* Contrôles sous la zone sélectionnée */
-        .controls-under-area {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 15px 0 25px 0;
-            flex-wrap: wrap;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 10px;
-            border: 2px solid #e1e8ed;
-        }
-
-        .control-btn {
-            padding: 12px 24px;
-            background: #ffffff;
-            border: 2px solid #e1e8ed;
-            color: #333;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border-radius: 8px;
-            min-width: 140px;
-            transition: all 0.3s ease;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .control-btn.primary {
-            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
-            color: white;
-            border: none;
-        }
-
-        .control-btn.danger {
-            background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
-            color: white;
-            border: none;
-        }
-
-        /* Caméra */
+        /* ========== CAMERA ========== */
         .camera-status {
+            background: #f0fff4;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #2ea043;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 10px;
-            padding: 10px;
-            background: #f0fff4;
-            border-radius: 8px;
-            border: 2px solid #2ea043;
-            margin: 15px 0;
+            gap: 15px;
         }
 
         .camera-status.active {
@@ -489,54 +338,39 @@
             border-color: #1a5fb4;
         }
 
-        .camera-icon {
-            font-size: 24px;
-            color: #2ea043;
+        /* ========== PHOTOS ========== */
+        .photos-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
 
-        .camera-status.active .camera-icon {
-            color: #1a5fb4;
-            animation: pulse 2s infinite;
-        }
-
-        /* Photos */
-        .photos-container {
-            margin: 25px 0;
-        }
-
-        .photos-title {
-            font-size: 18px;
-            color: #1a5fb4;
-            font-weight: 700;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e1e8ed;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .photo-boxes-container {
-            display: flex;
-            justify-content: space-between;
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
             gap: 10px;
-            margin-bottom: 15px;
-            flex-wrap: wrap;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .photo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         .photo-box {
-            flex: 1;
-            min-width: 150px;
             aspect-ratio: 4/3;
             background: #f8f9fa;
             border: 3px solid #e1e8ed;
-            border-radius: 10px;
+            border-radius: 8px;
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
+            align-items: center;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s;
             position: relative;
             overflow: hidden;
         }
@@ -544,19 +378,12 @@
         .photo-box:hover {
             border-color: #1a5fb4;
             transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(26, 95, 180, 0.15);
+            box-shadow: 0 5px 15px rgba(26, 95, 180, 0.1);
         }
 
         .photo-box.captured {
             border-color: #2ea043;
             background: #f0fff4;
-        }
-
-        .photo-box-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: #1a5fb4;
-            margin-bottom: 8px;
         }
 
         .photo-preview {
@@ -570,115 +397,20 @@
             display: block;
         }
 
-        .photo-box.captured .photo-box-label {
-            position: absolute;
-            bottom: 5px;
-            left: 0;
-            right: 0;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 3px;
-            font-size: 12px;
-            color: #2ea043;
-            font-weight: 600;
-        }
-
-        .photo-icon {
-            font-size: 32px;
-            color: #1a5fb4;
-            margin-bottom: 8px;
-        }
-
-        .photo-box.captured .photo-icon {
-            display: none;
-        }
-
-        /* Bouton APRÈS */
-        .section-divider {
-            text-align: center;
-            margin: 30px 0;
-            position: relative;
-        }
-
-        .apres-button {
-            display: inline-block;
-            background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
-            color: white;
-            padding: 15px 40px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 20px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
-            width: 100%;
-            max-width: 400px;
-        }
-
-        .apres-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
-        }
-
-        /* Bouton d'envoi */
-        .send-report-container {
-            text-align: center;
-            margin: 30px 0;
-            padding: 25px;
-            background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
-            border-radius: 12px;
-            border: 3px solid #2ea043;
-            box-shadow: 0 5px 20px rgba(46, 160, 67, 0.15);
-        }
-
-        .send-report-btn {
-            padding: 16px 40px;
-            background: linear-gradient(90deg, #2ea043 0%, #1a5fb4 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-family: 'Segoe UI', sans-serif;
-            font-size: 18px;
-            font-weight: 700;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(26, 95, 180, 0.3);
-        }
-
-        .send-report-btn:hover:not(:disabled) {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(26, 95, 180, 0.4);
-        }
-
-        .send-report-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .send-before-btn {
-            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
-        }
-
-        .send-after-btn {
-            background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
-        }
-
-        /* Sélection de nombre */
+        /* ========== NUMBER SELECTION ========== */
         .number-selection {
-            background: #ffffff;
-            padding: 20px;
+            background: white;
+            padding: 25px;
             border-radius: 10px;
             margin: 20px 0;
-            border: 2px solid #e1e8ed;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
         }
 
-        .number-buttons {
+        .number-grid {
             display: grid;
             grid-template-columns: repeat(9, 1fr);
             gap: 10px;
-            margin-top: 15px;
+            margin: 15px 0;
         }
 
         .number-btn {
@@ -688,71 +420,102 @@
             border-radius: 8px;
             font-size: 18px;
             font-weight: 700;
-            color: #333;
-            cursor: pointer;
-            transition: all 0.3s ease;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
         }
 
-        .number-btn:hover:not(:disabled) {
+        .number-btn:hover {
             background: #e3f2fd;
             border-color: #1a5fb4;
-            transform: translateY(-2px);
         }
 
         .number-btn.selected {
             background: linear-gradient(135deg, #1a5fb4 0%, #2ea043 100%);
             color: white;
             border-color: #1a5fb4;
-            box-shadow: 0 4px 12px rgba(26, 95, 180, 0.3);
         }
 
-        /* Rapports */
-        .reports-container {
-            margin-top: 25px;
+        /* ========== SEND BUTTONS ========== */
+        .send-section {
+            background: linear-gradient(135deg, #ffffff 0%, #f0fff4 100%);
+            padding: 30px;
+            border-radius: 10px;
+            margin: 30px 0;
+            border: 3px solid #2ea043;
+            text-align: center;
+        }
+
+        .send-btn {
+            padding: 16px 40px;
+            background: linear-gradient(90deg, #1a5fb4 0%, #2ea043 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(26, 95, 180, 0.2);
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(26, 95, 180, 0.3);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ========== APRES BUTTON ========== */
+        .apres-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .apres-btn {
+            background: linear-gradient(90deg, #ff6b6b 0%, #ff8e53 100%);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 10px;
+            font-size: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .apres-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        /* ========== REPORTS ========== */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
         }
 
         .report-card {
-            background: #ffffff;
-            padding: 20px;
-            margin: 15px 0;
+            background: white;
             border-radius: 10px;
+            padding: 20px;
             border-left: 5px solid #1a5fb4;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            transition: all 0.3s;
         }
 
         .report-card:hover {
             transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-left: 8px;
-        }
-
-        .badge-blue {
-            background: #1a5fb4;
-            color: white;
-        }
-
-        .badge-green {
-            background: #2ea043;
-            color: white;
-        }
-
-        .badge-red {
-            background: #ff6b6b;
-            color: white;
-        }
-
-        /* Flash effect */
+        /* ========== FLASH EFFECT ========== */
         .capture-flash {
             position: fixed;
             top: 0;
@@ -760,630 +523,742 @@
             width: 100%;
             height: 100%;
             background: white;
-            pointer-events: none;
-            z-index: 9999;
             opacity: 0;
+            pointer-events: none;
+            z-index: 9998;
         }
 
-        /* Responsive */
+        /* ========== RESPONSIVE ========== */
         @media (max-width: 768px) {
-            .photo-boxes-container {
-                flex-direction: column;
-            }
-            
-            .photo-box {
-                min-width: 100%;
-                margin-bottom: 10px;
-            }
-            
-            .number-buttons {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .employee-form {
-                grid-template-columns: 1fr;
-            }
-            
-            .control-btn {
-                min-width: 120px;
-                padding: 10px 15px;
-            }
-            
-            .apres-button {
-                padding: 12px 30px;
-                font-size: 18px;
-            }
-            
-            .controls-under-area {
-                flex-direction: column;
-                align-items: center;
-            }
-        }
-
-        @media (max-width: 480px) {
             .login-container {
                 padding: 25px;
                 margin: 15px;
             }
             
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .employee-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .number-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .reports-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .panel-title {
                 font-size: 18px;
             }
-            
-            .dashboard-section {
-                padding: 20px;
-                margin: 10px;
-            }
-            
-            .photo-box {
-                aspect-ratio: 3/2;
-            }
-            
-            .number-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .apres-button {
-                padding: 10px 20px;
-                font-size: 16px;
-            }
-            
-            .control-btn {
-                width: 100%;
-                max-width: 250px;
-            }
         }
     </style>
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- وضع عدم الاتصال -->
-    <div class="offline-badge" id="offlineBadge">
-        <i class="fas fa-wifi-slash"></i> Mode hors ligne
-    </div>
-
-    <!-- شاشة الخطأ -->
-    <div class="error-overlay" id="errorOverlay">
-        <div class="error-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        <div class="error-title">Erreur de connexion</div>
-        <div class="error-message" id="errorMessage">
-            Impossible de se connecter à la base de données.
-        </div>
-        <button class="retry-btn" onclick="retryConnection()">
-            <i class="fas fa-redo"></i> Réessayer
-        </button>
-        <div style="margin-top: 20px; font-size: 14px; color: #666;">
-            <button onclick="useOfflineMode()" style="background: none; border: none; color: #1a5fb4; cursor: pointer; text-decoration: underline;">
-                <i class="fas fa-desktop"></i> Utiliser en mode hors ligne
-            </button>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
         <div class="loader"></div>
-        <div class="loading-text" id="loadingText">Initialisation du système...</div>
-        <div class="loading-subtext" id="loadingSubtext">Veuillez patienter</div>
+        <h2 style="margin: 20px 0 10px; font-size: 24px;">Système NoteCam</h2>
+        <p style="opacity: 0.8;">Chargement en cours...</p>
     </div>
 
     <!-- Notification -->
-    <div class="notification" id="notification"></div>
+    <div id="notification" class="notification"></div>
 
-    <div class="app-container">
-        <!-- Barre d'état -->
-        <div class="status-bar" id="statusBar">
-            Système NoteCam ● Initialisation...
-        </div>
-
-        <!-- Page de connexion -->
-        <div class="login-container" id="loginPage">
-            <h2>Connexion</h2>
-            <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur">
-            <input type="password" id="password" class="login-input" placeholder="Mot de passe">
+    <!-- Login Page -->
+    <div id="loginPage">
+        <div class="login-container">
+            <h1 class="login-title">Connexion</h1>
+            <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur" value="admin">
+            <input type="password" id="password" class="login-input" placeholder="Mot de passe" value="admin123">
             <button class="login-btn" onclick="login()">Se connecter</button>
             
-            <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; font-size: 13px; color: #666;">
-                <p><strong>Comptes de test:</strong></p>
-                <p>Superviseur: <code>admin / admin123</code></p>
-                <p>Employés: <code>user1 à user11 / pass123</code></p>
-            </div>
-        </div>
-
-        <!-- Panneau du superviseur -->
-        <div class="admin-panel" id="adminPanel">
-            <div class="panel-header">
-                <div class="panel-title">Panneau de Contrôle du Superviseur</div>
-                <div>
-                    <button class="back-btn" onclick="logout()">Déconnexion</button>
-                </div>
-            </div>
-
-            <!-- Gestion des employés -->
-            <div class="dashboard-section">
-                <h3>Gestion des Employés <span class="badge badge-blue" id="employeesCount">0</span></h3>
-                <div class="employee-form">
-                    <input type="text" id="empUsername" class="form-input" placeholder="Nom d'utilisateur">
-                    <input type="password" id="empPassword" class="form-input" placeholder="Mot de passe">
-                    <input type="text" id="empName" class="form-input" placeholder="Nom de l'employé">
-                    <button class="action-btn" onclick="addEmployee()">Ajouter un employé</button>
-                </div>
-                <div class="employee-list" id="employeesList">
-                    <!-- Liste des employés -->
-                </div>
-            </div>
-
-            <!-- Attribution des zones géographiques -->
-            <div class="dashboard-section">
-                <h3>Attribution des Zones Géographiques <span class="badge badge-green" id="areasCount">0</span></h3>
-                <div class="employee-form">
-                    <select id="employeeSelect" class="form-input">
-                        <option value="">Sélectionner un employé</option>
-                    </select>
-                    <input type="text" id="areaName" class="form-input" placeholder="Nom de la zone">
-                    <input type="text" id="areaCode" class="form-input" placeholder="Code de la zone (ex: ZN001)">
-                    <button class="action-btn" onclick="assignArea()">Attribuer la zone</button>
-                </div>
-                
-                <div class="areas-list" id="assignedAreasList">
-                    <!-- Liste des zones attribuées -->
-                </div>
-            </div>
-
-            <!-- Rapports reçus -->
-            <div class="dashboard-section">
-                <h3>Rapports Reçus <span class="badge badge-red" id="reportsCount">0</span></h3>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <button class="control-btn primary" onclick="viewAllReports()">
-                        <i class="fas fa-file-alt"></i> Voir tous les rapports
-                    </button>
-                    <button class="control-btn" onclick="exportAllData()">
-                        <i class="fas fa-download"></i> Exporter toutes les données
-                    </button>
-                </div>
-                <div class="reports-container" id="reportsListMini">
-                    <!-- Rapports miniatures -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Panneau de l'employé -->
-        <div class="employee-panel" id="employeePanel">
-            <div class="panel-header">
-                <div class="panel-title" id="employeeName">
-                    <i class="fas fa-user"></i> Panneau de l'Employé
-                </div>
-                <button class="logout-btn" onclick="logout()">Déconnexion</button>
-            </div>
-
-            <div class="employee-area">
-                <div class="area-selection">
-                    <label>Sélectionnez la zone de travail :</label>
-                    <select class="area-select" id="areaSelect">
-                        <option value="">Choisissez une zone</option>
-                    </select>
-                    
-                    <div class="selected-area-display" id="selectedAreaInfo" style="display: none;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <h4 style="color: #1a5fb4; margin-bottom: 5px;">
-                                    <i class="fas fa-map-marker-alt"></i> Zone sélectionnée : <span id="selectedAreaName">Aucune zone</span>
-                                </h4>
-                                <p style="color: #666; font-size: 14px;">
-                                    <strong>Code :</strong> <span id="selectedAreaCode">-</span> | 
-                                    <strong>Assignée le :</strong> <span id="areaAssignedDate">-</span>
-                                </p>
-                            </div>
-                            <span class="badge badge-green" id="areaStatus">Active</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="camera-status" id="cameraStatus">
-                    <div class="camera-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="camera-text">Caméra en cours d'activation...</div>
-                </div>
-
-                <div class="controls-under-area">
-                    <button class="control-btn primary" id="toggleCamera" style="display: none;">
-                        <i class="fas fa-video"></i> Activer la caméra
-                    </button>
-                    <button class="control-btn danger" id="clearPhotos">
-                        <i class="fas fa-trash"></i> Effacer les photos
-                    </button>
-                    <button class="control-btn" id="refreshLocation">
-                        <i class="fas fa-sync-alt"></i> Actualiser la localisation
-                    </button>
-                </div>
-
-                <div class="photos-container" id="beforePhotosContainer">
-                    <div class="photos-title">
-                        <span><i class="fas fa-camera"></i> PHOTOS AVANT (Cliquez sur chaque case pour capturer)</span>
-                        <span class="badge badge-blue" id="beforePhotosCount">0/5</span>
-                    </div>
-                    <div class="photo-boxes-container" id="photoBoxesContainer">
-                        <!-- Les 5 cases seront générées dynamiquement -->
-                    </div>
-                </div>
-
-                <div class="number-selection" id="numberSelection">
-                    <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
-                        <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 :
-                    </label>
-                    <div class="number-buttons">
-                        <button class="number-btn" data-number="0">0</button>
-                        <button class="number-btn" data-number="1">1</button>
-                        <button class="number-btn" data-number="2">2</button>
-                        <button class="number-btn" data-number="3">3</button>
-                        <button class="number-btn" data-number="4">4</button>
-                        <button class="number-btn" data-number="5">5</button>
-                        <button class="number-btn" data-number="6">6</button>
-                        <button class="number-btn" data-number="7">7</button>
-                        <button class="number-btn" data-number="8">8</button>
-                    </div>
-                    <div style="margin-top: 15px; text-align: center; color: #666; font-size: 14px;">
-                        Nombre sélectionné : <span id="selectedNumberDisplay" style="font-weight: 700; color: #1a5fb4;">Aucun</span>
-                    </div>
-                </div>
-
-                <div class="send-report-container" id="sendBeforeContainer">
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-hashtag"></i> Nombre : <strong id="summaryNumber">-</strong>
-                            </span>
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-map-marker-alt"></i> Zone : <strong id="summaryZone">-</strong>
-                            </span>
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-image"></i> Photos AVANT : <strong id="summaryBeforePhotos">0/5</strong>
-                            </span>
-                        </div>
-                    </div>
-                    <button class="send-report-btn send-before-btn" id="sendBeforeBtn" onclick="sendBeforePhotos()" disabled>
-                        <i class="fas fa-paper-plane"></i> Envoyer les photos AVANT
-                    </button>
-                </div>
-
-                <div class="section-divider" id="apresButtonContainer" style="display: none;">
-                    <button class="apres-button" id="apresButton" onclick="showAfterPhotos()">
-                        <i class="fas fa-arrow-right"></i> PASSER AUX PHOTOS APRÈS
-                    </button>
-                </div>
-
-                <div class="photos-container" id="afterPhotosContainer" style="display: none;">
-                    <div class="photos-title">
-                        <span><i class="fas fa-camera-retro"></i> PHOTOS APRÈS (Cliquez sur chaque case pour capturer)</span>
-                        <span class="badge badge-red" id="afterPhotosCount">0/5</span>
-                    </div>
-                    <div class="photo-boxes-container" id="afterPhotoBoxesContainer">
-                        <!-- Les 5 cases seront générées dynamiquement -->
-                    </div>
-                </div>
-
-                <div class="send-report-container" id="sendAfterContainer" style="display: none;">
-                    <button class="send-report-btn send-after-btn" id="sendAfterBtn" onclick="sendAfterPhotos()" disabled>
-                        <i class="fas fa-paper-plane"></i> Envoyer les photos APRÈS
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Page des rapports complets -->
-        <div class="reports-panel" id="reportsPanel">
-            <div class="panel-header">
-                <div class="panel-title">
-                    <i class="fas fa-file-alt"></i> Tous les Rapports Reçus
-                </div>
-                <div>
-                    <button class="back-btn" onclick="backToAdminPanel()">
-                        <i class="fas fa-arrow-left"></i> Retour
-                    </button>
-                    <button class="logout-btn" onclick="logout()">Déconnexion</button>
-                </div>
-            </div>
-
-            <div class="report-details-container" id="reportDetailsContainer">
-                <!-- Rapports complets -->
+            <div class="login-info">
+                <p><strong>Comptes de test :</strong></p>
+                <p>Superviseur : <code>admin / admin123</code></p>
+                <p>Employés : <code>user1 à user11 / pass123</code></p>
             </div>
         </div>
     </div>
 
-    <!-- Flash effect overlay -->
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Panneau Administrateur</div>
+            <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+        </div>
+        
+        <div class="dashboard">
+            <!-- Gestion des employés -->
+            <div class="section">
+                <div class="section-title">
+                    Gestion des Employés
+                    <span class="badge" id="employeeCount">0</span>
+                </div>
+                
+                <div class="form-grid">
+                    <input type="text" id="newUsername" class="form-input" placeholder="Nom d'utilisateur">
+                    <input type="password" id="newPassword" class="form-input" placeholder="Mot de passe">
+                    <input type="text" id="newName" class="form-input" placeholder="Nom complet">
+                    <button class="btn btn-primary" onclick="addEmployee()">Ajouter Employé</button>
+                </div>
+                
+                <div class="employee-list" id="adminEmployeesList"></div>
+            </div>
+
+            <!-- Attribution des zones -->
+            <div class="section">
+                <div class="section-title">
+                    Attribution des Zones
+                    <span class="badge badge-green" id="zoneCount">0</span>
+                </div>
+                
+                <div class="form-grid">
+                    <select id="assignEmployee" class="form-select">
+                        <option value="">Sélectionner un employé</option>
+                    </select>
+                    <input type="text" id="zoneName" class="form-input" placeholder="Nom de la zone">
+                    <input type="text" id="zoneCode" class="form-input" placeholder="Code (ex: ZN001)">
+                    <button class="btn btn-primary" onclick="assignZone()">Attribuer Zone</button>
+                </div>
+                
+                <div id="assignedZonesList"></div>
+            </div>
+
+            <!-- Rapports -->
+            <div class="section">
+                <div class="section-title">
+                    Rapports Reçus
+                    <span class="badge badge-red" id="reportCount">0</span>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="viewReports()">Voir Tous les Rapports</button>
+                    <button class="btn" onclick="exportData()">Exporter les Données</button>
+                </div>
+                
+                <div class="reports-grid" id="reportsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Panel -->
+    <div id="employeePanel" class="panel">
+        <div class="panel-header">
+            <div class="panel-title">
+                <span id="employeeGreeting">Employé</span>
+            </div>
+            <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+        </div>
+        
+        <div class="employee-dashboard">
+            <!-- Sélection de zone -->
+            <div class="area-selection">
+                <h3 style="color: #1a5fb4; margin-bottom: 15px;">
+                    <i class="fas fa-map-marker-alt"></i> Sélectionnez votre zone de travail
+                </h3>
+                <select id="employeeZoneSelect" class="form-select">
+                    <option value="">-- Choisir une zone --</option>
+                </select>
+                
+                <div class="selected-area" id="selectedZoneInfo">
+                    <h4 style="color: #1a5fb4; margin-bottom: 10px;">
+                        Zone sélectionnée : <span id="currentZoneName">-</span>
+                    </h4>
+                    <p style="color: #666;">
+                        <strong>Code :</strong> <span id="currentZoneCode">-</span> | 
+                        <strong>Assignée le :</strong> <span id="zoneAssignedDate">-</span>
+                    </p>
+                </div>
+            </div>
+
+            <!-- Caméra -->
+            <div class="camera-status" id="cameraStatus">
+                <div style="font-size: 24px;">
+                    <i class="fas fa-video"></i>
+                </div>
+                <div>
+                    <div style="font-weight: 600;">Caméra</div>
+                    <div id="cameraText">Cliquez pour activer</div>
+                </div>
+                <button class="btn btn-primary" id="toggleCameraBtn" onclick="toggleCamera()" style="margin-left: auto;">
+                    Activer
+                </button>
+            </div>
+
+            <!-- Photos AVANT -->
+            <div class="photos-section" id="beforeSection">
+                <div class="section-title">
+                    Photos AVANT
+                    <span class="badge" id="beforeCount">0/5</span>
+                </div>
+                
+                <div class="photo-grid" id="beforePhotosGrid"></div>
+                
+                <div class="number-selection">
+                    <h4 style="color: #1a5fb4; margin-bottom: 15px;">
+                        <i class="fas fa-keyboard"></i> Sélectionnez un nombre (0-8)
+                    </h4>
+                    <div class="number-grid" id="numberGrid"></div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <span style="color: #666;">Nombre sélectionné :</span>
+                        <span id="selectedNumber" style="font-weight: 700; color: #1a5fb4; margin-left: 10px;">Aucun</span>
+                    </div>
+                </div>
+                
+                <div class="send-section">
+                    <button class="send-btn" id="sendBeforeBtn" onclick="sendBeforeReport()" disabled>
+                        <i class="fas fa-paper-plane"></i> Envoyer les Photos AVANT
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bouton APRÈS -->
+            <div class="apres-section" id="apresSection" style="display: none;">
+                <button class="apres-btn" onclick="showAfterPhotos()">
+                    <i class="fas fa-arrow-right"></i> PASSER AUX PHOTOS APRÈS
+                </button>
+            </div>
+
+            <!-- Photos APRÈS -->
+            <div class="photos-section" id="afterSection" style="display: none;">
+                <div class="section-title">
+                    Photos APRÈS
+                    <span class="badge badge-red" id="afterCount">0/5</span>
+                </div>
+                
+                <div class="photo-grid" id="afterPhotosGrid"></div>
+                
+                <div class="send-section">
+                    <button class="send-btn" id="sendAfterBtn" onclick="sendAfterReport()" disabled>
+                        <i class="fas fa-paper-plane"></i> Envoyer le Rapport Complet
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Panel -->
+    <div id="reportsPanel" class="panel">
+        <div class="panel-header">
+            <div class="panel-title">Tous les Rapports</div>
+            <div>
+                <button class="btn" onclick="backToAdmin()" style="margin-right: 10px;">
+                    <i class="fas fa-arrow-left"></i> Retour
+                </button>
+                <button class="btn btn-danger" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+        
+        <div class="dashboard">
+            <div id="allReportsList"></div>
+        </div>
+    </div>
+
+    <!-- Flash Effect -->
     <div class="capture-flash" id="captureFlash"></div>
 
     <script>
-        // ========== CONFIGURATION FIREBASE ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJHATLa34sB6dF_uqOXMeKXV2VXF1cOvU",
-            authDomain: "notcam-d2ee9.firebaseapp.com",
-            databaseURL: "https://notcam-d2ee9-default-rtdb.firebaseio.com",
-            projectId: "notcam-d2ee9",
-            storageBucket: "notcam-d2ee9.firebasestorage.app",
-            messagingSenderId: "408140358418",
-            appId: "1:408140358418:web:1e2acb1c7de915092249cb",
-            measurementId: "G-8WP7T9M7V4"
-        };
-
-        // ========== VARIABLES GLOBALES ==========
-        let database = null;
-        let usersData = {};
-        let assignedAreas = [];
-        let zoneReports = {};
+        // ========== GLOBAL VARIABLES ==========
         let currentUser = null;
+        let usersData = {};
+        let zonesData = [];
+        let reportsData = [];
         let videoStream = null;
         let isCameraActive = false;
-        let selectedArea = null;
+        let selectedZone = null;
         let selectedNumber = null;
-        let currentStep = 1;
-        let beforePhotos = [null, null, null, null, null];
-        let afterPhotos = [null, null, null, null, null];
-        let tempReport = null;
-        let isOfflineMode = false;
-        let connectionRetries = 0;
-        const MAX_RETRIES = 2;
+        let beforePhotos = Array(5).fill(null);
+        let afterPhotos = Array(5).fill(null);
+        let currentReport = null;
 
-        // Données de localisation
-        const sampleLocations = [
-            {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
-            {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
-            {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
-        ];
-
-        let currentLocation = {
-            lat: 33.603016,
-            lng: -7.636873,
-            elev: "9.34±11.02",
-            prec: 13.28,
-            time: ""
-        };
-
-        // ========== FONCTIONS D'INITIALISATION ==========
-        function updateLoadingText(message, submessage = "") {
-            document.getElementById('loadingText').textContent = message;
-            if (submessage) {
-                document.getElementById('loadingSubtext').textContent = submessage;
-            }
-        }
-
-        function showError(message) {
-            document.getElementById('loadingOverlay').style.display = 'none';
-            document.getElementById('errorMessage').textContent = message;
-            document.getElementById('errorOverlay').style.display = 'flex';
-        }
-
-        function hideError() {
-            document.getElementById('errorOverlay').style.display = 'none';
-        }
-
-        function updateOnlineStatus() {
-            const isOnline = navigator.onLine;
-            document.getElementById('offlineBadge').style.display = isOnline ? 'none' : 'block';
-        }
-
-        async function initializeFirebase() {
-            try {
-                updateLoadingText("Initialisation de Firebase...");
-                
-                // Initialiser Firebase rapidement
-                firebase.initializeApp(firebaseConfig);
-                database = firebase.database();
-                
-                updateLoadingText("Chargement des données...");
-                
-                // Charger les données avec timeout
-                const loadPromise = Promise.all([
-                    database.ref('users').once('value'),
-                    database.ref('assignedAreas').once('value'),
-                    database.ref('zoneReports').once('value')
-                ]);
-                
-                // Timeout de 10 secondes
-                const timeoutPromise = new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error("Timeout dépassé")), 10000)
-                );
-                
-                const [usersSnapshot, areasSnapshot, reportsSnapshot] = await Promise.race([loadPromise, timeoutPromise]);
-                
-                usersData = usersSnapshot.val() || {};
-                assignedAreas = areasSnapshot.val() || [];
-                zoneReports = reportsSnapshot.val() || {};
-                
-                // Vérifier si les données existent
-                if (!usersSnapshot.exists()) {
-                    updateLoadingText("Création des données par défaut...");
-                    await createDefaultData();
-                }
-                
-                // Cacher l'overlay
-                document.getElementById('loadingOverlay').style.display = 'none';
-                showNotification("Système prêt", "success");
-                updateStatusBar("Système prêt");
-                
-                // Vérifier l'utilisateur connecté
-                checkLoggedInUser();
-                
-            } catch (error) {
-                console.error('Erreur Firebase:', error);
-                
-                if (connectionRetries < MAX_RETRIES) {
-                    connectionRetries++;
-                    showError(`Tentative ${connectionRetries}/${MAX_RETRIES}. Réessayer?`);
-                } else {
-                    showError("Mode hors ligne recommandé");
-                }
-            }
-        }
-
-        async function createDefaultData() {
-            const defaultUsers = {
-                admin: {
-                    password: "admin123",
-                    role: "admin",
-                    name: "Superviseur Principal",
-                    assignedAreas: []
-                }
-            };
-
-            for (let i = 1; i <= 11; i++) {
-                defaultUsers[`user${i}`] = {
-                    password: "pass123",
-                    role: "employee",
-                    name: `Employé ${i}`,
-                    assignedAreas: []
-                };
-            }
-
-            await database.ref('users').set(defaultUsers);
-            await database.ref('assignedAreas').set([]);
-            await database.ref('zoneReports').set({});
-        }
-
-        function useOfflineMode() {
-            isOfflineMode = true;
-            hideError();
+        // ========== INITIALIZATION ==========
+        async function initializeApp() {
+            // Cacher l'écran de chargement
+            setTimeout(() => {
+                document.getElementById('loadingScreen').style.opacity = '0';
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').style.display = 'none';
+                }, 300);
+            }, 1000);
             
-            // Créer des données par défaut
+            // Charger les données
+            loadData();
+            
+            // Initialiser les grilles
+            initializePhotoGrids();
+            initializeNumberGrid();
+            
+            // Vérifier l'utilisateur connecté
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                try {
+                    currentUser = JSON.parse(savedUser);
+                    if (usersData[currentUser.username]) {
+                        showPanel(currentUser.role === 'admin' ? 'adminPanel' : 'employeePanel');
+                        updateUI();
+                    }
+                } catch (e) {
+                    console.error('Erreur de chargement:', e);
+                }
+            }
+        }
+
+        function loadData() {
+            // Charger depuis localStorage
+            const savedUsers = localStorage.getItem('notecam_users');
+            const savedZones = localStorage.getItem('notecam_zones');
+            const savedReports = localStorage.getItem('notecam_reports');
+            
+            if (savedUsers) {
+                usersData = JSON.parse(savedUsers);
+            } else {
+                createDefaultUsers();
+            }
+            
+            if (savedZones) zonesData = JSON.parse(savedZones);
+            if (savedReports) reportsData = JSON.parse(savedReports);
+        }
+
+        function createDefaultUsers() {
             usersData = {
                 admin: {
                     password: "admin123",
                     role: "admin",
                     name: "Superviseur Principal",
-                    assignedAreas: []
+                    zones: []
                 }
             };
-
+            
+            // Créer 11 employés
             for (let i = 1; i <= 11; i++) {
                 usersData[`user${i}`] = {
                     password: "pass123",
                     role: "employee",
                     name: `Employé ${i}`,
-                    assignedAreas: []
+                    zones: []
                 };
             }
-
-            assignedAreas = [];
-            zoneReports = {};
             
-            document.getElementById('loadingOverlay').style.display = 'none';
-            showNotification("Mode hors ligne activé", "success");
-            updateStatusBar("Mode hors ligne");
-            
-            document.getElementById('loginPage').style.display = 'block';
+            saveUsersData();
         }
 
-        function retryConnection() {
-            connectionRetries = 0;
-            hideError();
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            initializeFirebase();
+        function saveUsersData() {
+            localStorage.setItem('notecam_users', JSON.stringify(usersData));
         }
 
-        // ========== FONCTIONS UTILITAIRES ==========
-        function showNotification(message, type = 'success') {
-            const notification = document.getElementById('notification');
-            notification.textContent = message;
-            notification.style.background = type === 'success' ? '#2ea043' : '#ff6b6b';
-            notification.style.display = 'block';
+        function saveZonesData() {
+            localStorage.setItem('notecam_zones', JSON.stringify(zonesData));
+        }
+
+        function saveReportsData() {
+            localStorage.setItem('notecam_reports', JSON.stringify(reportsData));
+        }
+
+        function initializePhotoGrids() {
+            // Grille photos AVANT
+            const beforeGrid = document.getElementById('beforePhotosGrid');
+            beforeGrid.innerHTML = '';
             
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        function updateStatusBar(message) {
-            const statusBar = document.getElementById('statusBar');
-            if (statusBar) {
-                const mode = isOfflineMode ? "● Hors ligne" : "● En ligne";
-                statusBar.textContent = `Système NoteCam ${mode} ● ${message}`;
+            for (let i = 1; i <= 5; i++) {
+                const photoBox = createPhotoBox(i, 'before');
+                beforeGrid.appendChild(photoBox);
+            }
+            
+            // Grille photos APRÈS
+            const afterGrid = document.getElementById('afterPhotosGrid');
+            afterGrid.innerHTML = '';
+            
+            for (let i = 1; i <= 5; i++) {
+                const photoBox = createPhotoBox(i, 'after');
+                afterGrid.appendChild(photoBox);
             }
         }
 
-        function formatDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                if (isNaN(date.getTime())) return "Date invalide";
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0');
-                const year = date.getFullYear();
-                const hours = String(date.getHours()).padStart(2, '0');
-                const minutes = String(date.getMinutes()).padStart(2, '0');
-                return `${day}/${month}/${year} ${hours}:${minutes}`;
-            } catch {
-                return "Date invalide";
+        function createPhotoBox(index, type) {
+            const box = document.createElement('div');
+            box.className = 'photo-box';
+            box.dataset.index = index - 1;
+            box.dataset.type = type;
+            
+            box.innerHTML = `
+                <div style="font-size: 32px; color: #1a5fb4; margin-bottom: 10px;">
+                    <i class="fas fa-camera"></i>
+                </div>
+                <div style="font-weight: 600; color: #1a5fb4;">${type === 'before' ? 'AVANT' : 'APRÈS'} ${index}</div>
+                <img class="photo-preview" src="" style="display: none;">
+            `;
+            
+            box.onclick = () => capturePhoto(index - 1, type);
+            return box;
+        }
+
+        function initializeNumberGrid() {
+            const grid = document.getElementById('numberGrid');
+            grid.innerHTML = '';
+            
+            for (let i = 0; i <= 8; i++) {
+                const btn = document.createElement('div');
+                btn.className = 'number-btn';
+                btn.textContent = i;
+                btn.dataset.number = i;
+                btn.onclick = () => selectNumber(i);
+                grid.appendChild(btn);
             }
         }
 
-        function formatTime() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        // ========== AUTHENTICATION ==========
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            
+            if (!username || !password) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            const user = usersData[username];
+            
+            if (user && user.password === password) {
+                currentUser = {
+                    username: username,
+                    ...user
+                };
+                
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                
+                showNotification(`Bienvenue ${user.name} !`, 'success');
+                showPanel(user.role === 'admin' ? 'adminPanel' : 'employeePanel');
+                updateUI();
+                
+            } else {
+                showNotification('Nom d\'utilisateur ou mot de passe incorrect', 'error');
+            }
         }
 
-        function updateLocationInfo() {
-            const randomIndex = Math.floor(Math.random() * sampleLocations.length);
-            const location = sampleLocations[randomIndex];
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('currentUser');
+            showPanel('loginPage');
+            showNotification('Déconnexion réussie', 'success');
+        }
+
+        // ========== UI MANAGEMENT ==========
+        function showPanel(panelId) {
+            // Cacher tous les panneaux
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('employeePanel').style.display = 'none';
+            document.getElementById('reportsPanel').style.display = 'none';
             
-            currentLocation = {
-                lat: location.lat,
-                lng: location.lng,
-                elev: location.elev,
-                prec: location.prec,
-                time: formatTime()
+            // Afficher le panneau demandé
+            document.getElementById(panelId).style.display = 'block';
+        }
+
+        function updateUI() {
+            if (!currentUser) return;
+            
+            if (currentUser.role === 'admin') {
+                updateAdminUI();
+            } else {
+                updateEmployeeUI();
+            }
+        }
+
+        function updateAdminUI() {
+            // Mettre à jour les compteurs
+            const employeeCount = Object.values(usersData).filter(u => u.role === 'employee').length;
+            document.getElementById('employeeCount').textContent = employeeCount;
+            document.getElementById('zoneCount').textContent = zonesData.length;
+            document.getElementById('reportCount').textContent = reportsData.length;
+            
+            // Mettre à jour la liste des employés
+            updateEmployeeSelect();
+            displayEmployees();
+            displayAssignedZones();
+            displayReports();
+        }
+
+        function updateEmployeeUI() {
+            // Mettre à jour le nom
+            document.getElementById('employeeGreeting').textContent = currentUser.name;
+            
+            // Mettre à jour la liste des zones
+            updateEmployeeZoneSelect();
+            
+            // Charger le rapport temporaire
+            const savedReport = localStorage.getItem('currentReport');
+            if (savedReport) {
+                currentReport = JSON.parse(savedReport);
+                showAfterPhotos();
+            }
+        }
+
+        // ========== EMPLOYEE MANAGEMENT ==========
+        function updateEmployeeSelect() {
+            const select = document.getElementById('assignEmployee');
+            select.innerHTML = '<option value="">Sélectionner un employé</option>';
+            
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === 'employee') {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.textContent = `${data.name} (${username})`;
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function displayEmployees() {
+            const container = document.getElementById('adminEmployeesList');
+            container.innerHTML = '';
+            
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === 'employee') {
+                    const card = document.createElement('div');
+                    card.className = 'employee-card';
+                    
+                    const zoneCount = data.zones ? data.zones.length : 0;
+                    
+                    card.innerHTML = `
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
+                                    ${data.name}
+                                </div>
+                                <div style="color: #666; font-size: 14px; margin-bottom: 10px;">
+                                    ${username}
+                                </div>
+                                <div>
+                                    <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4;">
+                                        <i class="fas fa-map-marker-alt"></i> ${zoneCount} zones
+                                    </span>
+                                </div>
+                            </div>
+                            <button class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEmployee('${username}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    
+                    container.appendChild(card);
+                }
+            });
+        }
+
+        function addEmployee() {
+            const username = document.getElementById('newUsername').value.trim();
+            const password = document.getElementById('newPassword').value;
+            const name = document.getElementById('newName').value.trim();
+            
+            if (!username || !password || !name) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            if (usersData[username]) {
+                showNotification('Cet utilisateur existe déjà', 'error');
+                return;
+            }
+            
+            usersData[username] = {
+                password: password,
+                role: 'employee',
+                name: name,
+                zones: []
             };
             
-            showNotification("Localisation actualisée", "success");
+            saveUsersData();
+            updateAdminUI();
+            
+            document.getElementById('newUsername').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('newName').value = '';
+            
+            showNotification('Employé ajouté avec succès', 'success');
         }
 
-        // ========== GESTION DE LA CAMÉRA ==========
-        async function activateCameraAutomatically() {
-            try {
-                document.getElementById('cameraStatus').innerHTML = `
-                    <div class="camera-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="camera-text">Activation de la caméra...</div>
-                `;
+        function deleteEmployee(username) {
+            if (!confirm(`Supprimer l'employé ${username} ?`)) return;
+            
+            if (usersData[username]) {
+                delete usersData[username];
                 
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        facingMode: 'environment'
-                    },
-                    audio: false
-                });
+                // Retirer les zones assignées
+                zonesData = zonesData.filter(zone => zone.employee !== username);
                 
-                isCameraActive = true;
-                document.getElementById('cameraStatus').classList.add('active');
-                document.getElementById('cameraStatus').innerHTML = `
-                    <div class="camera-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="camera-text">Caméra active ✓</div>
-                `;
+                saveUsersData();
+                saveZonesData();
+                updateAdminUI();
                 
-            } catch (error) {
-                document.getElementById('toggleCamera').style.display = 'block';
-                document.getElementById('cameraStatus').innerHTML = `
-                    <div class="camera-icon" style="color: #ff6b6b;">
-                        <i class="fas fa-video-slash"></i>
-                    </div>
-                    <div class="camera-text" style="color: #ff6b6b;">Caméra non disponible</div>
-                `;
+                showNotification('Employé supprimé', 'success');
             }
         }
 
-        async function toggleCameraManually() {
+        // ========== ZONE MANAGEMENT ==========
+        function assignZone() {
+            const employee = document.getElementById('assignEmployee').value;
+            const name = document.getElementById('zoneName').value.trim();
+            const code = document.getElementById('zoneCode').value.trim().toUpperCase();
+            
+            if (!employee || !name || !code) {
+                showNotification('Veuillez remplir tous les champs', 'error');
+                return;
+            }
+            
+            if (zonesData.some(z => z.code === code)) {
+                showNotification('Ce code de zone existe déjà', 'error');
+                return;
+            }
+            
+            const zone = {
+                id: Date.now(),
+                employee: employee,
+                name: name,
+                code: code,
+                date: new Date().toISOString(),
+                active: true
+            };
+            
+            zonesData.push(zone);
+            
+            // Ajouter à l'employé
+            if (usersData[employee]) {
+                if (!usersData[employee].zones) usersData[employee].zones = [];
+                usersData[employee].zones.push(zone);
+            }
+            
+            saveZonesData();
+            saveUsersData();
+            updateAdminUI();
+            
+            document.getElementById('zoneName').value = '';
+            document.getElementById('zoneCode').value = '';
+            
+            showNotification('Zone attribuée avec succès', 'success');
+        }
+
+        function displayAssignedZones() {
+            const container = document.getElementById('assignedZonesList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            const zonesByEmployee = {};
+            zonesData.forEach(zone => {
+                if (!zonesByEmployee[zone.employee]) {
+                    zonesByEmployee[zone.employee] = [];
+                }
+                zonesByEmployee[zone.employee].push(zone);
+            });
+            
+            Object.entries(zonesByEmployee).forEach(([employee, zones]) => {
+                const user = usersData[employee];
+                if (!user) return;
+                
+                const section = document.createElement('div');
+                section.className = 'employee-card';
+                section.style.marginBottom = '15px';
+                
+                let zonesHTML = '';
+                zones.forEach(zone => {
+                    const reportCount = reportsData.filter(r => r.zoneCode === zone.code).length;
+                    
+                    zonesHTML += `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #f8f9fa; border-radius: 8px; margin: 5px 0;">
+                            <div>
+                                <div style="font-weight: 700; color: #333;">${zone.name}</div>
+                                <div style="font-size: 12px; color: #666;">Code: ${zone.code} • ${new Date(zone.date).toLocaleDateString()}</div>
+                            </div>
+                            <div style="display: flex; gap: 5px; align-items: center;">
+                                <span style="background: #f0fff4; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #2ea043;">
+                                    ${reportCount} rapports
+                                </span>
+                                <button class="btn btn-danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteZone(${zone.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                section.innerHTML = `
+                    <div style="color: #1a5fb4; font-weight: 700; margin-bottom: 10px;">
+                        ${user.name} <span style="font-size: 12px; color: #666;">(${employee})</span>
+                    </div>
+                    ${zonesHTML}
+                `;
+                
+                container.appendChild(section);
+            });
+        }
+
+        function deleteZone(zoneId) {
+            if (!confirm('Supprimer cette zone ?')) return;
+            
+            const zoneIndex = zonesData.findIndex(z => z.id === zoneId);
+            if (zoneIndex === -1) return;
+            
+            const zone = zonesData[zoneIndex];
+            
+            // Retirer de la liste générale
+            zonesData.splice(zoneIndex, 1);
+            
+            // Retirer de l'employé
+            if (usersData[zone.employee] && usersData[zone.employee].zones) {
+                const userZoneIndex = usersData[zone.employee].zones.findIndex(z => z.id === zoneId);
+                if (userZoneIndex !== -1) {
+                    usersData[zone.employee].zones.splice(userZoneIndex, 1);
+                }
+            }
+            
+            saveZonesData();
+            saveUsersData();
+            updateAdminUI();
+            
+            showNotification('Zone supprimée', 'success');
+        }
+
+        function updateEmployeeZoneSelect() {
+            const select = document.getElementById('employeeZoneSelect');
+            select.innerHTML = '<option value="">-- Choisir une zone --</option>';
+            
+            if (currentUser && currentUser.zones) {
+                currentUser.zones.forEach(zone => {
+                    const option = document.createElement('option');
+                    option.value = zone.id;
+                    option.textContent = `${zone.name} (${zone.code})`;
+                    select.appendChild(option);
+                });
+                
+                select.onchange = function() {
+                    const zoneId = parseInt(this.value);
+                    if (zoneId) {
+                        const zone = currentUser.zones.find(z => z.id === zoneId);
+                        if (zone) {
+                            selectZone(zone);
+                        }
+                    }
+                };
+            }
+        }
+
+        function selectZone(zone) {
+            selectedZone = zone;
+            
+            document.getElementById('currentZoneName').textContent = zone.name;
+            document.getElementById('currentZoneCode').textContent = zone.code;
+            document.getElementById('zoneAssignedDate').textContent = new Date(zone.date).toLocaleDateString();
+            document.getElementById('selectedZoneInfo').style.display = 'block';
+            
+            checkBeforeReportStatus();
+        }
+
+        // ========== CAMERA FUNCTIONS ==========
+        async function toggleCamera() {
             if (!isCameraActive) {
                 try {
                     videoStream = await navigator.mediaDevices.getUserMedia({
@@ -1396,17 +1271,14 @@
                     });
                     
                     isCameraActive = true;
-                    document.getElementById('toggleCamera').innerHTML = '<i class="fas fa-video-slash"></i> Désactiver';
                     document.getElementById('cameraStatus').classList.add('active');
-                    document.getElementById('cameraStatus').innerHTML = `
-                        <div class="camera-icon">
-                            <i class="fas fa-video"></i>
-                        </div>
-                        <div class="camera-text">Caméra active ✓</div>
-                    `;
+                    document.getElementById('cameraText').textContent = 'Caméra active';
+                    document.getElementById('toggleCameraBtn').textContent = 'Désactiver';
+                    
+                    showNotification('Caméra activée', 'success');
                     
                 } catch (error) {
-                    alert('Impossible d\'activer la caméra');
+                    showNotification('Erreur de caméra: ' + error.message, 'error');
                 }
             } else {
                 if (videoStream) {
@@ -1415,86 +1287,37 @@
                 }
                 
                 isCameraActive = false;
-                document.getElementById('toggleCamera').innerHTML = '<i class="fas fa-video"></i> Activer';
                 document.getElementById('cameraStatus').classList.remove('active');
-                document.getElementById('cameraStatus').innerHTML = `
-                    <div class="camera-icon">
-                        <i class="fas fa-video-slash"></i>
-                    </div>
-                    <div class="camera-text">Caméra désactivée</div>
-                `;
+                document.getElementById('cameraText').textContent = 'Caméra désactivée';
+                document.getElementById('toggleCameraBtn').textContent = 'Activer';
+                
+                showNotification('Caméra désactivée', 'info');
             }
-        }
-
-        // ========== GESTION DES PHOTOS ==========
-        function setupNumberButtons() {
-            document.querySelectorAll('.number-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const number = this.getAttribute('data-number');
-                    selectNumber(number);
-                });
-            });
-        }
-
-        function selectNumber(number) {
-            selectedNumber = number;
-            
-            document.querySelectorAll('.number-btn').forEach(btn => {
-                if (btn.getAttribute('data-number') === number) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-            
-            document.getElementById('selectedNumberDisplay').textContent = number;
-            document.getElementById('summaryNumber').textContent = number;
-            
-            checkSendBeforeStatus();
-        }
-
-        function setupPhotoBoxes() {
-            for (let i = 1; i <= 5; i++) {
-                const photoBox = createPhotoBox(i, 'before');
-                document.getElementById('photoBoxesContainer').appendChild(photoBox);
-            }
-            
-            for (let i = 1; i <= 5; i++) {
-                const photoBox = createPhotoBox(i, 'after');
-                document.getElementById('afterPhotoBoxesContainer').appendChild(photoBox);
-            }
-        }
-
-        function createPhotoBox(index, type) {
-            const box = document.createElement('div');
-            box.className = 'photo-box';
-            box.dataset.index = index - 1;
-            box.dataset.type = type;
-            
-            box.innerHTML = `
-                <div class="photo-icon">
-                    <i class="fas fa-camera"></i>
-                </div>
-                <div class="photo-box-label">${type.toUpperCase()} ${index}</div>
-                <img class="photo-preview" src="" alt="Photo ${type} ${index}">
-            `;
-            
-            box.addEventListener('click', () => capturePhoto(index - 1, type));
-            
-            return box;
         }
 
         async function capturePhoto(index, type) {
             if (!isCameraActive || !videoStream) {
-                alert("Activez la caméra d'abord");
+                showNotification('Activez la caméra d\'abord', 'error');
+                return;
+            }
+            
+            if (!selectedZone && type === 'before') {
+                showNotification('Sélectionnez une zone d\'abord', 'error');
+                return;
+            }
+            
+            if (!selectedNumber && type === 'before') {
+                showNotification('Sélectionnez un nombre d\'abord', 'error');
                 return;
             }
             
             try {
-                document.getElementById('captureFlash').style.animation = 'captureFlash 300ms ease-out';
+                // Effet flash
+                const flash = document.getElementById('captureFlash');
+                flash.style.animation = 'none';
                 setTimeout(() => {
-                    document.getElementById('captureFlash').style.animation = '';
-                }, 300);
+                    flash.style.animation = 'captureFlash 0.3s ease-out';
+                }, 10);
                 
                 const video = document.createElement('video');
                 video.srcObject = videoStream;
@@ -1509,9 +1332,20 @@
                 const canvas = document.createElement('canvas');
                 canvas.width = video.videoWidth;
                 canvas.height = video.videoHeight;
-                const context = canvas.getContext('2d');
+                const ctx = canvas.getContext('2d');
                 
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                
+                // Ajouter des informations
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillRect(10, canvas.height - 120, 300, 110);
+                
+                ctx.fillStyle = '#000';
+                ctx.font = '14px Arial';
+                ctx.fillText(`Zone: ${selectedZone ? selectedZone.code : 'N/A'}`, 20, canvas.height - 100);
+                ctx.fillText(`Nombre: ${selectedNumber !== null ? selectedNumber : 'N/A'}`, 20, canvas.height - 80);
+                ctx.fillText(`Date: ${new Date().toLocaleString()}`, 20, canvas.height - 60);
+                ctx.fillText(`Photo: ${type.toUpperCase()} ${index + 1}`, 20, canvas.height - 40);
                 
                 canvas.toBlob((blob) => {
                     const imageUrl = URL.createObjectURL(blob);
@@ -1530,661 +1364,451 @@
                         };
                     }
                     
+                    // Mettre à jour l'interface
                     const photoBox = document.querySelector(`.photo-box[data-index="${index}"][data-type="${type}"]`);
                     photoBox.classList.add('captured');
                     const preview = photoBox.querySelector('.photo-preview');
                     preview.src = imageUrl;
+                    preview.style.display = 'block';
                     
+                    // Mettre à jour le compteur
                     updatePhotoCount(type);
+                    
+                    showNotification(`Photo ${type} ${index + 1} capturée`, 'success');
                     
                 }, 'image/jpeg', 0.9);
                 
             } catch (error) {
-                console.error('Erreur de capture :', error);
-                alert('Erreur lors de la capture');
+                console.error('Capture error:', error);
+                showNotification('Erreur de capture', 'error');
             }
         }
 
         function updatePhotoCount(type) {
+            const photos = type === 'before' ? beforePhotos : afterPhotos;
+            const count = photos.filter(p => p !== null).length;
+            
             if (type === 'before') {
-                const beforeCount = beforePhotos.filter(p => p !== null).length;
-                document.getElementById('beforePhotosCount').textContent = `${beforeCount}/5`;
-                document.getElementById('summaryBeforePhotos').textContent = `${beforeCount}/5`;
-                checkSendBeforeStatus();
+                document.getElementById('beforeCount').textContent = `${count}/5`;
+                document.getElementById('sendBeforeBtn').disabled = count < 5 || !selectedNumber || !selectedZone;
             } else {
-                const afterCount = afterPhotos.filter(p => p !== null).length;
-                document.getElementById('afterPhotosCount').textContent = `${afterCount}/5`;
-                checkSendAfterStatus();
+                document.getElementById('afterCount').textContent = `${count}/5`;
+                document.getElementById('sendAfterBtn').disabled = count < 5;
             }
         }
 
-        function clearAllPhotos() {
-            if (!confirm("Effacer toutes les photos ?")) return;
+        function selectNumber(number) {
+            selectedNumber = number;
             
-            beforePhotos = [null, null, null, null, null];
-            afterPhotos = [null, null, null, null, null];
-            
-            document.querySelectorAll('.photo-box').forEach(box => {
-                box.classList.remove('captured');
-                const preview = box.querySelector('.photo-preview');
-                if (preview) preview.src = '';
+            // Mettre à jour les boutons
+            document.querySelectorAll('.number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (parseInt(btn.dataset.number) === number) {
+                    btn.classList.add('selected');
+                }
             });
             
-            updatePhotoCount('before');
-            updatePhotoCount('after');
-            
-            showNotification("Photos effacées", "success");
+            document.getElementById('selectedNumber').textContent = number;
+            checkBeforeReportStatus();
         }
 
-        function checkSendBeforeStatus() {
+        function checkBeforeReportStatus() {
             const beforeCount = beforePhotos.filter(p => p !== null).length;
-            const canSend = selectedNumber !== null && selectedArea !== null && beforeCount === 5;
+            const canSend = selectedNumber !== null && selectedZone !== null && beforeCount === 5;
             document.getElementById('sendBeforeBtn').disabled = !canSend;
         }
 
-        function checkSendAfterStatus() {
-            const afterCount = afterPhotos.filter(p => p !== null).length;
-            const canSend = afterCount === 5;
-            document.getElementById('sendAfterBtn').disabled = !canSend;
-        }
-
-        // ========== GESTION DES ÉTAPES ==========
-        function sendBeforePhotos() {
-            if (!checkSendBeforeStatus()) {
-                alert("Complétez toutes les informations");
+        // ========== REPORTS ==========
+        function sendBeforeReport() {
+            if (!selectedZone || selectedNumber === null) {
+                showNotification('Complétez les informations', 'error');
                 return;
             }
             
-            tempReport = {
+            const beforeCount = beforePhotos.filter(p => p !== null).length;
+            if (beforeCount < 5) {
+                showNotification('Capturez les 5 photos AVANT', 'error');
+                return;
+            }
+            
+            currentReport = {
                 id: Date.now(),
-                employee: currentUser.username,
+                employeeId: currentUser.username,
                 employeeName: currentUser.name,
+                zoneId: selectedZone.id,
+                zoneName: selectedZone.name,
+                zoneCode: selectedZone.code,
                 number: selectedNumber,
                 date: new Date().toISOString(),
-                location: {...currentLocation},
                 beforePhotos: beforePhotos.filter(p => p !== null),
-                area: selectedArea.name,
-                areaCode: selectedArea.code
+                status: 'before_only'
             };
             
-            localStorage.setItem('tempReport', JSON.stringify(tempReport));
+            localStorage.setItem('currentReport', JSON.stringify(currentReport));
             
-            document.getElementById('beforePhotosContainer').style.display = 'none';
-            document.getElementById('sendBeforeContainer').style.display = 'none';
-            document.getElementById('apresButtonContainer').style.display = 'block';
+            // Cacher AVANT, montrer APRÈS
+            document.getElementById('apresSection').style.display = 'block';
             
-            document.querySelectorAll('.number-btn').forEach(btn => btn.disabled = true);
-            document.getElementById('areaSelect').disabled = true;
-            
-            showNotification("Photos AVANT envoyées", "success");
+            showNotification('Photos AVANT envoyées avec succès', 'success');
         }
 
         function showAfterPhotos() {
-            document.getElementById('apresButtonContainer').style.display = 'none';
-            document.getElementById('afterPhotosContainer').style.display = 'block';
-            document.getElementById('sendAfterContainer').style.display = 'block';
+            document.getElementById('beforeSection').style.display = 'none';
+            document.getElementById('apresSection').style.display = 'none';
+            document.getElementById('afterSection').style.display = 'block';
         }
 
-        async function sendAfterPhotos() {
-            if (!checkSendAfterStatus()) {
-                alert("Capturez les 5 photos APRÈS");
+        function sendAfterReport() {
+            const afterCount = afterPhotos.filter(p => p !== null).length;
+            if (afterCount < 5) {
+                showNotification('Capturez les 5 photos APRÈS', 'error');
                 return;
             }
             
-            if (!tempReport) {
-                alert("Rapport temporaire non trouvé");
+            if (!currentReport) {
+                showNotification('Erreur: rapport non trouvé', 'error');
                 return;
             }
             
-            const report = {
-                ...tempReport,
-                afterPhotos: afterPhotos.filter(p => p !== null),
-                status: 'complete'
-            };
+            // Compléter le rapport
+            currentReport.afterPhotos = afterPhotos.filter(p => p !== null);
+            currentReport.status = 'complete';
+            currentReport.completedDate = new Date().toISOString();
             
-            const zoneCode = selectedArea.code;
-            if (!zoneReports[zoneCode]) {
-                zoneReports[zoneCode] = {
-                    name: selectedArea.name,
-                    reports: [],
-                    photos: []
-                };
-            }
+            // Ajouter aux rapports
+            reportsData.push(currentReport);
+            saveReportsData();
             
-            zoneReports[zoneCode].reports.push(report);
+            // Générer le fichier
+            generateReportFile(currentReport);
             
-            // Sauvegarder
-            if (!isOfflineMode && database) {
-                try {
-                    await database.ref('zoneReports').set(zoneReports);
-                } catch (error) {
-                    isOfflineMode = true;
-                    localStorage.setItem('offline_zoneReports', JSON.stringify(zoneReports));
-                }
-            } else {
-                localStorage.setItem('offline_zoneReports', JSON.stringify(zoneReports));
-            }
+            // Réinitialiser
+            resetEmployeeForm();
             
-            generateZoneFile(zoneCode);
-            
-            tempReport = null;
-            localStorage.removeItem('tempReport');
-            resetForm();
-            
-            showNotification("Rapport envoyé avec succès", "success");
-            updateCounters();
+            showNotification('Rapport complet envoyé !', 'success');
         }
 
-        function generateZoneFile(zoneCode) {
-            const zoneData = zoneReports[zoneCode];
-            if (!zoneData) return;
+        function resetEmployeeForm() {
+            // Réinitialiser les photos
+            beforePhotos = Array(5).fill(null);
+            afterPhotos = Array(5).fill(null);
             
-            const zoneFile = {
-                zoneCode: zoneCode,
-                zoneName: zoneData.name,
-                generatedAt: new Date().toISOString(),
-                totalReports: zoneData.reports.length
+            // Réinitialiser l'interface
+            document.querySelectorAll('.photo-box').forEach(box => {
+                box.classList.remove('captured');
+                const preview = box.querySelector('.photo-preview');
+                preview.src = '';
+                preview.style.display = 'none';
+            });
+            
+            // Réinitialiser le nombre
+            selectedNumber = null;
+            document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('selectedNumber').textContent = 'Aucun';
+            
+            // Réinitialiser le rapport
+            currentReport = null;
+            localStorage.removeItem('currentReport');
+            
+            // Réafficher AVANT
+            document.getElementById('beforeSection').style.display = 'block';
+            document.getElementById('afterSection').style.display = 'none';
+            document.getElementById('apresSection').style.display = 'none';
+            
+            // Mettre à jour les compteurs
+            document.getElementById('beforeCount').textContent = '0/5';
+            document.getElementById('afterCount').textContent = '0/5';
+        }
+
+        function generateReportFile(report) {
+            const reportData = {
+                id: report.id,
+                employee: report.employeeName,
+                zone: report.zoneName,
+                zoneCode: report.zoneCode,
+                number: report.number,
+                date: report.date,
+                completedDate: report.completedDate,
+                status: report.status,
+                beforePhotosCount: report.beforePhotos.length,
+                afterPhotosCount: report.afterPhotos.length
             };
             
-            const jsonData = JSON.stringify(zoneFile, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
+            const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
             const link = document.createElement('a');
             link.href = url;
-            link.download = `NoteCam_Zone_${zoneCode}.json`;
+            link.download = `NoteCam_${report.zoneCode}_${report.date.split('T')[0]}.json`;
             link.click();
             
             URL.revokeObjectURL(url);
         }
 
-        function resetForm() {
-            selectedNumber = null;
-            beforePhotos = [null, null, null, null, null];
-            afterPhotos = [null, null, null, null, null];
+        function displayReports() {
+            const container = document.getElementById('reportsList');
+            if (!container) return;
             
-            document.querySelectorAll('.number-btn').forEach(btn => {
-                btn.classList.remove('selected');
-                btn.disabled = false;
-            });
+            container.innerHTML = '';
             
-            document.getElementById('areaSelect').disabled = false;
-            document.getElementById('selectedNumberDisplay').textContent = "Aucun";
-            document.getElementById('summaryNumber').textContent = "-";
+            // Afficher les 5 derniers rapports
+            const recentReports = [...reportsData].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
             
-            document.querySelectorAll('.photo-box').forEach(box => {
-                box.classList.remove('captured');
-                const preview = box.querySelector('.photo-preview');
-                if (preview) preview.src = '';
-            });
-            
-            document.getElementById('beforePhotosCount').textContent = "0/5";
-            document.getElementById('afterPhotosCount').textContent = "0/5";
-            document.getElementById('summaryBeforePhotos').textContent = "0/5";
-            
-            document.getElementById('beforePhotosContainer').style.display = 'block';
-            document.getElementById('afterPhotosContainer').style.display = 'none';
-            document.getElementById('sendBeforeContainer').style.display = 'block';
-            document.getElementById('sendAfterContainer').style.display = 'none';
-            document.getElementById('apresButtonContainer').style.display = 'none';
-            
-            document.getElementById('sendBeforeBtn').disabled = true;
-            document.getElementById('sendAfterBtn').disabled = true;
-        }
-
-        // ========== AUTHENTIFICATION ==========
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (!username || !password) {
-                alert("Veuillez saisir le nom d'utilisateur et le mot de passe");
-                return;
-            }
-            
-            const user = usersData[username];
-            
-            if (user && user.password === password) {
-                currentUser = {
-                    username: username,
-                    ...user
-                };
+            recentReports.forEach(report => {
+                const card = document.createElement('div');
+                card.className = 'report-card';
                 
-                updateStatusBar(`Bienvenue ${user.name}`);
-                document.getElementById('loginPage').style.display = 'none';
-                
-                if (user.role === 'admin') {
-                    document.getElementById('adminPanel').style.display = 'block';
-                    updateAdminDashboard();
-                } else {
-                    document.getElementById('employeePanel').style.display = 'block';
-                    document.getElementById('employeeName').textContent = `Employé : ${user.name}`;
-                    loadEmployeeAreas();
-                    populateAreaSelect();
-                    
-                    setTimeout(() => {
-                        activateCameraAutomatically();
-                    }, 500);
-                }
-                
-                showNotification(`Bienvenue ${user.name}`, "success");
-                
-            } else {
-                showNotification("Nom d'utilisateur ou mot de passe incorrect", "error");
-            }
-        }
-
-        function logout() {
-            if (isCameraActive && videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-            }
-            
-            currentUser = null;
-            selectedArea = null;
-            
-            document.getElementById('loginPage').style.display = 'block';
-            document.getElementById('adminPanel').style.display = 'none';
-            document.getElementById('employeePanel').style.display = 'none';
-            document.getElementById('reportsPanel').style.display = 'none';
-            
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            
-            showNotification("Déconnexion réussie", "success");
-            updateStatusBar("Déconnexion réussie");
-        }
-
-        function checkLoggedInUser() {
-            // Vérifier si un utilisateur est déjà connecté
-            const savedUser = localStorage.getItem('currentUser');
-            if (savedUser) {
-                try {
-                    currentUser = JSON.parse(savedUser);
-                    if (usersData[currentUser.username]) {
-                        login();
-                    }
-                } catch (e) {
-                    console.error('Erreur de chargement de l\'utilisateur:', e);
-                }
-            }
-        }
-
-        // ========== GESTION DES EMPLOYÉS ==========
-        async function addEmployee() {
-            const username = document.getElementById('empUsername').value;
-            const password = document.getElementById('empPassword').value;
-            const name = document.getElementById('empName').value;
-            
-            if (!username || !password || !name) {
-                alert("Veuillez remplir tous les champs");
-                return;
-            }
-            
-            if (usersData[username]) {
-                alert("Le nom d'utilisateur existe déjà");
-                return;
-            }
-            
-            usersData[username] = {
-                password: password,
-                role: "employee",
-                name: name,
-                assignedAreas: []
-            };
-            
-            // Sauvegarder
-            if (!isOfflineMode && database) {
-                try {
-                    await database.ref('users').set(usersData);
-                } catch (error) {
-                    isOfflineMode = true;
-                    localStorage.setItem('offline_usersData', JSON.stringify(usersData));
-                }
-            } else {
-                localStorage.setItem('offline_usersData', JSON.stringify(usersData));
-            }
-            
-            updateEmployeeSelect();
-            displayEmployees();
-            updateCounters();
-            
-            document.getElementById('empUsername').value = '';
-            document.getElementById('empPassword').value = '';
-            document.getElementById('empName').value = '';
-            
-            showNotification("Employé ajouté", "success");
-        }
-
-        function displayEmployees() {
-            const employeesList = document.getElementById('employeesList');
-            if (!employeesList) return;
-            
-            employeesList.innerHTML = '';
-            
-            let employeeCount = 0;
-            
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    employeeCount++;
-                    const employeeCard = document.createElement('div');
-                    employeeCard.className = 'employee-card';
-                    
-                    const areasCount = (data.assignedAreas || []).length;
-                    
-                    employeeCard.innerHTML = `
-                        <div style="display: flex; justify-content: space-between; align-items: start;">
-                            <div>
-                                <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
-                                    ${data.name}
-                                </div>
-                                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
-                                    Nom d'utilisateur : ${username}
-                                </div>
-                                <div style="display: flex; gap: 15px;">
-                                    <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4;">
-                                        <i class="fas fa-map-marker-alt"></i> ${areasCount} zones
-                                    </span>
-                                </div>
+                card.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                        <div>
+                            <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
+                                ${report.employeeName}
                             </div>
-                            <button class="control-btn danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEmployee('${username}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            <div style="color: #666; font-size: 14px; margin-bottom: 5px;">
+                                ${report.zoneName} (${report.zoneCode})
+                            </div>
+                            <div style="font-size: 12px; color: #888;">
+                                ${new Date(report.date).toLocaleString()}
+                            </div>
                         </div>
-                    `;
-                    
-                    employeesList.appendChild(employeeCard);
-                }
-            });
-            
-            if (employeeCount === 0) {
-                employeesList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucun employé enregistré</p>';
-            }
-        }
-
-        async function deleteEmployee(username) {
-            if (!confirm(`Supprimer l'employé ${username} ?`)) return;
-            
-            if (usersData[username]) {
-                delete usersData[username];
-            }
-            
-            assignedAreas = assignedAreas.filter(area => area.employee !== username);
-            
-            // Sauvegarder
-            if (!isOfflineMode && database) {
-                try {
-                    await Promise.all([
-                        database.ref('users').set(usersData),
-                        database.ref('assignedAreas').set(assignedAreas)
-                    ]);
-                } catch (error) {
-                    isOfflineMode = true;
-                    localStorage.setItem('offline_usersData', JSON.stringify(usersData));
-                    localStorage.setItem('offline_assignedAreas', JSON.stringify(assignedAreas));
-                }
-            } else {
-                localStorage.setItem('offline_usersData', JSON.stringify(usersData));
-                localStorage.setItem('offline_assignedAreas', JSON.stringify(assignedAreas));
-            }
-            
-            updateEmployeeSelect();
-            displayEmployees();
-            updateCounters();
-            
-            showNotification("Employé supprimé", "success");
-        }
-
-        // ========== GESTION DES ZONES ==========
-        function updateEmployeeSelect() {
-            const employeeSelect = document.getElementById('employeeSelect');
-            if (!employeeSelect) return;
-            
-            employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
-            
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    const option = document.createElement('option');
-                    option.value = username;
-                    option.textContent = `${data.name} (${username})`;
-                    employeeSelect.appendChild(option);
-                }
-            });
-        }
-
-        async function assignArea() {
-            const employeeUsername = document.getElementById('employeeSelect').value;
-            const areaName = document.getElementById('areaName').value;
-            const areaCode = document.getElementById('areaCode').value;
-            
-            if (!employeeUsername || !areaName || !areaCode) {
-                alert("Veuillez remplir tous les champs");
-                return;
-            }
-            
-            if (assignedAreas.some(area => area.code === areaCode)) {
-                alert("Ce code de zone existe déjà");
-                return;
-            }
-            
-            const area = {
-                id: Date.now(),
-                employee: employeeUsername,
-                name: areaName,
-                code: areaCode,
-                date: new Date().toISOString(),
-                isActive: true
-            };
-            
-            assignedAreas.push(area);
-            
-            // Mettre à jour l'utilisateur
-            if (usersData[employeeUsername]) {
-                if (!usersData[employeeUsername].assignedAreas) {
-                    usersData[employeeUsername].assignedAreas = [];
-                }
-                usersData[employeeUsername].assignedAreas.push(area);
-            }
-            
-            // Sauvegarder
-            if (!isOfflineMode && database) {
-                try {
-                    await Promise.all([
-                        database.ref('assignedAreas').set(assignedAreas),
-                        database.ref('users').set(usersData)
-                    ]);
-                } catch (error) {
-                    isOfflineMode = true;
-                    localStorage.setItem('offline_assignedAreas', JSON.stringify(assignedAreas));
-                    localStorage.setItem('offline_usersData', JSON.stringify(usersData));
-                }
-            } else {
-                localStorage.setItem('offline_assignedAreas', JSON.stringify(assignedAreas));
-                localStorage.setItem('offline_usersData', JSON.stringify(usersData));
-            }
-            
-            displayAssignedAreasList();
-            updateCounters();
-            
-            document.getElementById('areaName').value = '';
-            document.getElementById('areaCode').value = '';
-            
-            showNotification("Zone attribuée", "success");
-        }
-
-        function displayAssignedAreasList() {
-            const assignedAreasList = document.getElementById('assignedAreasList');
-            if (!assignedAreasList) return;
-            
-            if (assignedAreas.length === 0) {
-                assignedAreasList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucune zone attribuée</p>';
-                return;
-            }
-            
-            const areasByEmployee = {};
-            assignedAreas.forEach(area => {
-                if (!areasByEmployee[area.employee]) {
-                    areasByEmployee[area.employee] = [];
-                }
-                areasByEmployee[area.employee].push(area);
-            });
-            
-            assignedAreasList.innerHTML = '';
-            
-            Object.keys(areasByEmployee).forEach(employeeUsername => {
-                const employee = usersData[employeeUsername];
-                if (!employee) return;
+                        <span style="background: #e3f2fd; padding: 5px 12px; border-radius: 15px; font-size: 14px; color: #1a5fb4; font-weight: 700;">
+                            ${report.number}
+                        </span>
+                    </div>
+                    <div style="display: flex; gap: 10px; font-size: 12px; color: #666; margin-bottom: 15px;">
+                        <span><i class="fas fa-images"></i> ${report.beforePhotosCount + report.afterPhotosCount} photos</span>
+                        <span><i class="fas fa-check-circle"></i> ${report.status === 'complete' ? 'Complet' : 'Partiel'}</span>
+                    </div>
+                    <button class="btn btn-primary" style="width: 100%; padding: 8px;" onclick="viewReportDetails(${report.id})">
+                        <i class="fas fa-eye"></i> Voir détails
+                    </button>
+                `;
                 
-                const employeeSection = document.createElement('div');
-                employeeSection.className = 'employee-card';
+                container.appendChild(card);
+            });
+            
+            if (reportsData.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <i class="fas fa-inbox" style="font-size: 48px; opacity: 0.3; margin-bottom: 15px;"></i>
+                        <p>Aucun rapport reçu</p>
+                    </div>
+                `;
+            }
+        }
+
+        function viewReports() {
+            showPanel('reportsPanel');
+            displayAllReports();
+        }
+
+        function displayAllReports() {
+            const container = document.getElementById('allReportsList');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Grouper par zone
+            const reportsByZone = {};
+            reportsData.forEach(report => {
+                if (!reportsByZone[report.zoneCode]) {
+                    reportsByZone[report.zoneCode] = {
+                        name: report.zoneName,
+                        reports: []
+                    };
+                }
+                reportsByZone[report.zoneCode].reports.push(report);
+            });
+            
+            Object.entries(reportsByZone).forEach(([zoneCode, zoneData]) => {
+                const section = document.createElement('div');
+                section.className = 'section';
                 
-                let areasHTML = '';
-                areasByEmployee[employeeUsername].forEach(area => {
-                    const reportCount = zoneReports[area.code]?.reports?.length || 0;
-                    
-                    areasHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #ffffff; border-radius: 8px; margin: 5px 0; border: 1px solid #e1e8ed;">
-                            <div>
-                                <div style="font-weight: 700; color: #333;">${area.name}</div>
-                                <div style="font-size: 12px; color: #666;">Code: ${area.code} • ${formatDate(area.date)}</div>
-                            </div>
-                            <div style="display: flex; gap: 5px; align-items: center;">
-                                <span style="background: #f0fff4; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #2ea043;">
-                                    ${reportCount} rapports
+                let reportsHTML = '';
+                zoneData.reports.forEach(report => {
+                    reportsHTML += `
+                        <div class="report-card" style="margin-bottom: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div>
+                                    <div style="font-weight: 700; color: #333;">${report.employeeName}</div>
+                                    <div style="font-size: 12px; color: #666;">
+                                        ${new Date(report.date).toLocaleString()} • ${report.beforePhotosCount + report.afterPhotosCount} photos
+                                    </div>
+                                </div>
+                                <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4; font-weight: 700;">
+                                    ${report.number}
                                 </span>
-                                <button class="control-btn danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteArea(${area.id})">
-                                    <i class="fas fa-trash"></i>
-                                </button>
                             </div>
                         </div>
                     `;
                 });
                 
-                employeeSection.innerHTML = `
-                    <div style="color: #1a5fb4; font-weight: 700; margin-bottom: 10px; font-size: 16px;">
-                        ${employee.name} <span style="font-size: 12px; color: #666;">(${employeeUsername})</span>
+                section.innerHTML = `
+                    <div class="section-title">
+                        ${zoneData.name} (${zoneCode})
+                        <span class="badge">${zoneData.reports.length} rapports</span>
                     </div>
-                    ${areasHTML}
+                    ${reportsHTML}
                 `;
                 
-                assignedAreasList.appendChild(employeeSection);
+                container.appendChild(section);
             });
-        }
-
-        function loadEmployeeAreas() {
-            if (!currentUser || !usersData[currentUser.username] || !usersData[currentUser.username].assignedAreas) {
-                document.getElementById('selectedAreaInfo').style.display = 'none';
-                return;
-            }
             
-            const areas = usersData[currentUser.username].assignedAreas;
-            if (areas && areas.length > 0) {
-                if (!selectedArea) {
-                    selectArea(areas[0]);
-                }
-            } else {
-                document.getElementById('selectedAreaInfo').style.display = 'none';
+            if (reportsData.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: #666;">
+                        <i class="fas fa-file-alt" style="font-size: 60px; opacity: 0.2; margin-bottom: 20px;"></i>
+                        <h3 style="margin-bottom: 10px;">Aucun rapport</h3>
+                        <p>Les rapports apparaîtront ici</p>
+                    </div>
+                `;
             }
         }
 
-        function populateAreaSelect() {
-            if (!currentUser || !usersData[currentUser.username] || !usersData[currentUser.username].assignedAreas) {
-                document.getElementById('areaSelect').innerHTML = '<option value="">Choisissez une zone</option>';
-                return;
-            }
+        function viewReportDetails(reportId) {
+            const report = reportsData.find(r => r.id === reportId);
+            if (!report) return;
             
-            const areaSelect = document.getElementById('areaSelect');
-            areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
+            let details = `
+                <div style="background: white; padding: 30px; border-radius: 10px; max-width: 600px; margin: 20px auto;">
+                    <h3 style="color: #1a5fb4; margin-bottom: 20px;">Détails du rapport</h3>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                        <div>
+                            <div style="font-size: 12px; color: #666;">Employé</div>
+                            <div style="font-weight: 700;">${report.employeeName}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #666;">Zone</div>
+                            <div style="font-weight: 700;">${report.zoneName} (${report.zoneCode})</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #666;">Nombre</div>
+                            <div style="font-weight: 700; font-size: 24px;">${report.number}</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: #666;">Date</div>
+                            <div style="font-weight: 700;">${new Date(report.date).toLocaleString()}</div>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                        <div style="display: flex; gap: 20px;">
+                            <div>
+                                <div style="font-size: 12px; color: #666;">Photos AVANT</div>
+                                <div style="font-weight: 700;">${report.beforePhotosCount}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #666;">Photos APRÈS</div>
+                                <div style="font-weight: 700;">${report.afterPhotosCount}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 12px; color: #666;">Statut</div>
+                                <div style="font-weight: 700; color: ${report.status === 'complete' ? '#2ea043' : '#ff6b6b'}">
+                                    ${report.status === 'complete' ? 'Complet' : 'Partiel'}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-primary" style="width: 100%; padding: 12px;" onclick="downloadReport(${report.id})">
+                        <i class="fas fa-download"></i> Télécharger ce rapport
+                    </button>
+                </div>
+            `;
             
-            const areas = usersData[currentUser.username].assignedAreas;
-            areas.forEach(area => {
-                const option = document.createElement('option');
-                option.value = area.id;
-                option.textContent = `${area.name} (${area.code})`;
-                areaSelect.appendChild(option);
-            });
+            // Créer une modal
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            modal.style.zIndex = '10000';
+            modal.style.padding = '20px';
             
-            areaSelect.onchange = function() {
-                const areaId = parseInt(this.value);
-                if (areaId) {
-                    const area = areas.find(a => a.id === areaId);
-                    if (area) {
-                        selectArea(area);
-                    }
-                }
+            modal.innerHTML = `
+                <div style="position: relative; width: 100%; max-width: 700px;">
+                    <button onclick="this.parentElement.parentElement.remove()" style="position: absolute; top: -40px; right: 0; background: #ff6b6b; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 16px;">×</button>
+                    ${details}
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function downloadReport(reportId) {
+            const report = reportsData.find(r => r.id === reportId);
+            if (!report) return;
+            
+            const reportExport = {
+                reportId: report.id,
+                employee: report.employeeName,
+                zone: report.zoneName,
+                zoneCode: report.zoneCode,
+                number: report.number,
+                date: report.date,
+                beforePhotosCount: report.beforePhotosCount,
+                afterPhotosCount: report.afterPhotosCount,
+                status: report.status
             };
+            
+            const blob = new Blob([JSON.stringify(reportExport, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `NoteCam_Rapport_${report.zoneCode}_${report.date.split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
         }
 
-        function selectArea(area) {
-            selectedArea = area;
-            document.getElementById('selectedAreaName').textContent = area.name;
-            document.getElementById('selectedAreaCode').textContent = area.code;
-            document.getElementById('areaAssignedDate').textContent = formatDate(area.date);
-            document.getElementById('selectedAreaInfo').style.display = 'block';
+        function exportData() {
+            const exportData = {
+                users: usersData,
+                zones: zonesData,
+                reports: reportsData,
+                exportedAt: new Date().toISOString()
+            };
             
-            document.getElementById('summaryZone').textContent = area.name;
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
             
-            checkSendBeforeStatus();
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `NoteCam_Export_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            showNotification('Données exportées', 'success');
         }
 
-        // ========== INTERFACE ADMIN ==========
-        function updateAdminDashboard() {
-            displayEmployees();
-            displayAssignedAreasList();
-            displayMiniReports();
-            updateCounters();
+        function backToAdmin() {
+            showPanel('adminPanel');
         }
 
-        function updateCounters() {
-            let employeeCount = 0;
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    employeeCount++;
-                }
-            });
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type}`;
+            notification.style.display = 'block';
             
-            const employeesCount = document.getElementById('employeesCount');
-            const areasCount = document.getElementById('areasCount');
-            const reportsCount = document.getElementById('reportsCount');
-            
-            if (employeesCount) employeesCount.textContent = employeeCount;
-            if (areasCount) areasCount.textContent = assignedAreas.length;
-            
-            let totalReports = 0;
-            Object.values(zoneReports).forEach(zone => {
-                totalReports += zone.reports.length;
-            });
-            if (reportsCount) reportsCount.textContent = totalReports;
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
         }
 
-        // ========== INITIALISATION ==========
-        function initializeApp() {
-            updateOnlineStatus();
-            
-            // Écouter les changements de connexion
-            window.addEventListener('online', updateOnlineStatus);
-            window.addEventListener('offline', updateOnlineStatus);
-            
-            // Essayer Firebase
-            if (navigator.onLine) {
-                initializeFirebase();
-            } else {
-                useOfflineMode();
-            }
-            
-            // Initialiser le reste
-            updateLocationInfo();
-            setupNumberButtons();
-            setupPhotoBoxes();
-            
-            // Écouteurs
-            document.getElementById('toggleCamera')?.addEventListener('click', toggleCameraManually);
-            document.getElementById('clearPhotos')?.addEventListener('click', clearAllPhotos);
-            document.getElementById('refreshLocation')?.addEventListener('click', updateLocationInfo);
-        }
-
-        // ========== DÉMARRER ==========
+        // ========== START APP ==========
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
+
+    <!-- Font Awesome Icons -->
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </body>
 </html>
