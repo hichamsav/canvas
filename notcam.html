@@ -126,7 +126,7 @@
             font-weight: 700;
         }
 
-        .logout-btn, .back-btn {
+        .logout-btn, .back-btn, .github-btn {
             padding: 10px 20px;
             background: #ff6b6b;
             color: white;
@@ -139,13 +139,17 @@
             transition: all 0.3s ease;
         }
 
-        .logout-btn:hover, .back-btn:hover {
+        .logout-btn:hover, .back-btn:hover, .github-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
         }
 
         .back-btn {
             background: #2ea043;
+        }
+
+        .github-btn {
+            background: #24292e;
         }
 
         /* Sections du tableau de bord */
@@ -228,7 +232,7 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Zone de l'employé - Interface compacte */
+        /* Zone de l'employé */
         .employee-area {
             padding: 20px;
         }
@@ -277,7 +281,7 @@
             box-shadow: 0 3px 10px rgba(26, 95, 180, 0.1);
         }
 
-        /* Contrôles sous la zone sélectionnée */
+        /* Contrôles */
         .controls-under-area {
             display: flex;
             justify-content: center;
@@ -458,7 +462,7 @@
             display: none;
         }
 
-        /* Section APRES - comme bouton */
+        /* Section APRES */
         .section-divider {
             text-align: center;
             margin: 30px 0;
@@ -555,7 +559,7 @@
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
 
-        /* Zone de saisie du nombre (toujours visible) */
+        /* Zone de saisie du nombre */
         .number-selection {
             background: #ffffff;
             padding: 20px;
@@ -603,189 +607,72 @@
             cursor: not-allowed;
         }
 
-        /* État des photos */
-        .photos-status {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding: 10px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        /* GitHub Panel Styles */
+        .github-panel {
+            display: none;
+        }
+
+        .github-controls {
+            background: #f6f8fa;
             border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px;
         }
 
-        .status-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
+        .github-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        .status-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 3px;
-        }
-
-        .status-value {
-            font-size: 16px;
-            font-weight: 700;
-            color: #1a5fb4;
-        }
-
-        .status-value.completed {
-            color: #2ea043;
-        }
-
-        /* Animations */
-        @keyframes captureFlash {
-            0% { opacity: 0; }
-            50% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-
-        .capture-flash {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+        .github-input {
+            padding: 12px;
             background: white;
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 14px;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .photo-boxes-container {
-                flex-direction: column;
-            }
-            
-            .photo-box {
-                min-width: 100%;
-                margin-bottom: 10px;
-            }
-            
-            .number-buttons {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .employee-form {
-                grid-template-columns: 1fr;
-            }
-            
-            .control-btn {
-                min-width: 120px;
-                padding: 10px 15px;
-            }
-            
-            .apres-button {
-                padding: 12px 30px;
-                font-size: 18px;
-            }
-            
-            .controls-under-area {
-                flex-direction: column;
-                align-items: center;
-            }
+        .github-input:focus {
+            border-color: #24292e;
+            outline: none;
         }
 
-        @media (max-width: 480px) {
-            .login-container {
-                padding: 25px;
-                margin: 15px;
-            }
-            
-            .panel-title {
-                font-size: 18px;
-            }
-            
-            .dashboard-section {
-                padding: 20px;
-                margin: 10px;
-            }
-            
-            .photo-box {
-                aspect-ratio: 3/2;
-            }
-            
-            .number-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .apres-button {
-                padding: 10px 20px;
-                font-size: 16px;
-            }
-            
-            .control-btn {
-                width: 100%;
-                max-width: 250px;
-            }
-        }
-
-        /* Badges */
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
-            margin-left: 8px;
-        }
-
-        .badge-blue {
-            background: #1a5fb4;
+        .github-action-btn {
+            padding: 12px 20px;
+            background: #24292e;
             color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 10px;
         }
 
-        .badge-green {
+        .github-action-btn:hover {
             background: #2ea043;
-            color: white;
+            transform: translateY(-2px);
         }
 
-        .badge-red {
-            background: #ff6b6b;
-            color: white;
+        .sync-status {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 5px solid #e1e8ed;
         }
 
-        /* Indicateur de progression */
-        .progress-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin: 15px 0;
+        .sync-status.active {
+            border-left-color: #2ea043;
+            background: #f0fff4;
         }
 
-        .progress-step {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #e1e8ed;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            color: #666;
-        }
-
-        .progress-step.active {
-            background: #1a5fb4;
-            color: white;
-        }
-
-        .progress-step.completed {
-            background: #2ea043;
-            color: white;
-        }
-
-        .progress-label {
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            margin-top: 5px;
+        .sync-status.error {
+            border-left-color: #ff6b6b;
+            background: #fff0f0;
         }
 
         /* Notification */
@@ -813,6 +700,60 @@
                 opacity: 1;
             }
         }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .photo-boxes-container {
+                flex-direction: column;
+            }
+            
+            .photo-box {
+                min-width: 100%;
+                margin-bottom: 10px;
+            }
+            
+            .number-buttons {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .employee-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .github-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .control-btn {
+                min-width: 120px;
+                padding: 10px 15px;
+            }
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        .badge-blue {
+            background: #1a5fb4;
+            color: white;
+        }
+
+        .badge-green {
+            background: #2ea043;
+            color: white;
+        }
+
+        .badge-red {
+            background: #ff6b6b;
+            color: white;
+        }
     </style>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -827,7 +768,7 @@
             Système NoteCam ● Prêt ●
         </div>
 
-        <!-- Page de connexion (SANS informations de connexion visibles) -->
+        <!-- Page de connexion -->
         <div class="login-container" id="loginPage">
             <h2>Connexion</h2>
             <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur">
@@ -840,7 +781,10 @@
             <div class="panel-header">
                 <div class="panel-title">Panneau de Contrôle du Superviseur</div>
                 <div>
-                    <button class="back-btn" onclick="logout()">Déconnexion</button>
+                    <button class="github-btn" onclick="showGitHubPanel()">
+                        <i class="fab fa-github"></i> GitHub
+                    </button>
+                    <button class="logout-btn" onclick="logout()">Déconnexion</button>
                 </div>
             </div>
 
@@ -889,6 +833,68 @@
                 </div>
                 <div class="reports-container" id="reportsListMini">
                     <!-- Rapports miniatures apparaîtront ici -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Panneau GitHub -->
+        <div class="github-panel" id="githubPanel">
+            <div class="panel-header">
+                <div class="panel-title">
+                    <i class="fab fa-github"></i> Configuration GitHub
+                </div>
+                <div>
+                    <button class="back-btn" onclick="backToAdminPanel()">
+                        <i class="fas fa-arrow-left"></i> Retour
+                    </button>
+                    <button class="logout-btn" onclick="logout()">Déconnexion</button>
+                </div>
+            </div>
+
+            <div class="github-controls">
+                <h3><i class="fab fa-github"></i> Configuration du dépôt GitHub</h3>
+                <div class="github-form">
+                    <input type="text" id="githubToken" class="github-input" placeholder="Token d'accès GitHub">
+                    <input type="text" id="githubOwner" class="github-input" placeholder="Propriétaire du dépôt">
+                    <input type="text" id="githubRepo" class="github-input" placeholder="Nom du dépôt">
+                    <input type="text" id="githubBranch" class="github-input" placeholder="Branche (par défaut: main)" value="main">
+                </div>
+                <button class="github-action-btn" onclick="testGitHubConnection()">
+                    <i class="fas fa-plug"></i> Tester la connexion
+                </button>
+                <button class="github-action-btn" onclick="saveGitHubConfig()">
+                    <i class="fas fa-save"></i> Sauvegarder la configuration
+                </button>
+
+                <div class="sync-status" id="githubStatus">
+                    <h4><i class="fas fa-sync-alt"></i> Statut de synchronisation</h4>
+                    <p id="githubStatusText">Non configuré</p>
+                </div>
+
+                <div style="margin-top: 20px;">
+                    <h4><i class="fas fa-cloud-upload-alt"></i> Synchronisation manuelle</h4>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="github-action-btn" onclick="pushToGitHub()">
+                            <i class="fas fa-upload"></i> Pousser vers GitHub
+                        </button>
+                        <button class="github-action-btn" onclick="pullFromGitHub()">
+                            <i class="fas fa-download"></i> Tirer de GitHub
+                        </button>
+                        <button class="github-action-btn" onclick="syncWithGitHub()">
+                            <i class="fas fa-sync"></i> Synchroniser complet
+                        </button>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; background: #e3f2fd; padding: 15px; border-radius: 8px;">
+                    <h4><i class="fas fa-info-circle"></i> Instructions</h4>
+                    <ol style="margin-left: 20px; margin-top: 10px; font-size: 14px;">
+                        <li>Créez un token d'accès GitHub avec les permissions "repo"</li>
+                        <li>Créez un dépôt sur GitHub</li>
+                        <li>Entrez les informations ci-dessus</li>
+                        <li>Testez la connexion</li>
+                        <li>Sauvegardez la configuration</li>
+                    </ol>
                 </div>
             </div>
         </div>
@@ -948,39 +954,11 @@
                     </button>
                 </div>
 
-                <!-- Liste des zones disponibles -->
-                <div class="areas-list" id="employeeAreasList">
-                    <!-- Zones de l'employé -->
-                </div>
-
-                <!-- Indicateur de progression -->
-                <div class="progress-indicator">
-                    <div class="progress-step" id="step1">1</div>
-                    <div class="progress-step" id="step2">2</div>
-                </div>
-                <div class="progress-label">
-                    <span id="step1Label">Photos AVANT</span> → <span id="step2Label">Photos APRÈS</span>
-                </div>
-
-                <!-- Section PHOTOS AVANT (visible au début) -->
+                <!-- Section PHOTOS AVANT -->
                 <div class="photos-container" id="beforePhotosContainer">
                     <div class="photos-title">
                         <span><i class="fas fa-camera"></i> PHOTOS AVANT (Cliquez sur chaque case pour capturer)</span>
                         <span class="badge badge-blue" id="beforePhotosCount">0/5</span>
-                    </div>
-                    <div class="photos-status">
-                        <div class="status-item">
-                            <div class="status-label">Nombre</div>
-                            <div class="status-value" id="statusNumber">-</div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">Zone</div>
-                            <div class="status-value" id="statusZone">-</div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">Photos AVANT</div>
-                            <div class="status-value" id="statusBefore">0/5</div>
-                        </div>
                     </div>
                     <div class="photo-boxes-container" id="photoBoxesContainer">
                         <!-- Les 5 cases seront générées dynamiquement -->
@@ -1010,25 +988,9 @@
 
                 <!-- Bouton d'envoi des photos AVANT -->
                 <div class="send-report-container" id="sendBeforeContainer">
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-hashtag"></i> Nombre : <strong id="summaryNumber">-</strong>
-                            </span>
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-map-marker-alt"></i> Zone : <strong id="summaryZone">-</strong>
-                            </span>
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-image"></i> Photos AVANT : <strong id="summaryBeforePhotos">0/5</strong>
-                            </span>
-                        </div>
-                    </div>
                     <button class="send-report-btn send-before-btn" id="sendBeforeBtn" onclick="sendBeforePhotos()" disabled>
                         <i class="fas fa-paper-plane"></i> Envoyer les photos AVANT
                     </button>
-                    <div style="margin-top: 15px; font-size: 12px; color: #666; text-align: center;">
-                        Les photos AVANT seront envoyées immédiatement, vous pourrez ensuite prendre les photos APRÈS
-                    </div>
                 </div>
 
                 <!-- Bouton APRÈS pour passer à l'étape suivante -->
@@ -1038,25 +1000,11 @@
                     </button>
                 </div>
 
-                <!-- Section PHOTOS APRÈS (cachée au début) -->
+                <!-- Section PHOTOS APRÈS -->
                 <div class="photos-container" id="afterPhotosContainer" style="display: none;">
                     <div class="photos-title">
                         <span><i class="fas fa-camera-retro"></i> PHOTOS APRÈS (Cliquez sur chaque case pour capturer)</span>
                         <span class="badge badge-red" id="afterPhotosCount">0/5</span>
-                    </div>
-                    <div class="photos-status">
-                        <div class="status-item">
-                            <div class="status-label">Nombre</div>
-                            <div class="status-value" id="statusNumberAfter">-</div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">Zone</div>
-                            <div class="status-value" id="statusZoneAfter">-</div>
-                        </div>
-                        <div class="status-item">
-                            <div class="status-label">Photos APRÈS</div>
-                            <div class="status-value" id="statusAfter">0/5</div>
-                        </div>
                     </div>
                     <div class="photo-boxes-container" id="afterPhotoBoxesContainer">
                         <!-- Les 5 cases seront générées dynamiquement -->
@@ -1086,27 +1034,6 @@
 
                 <!-- Bouton d'envoi des photos APRÈS -->
                 <div class="send-report-container" id="sendAfterContainer" style="display: none;">
-                    <div style="margin-bottom: 15px;">
-                        <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-hashtag"></i> Nombre : <strong id="summaryNumberAfter">-</strong>
-                            </span>
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-map-marker-alt"></i> Zone : <strong id="summaryZoneAfter">-</strong>
-                            </span>
-                            <span style="color: #666; font-size: 14px;">
-                                <i class="fas fa-image"></i> Photos APRÈS : <strong id="summaryAfterPhotos">0/5</strong>
-                            </span>
-                        </div>
-                        <div style="background: #e3f2fd; padding: 10px; border-radius: 8px; margin-top: 10px;">
-                            <div style="color: #1a5fb4; font-weight: 700; font-size: 14px;">
-                                <i class="fas fa-check-circle"></i> Photos AVANT déjà envoyées
-                            </div>
-                            <div style="font-size: 12px; color: #666;">
-                                Nombre AVANT : <strong id="completedBeforeNumber">-</strong> | Prêt à envoyer les photos APRÈS
-                            </div>
-                        </div>
-                    </div>
                     <button class="send-report-btn send-after-btn" id="sendAfterBtn" onclick="sendAfterPhotos()" disabled>
                         <i class="fas fa-paper-plane"></i> Envoyer les photos APRÈS et compléter le rapport
                     </button>
@@ -1135,7 +1062,7 @@
     </div>
 
     <!-- Flash effect overlay -->
-    <div class="capture-flash" id="captureFlash"></div>
+    <div class="capture-flash" id="captureFlash" style="display: none;"></div>
 
     <script>
         // ========== DONNÉES SYSTÈME ==========
@@ -1147,7 +1074,7 @@
             }
         };
 
-        // إضافة 11 مستخدمين (من user1 إلى user11)
+        // إضافة مستخدمين
         for (let i = 1; i <= 11; i++) {
             defaultUsersData[`user${i}`] = {
                 password: "pass123",
@@ -1160,6 +1087,8 @@
         let usersData = JSON.parse(JSON.stringify(defaultUsersData));
         let assignedAreas = [];
         let zoneReports = {};
+        let githubConfig = null;
+        let lastSync = null;
 
         // Variables système
         let currentUser = null;
@@ -1177,86 +1106,25 @@
         // Rapport temporaire
         let tempReport = null;
         
-        // Éléments DOM
-        const statusBar = document.getElementById('statusBar');
-        const loginPage = document.getElementById('loginPage');
-        const adminPanel = document.getElementById('adminPanel');
-        const employeePanel = document.getElementById('employeePanel');
-        const reportsPanel = document.getElementById('reportsPanel');
-        const employeesList = document.getElementById('employeesList');
-        const employeeSelect = document.getElementById('employeeSelect');
-        const reportsListMini = document.getElementById('reportsListMini');
-        const reportDetailsContainer = document.getElementById('reportDetailsContainer');
-        const employeeName = document.getElementById('employeeName');
-        const selectedAreaInfo = document.getElementById('selectedAreaInfo');
-        const selectedAreaName = document.getElementById('selectedAreaName');
-        const selectedAreaCode = document.getElementById('selectedAreaCode');
-        const areaAssignedDate = document.getElementById('areaAssignedDate');
-        const areaSelect = document.getElementById('areaSelect');
-        const employeeAreasList = document.getElementById('employeeAreasList');
-        const assignedAreasList = document.getElementById('assignedAreasList');
-        const photoBoxesContainer = document.getElementById('photoBoxesContainer');
-        const afterPhotoBoxesContainer = document.getElementById('afterPhotoBoxesContainer');
-        const beforePhotosContainer = document.getElementById('beforePhotosContainer');
-        const afterPhotosContainer = document.getElementById('afterPhotosContainer');
-        const numberSelection = document.getElementById('numberSelection');
-        const numberSelectionAfter = document.getElementById('numberSelectionAfter');
-        const selectedNumberDisplay = document.getElementById('selectedNumberDisplay');
-        const selectedNumberDisplayAfter = document.getElementById('selectedNumberDisplayAfter');
-        const beforePhotosCount = document.getElementById('beforePhotosCount');
-        const afterPhotosCount = document.getElementById('afterPhotosCount');
-        const sendBeforeBtn = document.getElementById('sendBeforeBtn');
-        const sendAfterBtn = document.getElementById('sendAfterBtn');
-        const sendBeforeContainer = document.getElementById('sendBeforeContainer');
-        const sendAfterContainer = document.getElementById('sendAfterContainer');
-        const apresButtonContainer = document.getElementById('apresButtonContainer');
-        const apresButton = document.getElementById('apresButton');
-        const toggleCameraBtn = document.getElementById('toggleCamera');
-        const clearPhotosBtn = document.getElementById('clearPhotos');
-        const refreshLocationBtn = document.getElementById('refreshLocation');
-        const captureFlash = document.getElementById('captureFlash');
-        const notification = document.getElementById('notification');
-        const cameraStatus = document.getElementById('cameraStatus');
-        
-        // Éléments de statut
-        const statusNumber = document.getElementById('statusNumber');
-        const statusZone = document.getElementById('statusZone');
-        const statusBefore = document.getElementById('statusBefore');
-        const statusNumberAfter = document.getElementById('statusNumberAfter');
-        const statusZoneAfter = document.getElementById('statusZoneAfter');
-        const statusAfter = document.getElementById('statusAfter');
-        const summaryNumber = document.getElementById('summaryNumber');
-        const summaryZone = document.getElementById('summaryZone');
-        const summaryBeforePhotos = document.getElementById('summaryBeforePhotos');
-        const summaryNumberAfter = document.getElementById('summaryNumberAfter');
-        const summaryZoneAfter = document.getElementById('summaryZoneAfter');
-        const summaryAfterPhotos = document.getElementById('summaryAfterPhotos');
-        const completedBeforeNumber = document.getElementById('completedBeforeNumber');
-        
-        // Éléments de progression
-        const step1 = document.getElementById('step1');
-        const step2 = document.getElementById('step2');
-        const step1Label = document.getElementById('step1Label');
-        const step2Label = document.getElementById('step2Label');
+        // ========== INITIALISATION ==========
+        function initializeApp() {
+            loadFromLocalStorage();
+            updateStatusBar("Prêt à l'utilisation");
+            
+            if (githubConfig) {
+                updateGitHubStatus("GitHub configuré", "active");
+            }
+            
+            setupEventListeners();
+            checkLoggedInUser();
+        }
 
-        // Données de localisation
-        const sampleLocations = [
-            {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
-            {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
-            {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
-        ];
+        function updateStatusBar(message) {
+            document.getElementById('statusBar').textContent = `Système NoteCam ● ${message} ●`;
+        }
 
-        // Variables de localisation courante
-        let currentLocation = {
-            lat: 33.603016,
-            lng: -7.636873,
-            elev: "9.34±11.02",
-            prec: 13.28,
-            time: ""
-        };
-
-        // ========== FONCTIONS UTILITAIRES ==========
         function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.style.background = type === 'success' ? '#2ea043' : '#ff6b6b';
             notification.style.display = 'block';
@@ -1266,240 +1134,36 @@
             }, 3000);
         }
 
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
-        }
-
-        function formatTime() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
-        }
-
-        function updateStatusBar(message) {
-            statusBar.textContent = `Système NoteCam ● ${message} ●`;
-        }
-
-        function updateLocationInfo() {
-            const randomIndex = Math.floor(Math.random() * sampleLocations.length);
-            const location = sampleLocations[randomIndex];
-            
-            currentLocation = {
-                lat: location.lat,
-                lng: location.lng,
-                elev: location.elev,
-                prec: location.prec,
-                time: formatTime()
-            };
-            
-            showNotification("Localisation actualisée", "success");
-            updateStatusBar("Localisation actualisée");
-        }
-
-        // ========== GESTION AUTOMATIQUE DE LA CAMÉRA ==========
-        async function activateCameraAutomatically() {
-            try {
-                cameraStatus.innerHTML = `
-                    <div class="camera-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="camera-text">Activation automatique de la caméra...</div>
-                `;
-                
-                toggleCameraBtn.style.display = 'none';
-                
-                updateStatusBar("Activation automatique de la caméra...");
-                
-                videoStream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        width: { ideal: 1280 },
-                        height: { ideal: 720 },
-                        facingMode: 'environment'
-                    },
-                    audio: false
+        function setupEventListeners() {
+            // Numéro boutons
+            document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectNumber(this.getAttribute('data-number'));
                 });
-                
-                isCameraActive = true;
-                
-                cameraStatus.classList.add('active');
-                cameraStatus.innerHTML = `
-                    <div class="camera-icon">
-                        <i class="fas fa-video"></i>
-                    </div>
-                    <div class="camera-text">Caméra active ✓</div>
-                `;
-                
-                showNotification("Caméra activée automatiquement", "success");
-                updateStatusBar("Caméra activée automatiquement - Prêt à capturer");
-                
-            } catch (error) {
-                console.error('Erreur d\'activation automatique de la caméra :', error);
-                
-                toggleCameraBtn.style.display = 'block';
-                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer manuellement la caméra';
-                
-                cameraStatus.innerHTML = `
-                    <div class="camera-icon" style="color: #ff6b6b;">
-                        <i class="fas fa-video-slash"></i>
-                    </div>
-                    <div class="camera-text" style="color: #ff6b6b;">Caméra non disponible - Cliquez sur le bouton ci-dessous</div>
-                `;
-                
-                showNotification("Impossible d'activer automatiquement la caméra", "error");
-                updateStatusBar("Erreur de caméra - Activation manuelle nécessaire");
-            }
-        }
-
-        async function toggleCameraManually() {
-            if (!isCameraActive) {
-                try {
-                    updateStatusBar("Activation manuelle de la caméra...");
-                    
-                    videoStream = await navigator.mediaDevices.getUserMedia({
-                        video: {
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 },
-                            facingMode: 'environment'
-                        },
-                        audio: false
-                    });
-                    
-                    isCameraActive = true;
-                    toggleCameraBtn.innerHTML = '<i class="fas fa-video-slash"></i> Désactiver la caméra';
-                    cameraStatus.classList.add('active');
-                    cameraStatus.innerHTML = `
-                        <div class="camera-icon">
-                            <i class="fas fa-video"></i>
-                        </div>
-                        <div class="camera-text">Caméra active ✓</div>
-                    `;
-                    
-                    showNotification("Caméra activée manuellement", "success");
-                    updateStatusBar("Caméra activée - Prêt à capturer");
-                    
-                } catch (error) {
-                    console.error('Erreur de caméra manuelle :', error);
-                    showNotification("Erreur de caméra", "error");
-                    updateStatusBar("Erreur de caméra");
-                    alert('Impossible d\'activer la caméra. Vérifiez les autorisations.');
-                }
-            } else {
-                if (videoStream) {
-                    videoStream.getTracks().forEach(track => track.stop());
-                    videoStream = null;
-                }
-                
-                isCameraActive = false;
-                toggleCameraBtn.innerHTML = '<i class="fas fa-video"></i> Activer la caméra';
-                cameraStatus.classList.remove('active');
-                cameraStatus.innerHTML = `
-                    <div class="camera-icon">
-                        <i class="fas fa-video-slash"></i>
-                    </div>
-                    <div class="camera-text">Caméra désactivée</div>
-                `;
-                
-                showNotification("Caméra désactivée", "success");
-                updateStatusBar("Caméra désactivée");
-            }
-        }
-
-        // ========== INITIALISATION ==========
-        function initializeApp() {
-            loadFromLocalStorage();
-            updateStatusBar("Prêt à l'utilisation");
-            updateLocationInfo();
+            });
             
-            updateCounters();
+            document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    selectNumberAfter(this.getAttribute('data-number'));
+                });
+            });
             
-            setupNumberButtons();
+            // Camera buttons
+            document.getElementById('toggleCamera').addEventListener('click', toggleCameraManually);
+            document.getElementById('clearPhotos').addEventListener('click', clearAllPhotos);
+            document.getElementById('refreshLocation').addEventListener('click', updateLocationInfo);
+            
+            // Setup photo boxes
             setupPhotoBoxes();
-            
-            toggleCameraBtn.addEventListener('click', toggleCameraManually);
-            clearPhotosBtn.addEventListener('click', clearAllPhotos);
-            refreshLocationBtn.addEventListener('click', updateLocationInfo);
-            
-            checkLoggedInUser();
-            updateStepDisplay();
-        }
-
-        function setupNumberButtons() {
-            // Boutons pour AVANT
-            document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const number = this.getAttribute('data-number');
-                    selectNumber(number);
-                });
-            });
-            
-            // Boutons pour APRÈS
-            document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const number = this.getAttribute('data-number');
-                    selectNumberAfter(number);
-                });
-            });
-        }
-
-        function selectNumber(number) {
-            selectedNumber = number;
-            
-            document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
-                if (btn.getAttribute('data-number') === number) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-            
-            selectedNumberDisplay.textContent = number;
-            statusNumber.textContent = number;
-            summaryNumber.textContent = number;
-            
-            checkSendBeforeStatus();
-            
-            updateStatusBar(`Nombre sélectionné : ${number}`);
-        }
-
-        function selectNumberAfter(number) {
-            selectedNumberAfter = number;
-            
-            document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
-                if (btn.getAttribute('data-number') === number) {
-                    btn.classList.add('selected');
-                } else {
-                    btn.classList.remove('selected');
-                }
-            });
-            
-            selectedNumberDisplayAfter.textContent = number;
-            statusNumberAfter.textContent = number;
-            summaryNumberAfter.textContent = number;
-            
-            checkSendAfterStatus();
-            
-            updateStatusBar(`Nombre APRÈS sélectionné : ${number}`);
         }
 
         function setupPhotoBoxes() {
-            for (let i = 1; i <= 5; i++) {
-                const photoBox = createPhotoBox(i, 'before');
-                photoBoxesContainer.appendChild(photoBox);
-            }
+            const beforeContainer = document.getElementById('photoBoxesContainer');
+            const afterContainer = document.getElementById('afterPhotoBoxesContainer');
             
             for (let i = 1; i <= 5; i++) {
-                const photoBox = createPhotoBox(i, 'after');
-                afterPhotoBoxesContainer.appendChild(photoBox);
+                beforeContainer.appendChild(createPhotoBox(i, 'before'));
+                afterContainer.appendChild(createPhotoBox(i, 'after'));
             }
         }
 
@@ -1522,462 +1186,208 @@
             return box;
         }
 
-        async function capturePhoto(index, type) {
-            if (!isCameraActive || !videoStream) {
-                alert("La caméra n'est pas encore activée. Veuillez patienter quelques secondes.");
-                return;
-            }
+        // ========== GESTION GITHUB ==========
+        function showGitHubPanel() {
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('githubPanel').style.display = 'block';
             
-            if (type === 'before' && currentStep !== 1) {
-                alert("Vous devez d'abord envoyer les photos AVANT avant de capturer plus de photos");
-                return;
+            if (githubConfig) {
+                document.getElementById('githubToken').value = githubConfig.token || '';
+                document.getElementById('githubOwner').value = githubConfig.owner || '';
+                document.getElementById('githubRepo').value = githubConfig.repo || '';
+                document.getElementById('githubBranch').value = githubConfig.branch || 'main';
             }
+        }
+
+        function backToAdminPanel() {
+            document.getElementById('githubPanel').style.display = 'none';
+            document.getElementById('adminPanel').style.display = 'block';
+            updateAdminDashboard();
+        }
+
+        async function testGitHubConnection() {
+            const token = document.getElementById('githubToken').value;
+            const owner = document.getElementById('githubOwner').value;
+            const repo = document.getElementById('githubRepo').value;
             
-            if (type === 'after' && currentStep !== 2) {
-                alert("Vous devez d'abord passer à l'étape APRÈS pour capturer ces photos");
+            if (!token || !owner || !repo) {
+                showNotification("Veuillez remplir tous les champs", "error");
                 return;
             }
             
             try {
-                captureFlash.style.animation = 'captureFlash 300ms ease-out';
-                setTimeout(() => {
-                    captureFlash.style.animation = '';
-                }, 300);
-                
-                const video = document.createElement('video');
-                video.srcObject = videoStream;
-                
-                await new Promise((resolve) => {
-                    video.onloadedmetadata = () => {
-                        video.play();
-                        resolve();
-                    };
-                });
-                
-                const canvas = document.createElement('canvas');
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                const context = canvas.getContext('2d');
-                
-                context.drawImage(video, 0, 0, canvas.width, canvas.height);
-                addInfoToImage(context, canvas.width, canvas.height);
-                
-                canvas.toBlob((blob) => {
-                    const imageUrl = URL.createObjectURL(blob);
-                    
-                    if (type === 'before') {
-                        beforePhotos[index] = {
-                            url: imageUrl,
-                            blob: blob,
-                            timestamp: new Date().toISOString(),
-                            location: {...currentLocation},
-                            noteCode: selectedArea ? selectedArea.code : "ZN000"
-                        };
-                    } else {
-                        afterPhotos[index] = {
-                            url: imageUrl,
-                            blob: blob,
-                            timestamp: new Date().toISOString(),
-                            location: {...currentLocation},
-                            noteCode: selectedArea ? selectedArea.code : "ZN000"
-                        };
+                const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Accept': 'application/vnd.github.v3+json'
                     }
-                    
-                    const photoBox = document.querySelector(`.photo-box[data-index="${index}"][data-type="${type}"]`);
-                    photoBox.classList.add('captured');
-                    const preview = photoBox.querySelector('.photo-preview');
-                    preview.src = imageUrl;
-                    
-                    updatePhotoCount(type);
-                    
-                    updateStatusBar(`Photo ${type} ${index + 1} capturée`);
-                    
-                }, 'image/jpeg', 0.9);
-                
-            } catch (error) {
-                console.error('Erreur de capture :', error);
-                alert('Erreur lors de la capture de la photo');
-            }
-        }
-
-        function addInfoToImage(context, width, height) {
-            context.save();
-            
-            const lineHeight = 16;
-            const totalHeight = lineHeight * 6 + 8;
-            const boxWidth = width * 0.18;
-            const boxX = 2;
-            const boxY = height - totalHeight - 2;
-            
-            context.fillStyle = 'rgba(255, 255, 255, 0.5)';
-            context.fillRect(boxX, boxY, boxWidth, totalHeight);
-            
-            context.font = 'bold 14px "Courier New", monospace';
-            context.fillStyle = '#000000';
-            context.textAlign = 'left';
-            context.textBaseline = 'top';
-            
-            const startY = boxY + 4;
-            
-            const noteCode = selectedArea ? selectedArea.code : "ZN000";
-            const infoLines = [
-                `Latitude : ${currentLocation.lat.toFixed(6)}`,
-                `Longitude : ${currentLocation.lng.toFixed(6)}`,
-                `Élévation : ${currentLocation.elev} m`,
-                `Précision : ${currentLocation.prec.toFixed(2)} m`,
-                `Temps : ${currentLocation.time}`,
-                `Note : ${noteCode}`
-            ];
-            
-            infoLines.forEach((line, i) => {
-                context.fillText(line, boxX + 5, startY + (i * lineHeight));
-            });
-            
-            context.textAlign = 'right';
-            context.font = '900 16px "Arial Black", sans-serif';
-            context.fillStyle = '#ff0000';
-            
-            context.shadowColor = 'rgba(0, 0, 0, 0.7)';
-            context.shadowBlur = 2;
-            context.shadowOffsetX = 1;
-            context.shadowOffsetY = 1;
-            
-            context.fillText('Powered by Notecam', width - 11, boxY + totalHeight - 12);
-            
-            context.restore();
-        }
-
-        function updatePhotoCount(type) {
-            if (type === 'before') {
-                const beforeCount = beforePhotos.filter(p => p !== null).length;
-                beforePhotosCount.textContent = `${beforeCount}/5`;
-                statusBefore.textContent = `${beforeCount}/5`;
-                summaryBeforePhotos.textContent = `${beforeCount}/5`;
-                
-                if (beforeCount === 5) {
-                    statusBefore.classList.add('completed');
-                } else {
-                    statusBefore.classList.remove('completed');
-                }
-                
-                checkSendBeforeStatus();
-            } else {
-                const afterCount = afterPhotos.filter(p => p !== null).length;
-                afterPhotosCount.textContent = `${afterCount}/5`;
-                statusAfter.textContent = `${afterCount}/5`;
-                summaryAfterPhotos.textContent = `${afterCount}/5`;
-                
-                if (afterCount === 5) {
-                    statusAfter.classList.add('completed');
-                } else {
-                    statusAfter.classList.remove('completed');
-                }
-                
-                checkSendAfterStatus();
-            }
-        }
-
-        function clearAllPhotos() {
-            if (!confirm("Voulez-vous vraiment effacer toutes les photos ?")) {
-                return;
-            }
-            
-            beforePhotos = [null, null, null, null, null];
-            afterPhotos = [null, null, null, null, null];
-            
-            document.querySelectorAll('.photo-box').forEach(box => {
-                box.classList.remove('captured');
-                const preview = box.querySelector('.photo-preview');
-                if (preview) {
-                    preview.src = '';
-                }
-            });
-            
-            updatePhotoCount('before');
-            updatePhotoCount('after');
-            
-            checkSendBeforeStatus();
-            checkSendAfterStatus();
-            
-            showNotification("Toutes les photos ont été effacées", "success");
-            updateStatusBar('Toutes les photos effacées');
-        }
-
-        function checkSendBeforeStatus() {
-            const beforeCount = beforePhotos.filter(p => p !== null).length;
-            const canSend = selectedNumber !== null && 
-                          selectedArea !== null && 
-                          beforeCount === 5;
-            
-            sendBeforeBtn.disabled = !canSend;
-            return canSend;
-        }
-
-        function checkSendAfterStatus() {
-            const afterCount = afterPhotos.filter(p => p !== null).length;
-            const canSend = selectedNumberAfter !== null && 
-                          selectedArea !== null && 
-                          afterCount === 5;
-            
-            sendAfterBtn.disabled = !canSend;
-            return canSend;
-        }
-
-        // ========== GESTION DES ÉTAPES ==========
-        function updateStepDisplay() {
-            if (currentStep === 1) {
-                step1.classList.add('active');
-                step2.classList.remove('active');
-                step1Label.style.fontWeight = '700';
-                step2Label.style.fontWeight = '400';
-            } else {
-                step1.classList.remove('active');
-                step1.classList.add('completed');
-                step2.classList.add('active');
-                step1Label.style.fontWeight = '400';
-                step2Label.style.fontWeight = '700';
-            }
-            
-            if (selectedArea) {
-                statusZone.textContent = selectedArea.name;
-                statusZoneAfter.textContent = selectedArea.name;
-                summaryZone.textContent = selectedArea.name;
-                summaryZoneAfter.textContent = selectedArea.name;
-            }
-        }
-
-        function sendBeforePhotos() {
-            if (!checkSendBeforeStatus()) {
-                alert("Veuillez compléter toutes les informations avant d'envoyer les photos AVANT");
-                return;
-            }
-            
-            // Créer rapport pour AVANT seulement
-            const beforeReport = {
-                id: Date.now(),
-                employee: currentUser.username,
-                employeeName: currentUser.name,
-                numberBefore: selectedNumber,
-                date: new Date().toISOString(),
-                location: {...currentLocation},
-                beforePhotos: beforePhotos.filter(p => p !== null),
-                area: selectedArea.name,
-                areaCode: selectedArea.code,
-                noteCode: selectedArea.code,
-                status: 'before_only',
-                step: 'first'
-            };
-            
-            // Enregistrer le rapport AVANT dans zoneReports
-            const zoneCode = selectedArea.code;
-            if (!zoneReports[zoneCode]) {
-                zoneReports[zoneCode] = {
-                    name: selectedArea.name,
-                    reports: [],
-                    photos: []
-                };
-            }
-            
-            zoneReports[zoneCode].reports.push(beforeReport);
-            
-            // Ajouter photos AVANT
-            beforeReport.beforePhotos.forEach((photo, index) => {
-                zoneReports[zoneCode].photos.push({
-                    type: 'before',
-                    index: index,
-                    url: photo.url,
-                    timestamp: photo.timestamp,
-                    reportId: beforeReport.id
                 });
-            });
+                
+                if (response.ok) {
+                    updateGitHubStatus("Connexion réussie ✓", "active");
+                    showNotification("Connexion GitHub établie", "success");
+                } else {
+                    updateGitHubStatus("Échec de connexion", "error");
+                    showNotification("Impossible de se connecter au dépôt", "error");
+                }
+            } catch (error) {
+                updateGitHubStatus("Erreur de connexion", "error");
+                showNotification("Erreur de connexion à GitHub", "error");
+            }
+        }
+
+        function saveGitHubConfig() {
+            const token = document.getElementById('githubToken').value;
+            const owner = document.getElementById('githubOwner').value;
+            const repo = document.getElementById('githubRepo').value;
+            const branch = document.getElementById('githubBranch').value || 'main';
             
-            // Sauvegarder
-            saveToLocalStorage();
+            if (!token || !owner || !repo) {
+                showNotification("Veuillez remplir tous les champs", "error");
+                return;
+            }
             
-            // Créer rapport temporaire pour APRÈS
-            tempReport = {
-                id: beforeReport.id,
-                employee: currentUser.username,
-                employeeName: currentUser.name,
-                numberBefore: selectedNumber,
-                date: new Date().toISOString(),
-                location: {...currentLocation},
-                beforePhotos: beforePhotos.filter(p => p !== null),
-                area: selectedArea.name,
-                areaCode: selectedArea.code,
-                noteCode: selectedArea.code,
-                status: 'awaiting_after'
+            githubConfig = {
+                token,
+                owner,
+                repo,
+                branch,
+                configuredAt: new Date().toISOString()
             };
             
-            localStorage.setItem('tempReport', JSON.stringify(tempReport));
-            
-            // Masquer AVANT, montrer APRÈS
-            beforePhotosContainer.style.display = 'none';
-            sendBeforeContainer.style.display = 'none';
-            numberSelection.style.display = 'none';
-            apresButtonContainer.style.display = 'block';
-            
-            showNotification("Photos AVANT envoyées avec succès !", "success");
-            updateStatusBar("Photos AVANT envoyées avec succès");
-            
-            currentStep = 2;
-            updateStepDisplay();
-            
-            // Notifier superviseur
-            notifySupervisor(beforeReport);
-        }
-
-        function showAfterPhotos() {
-            apresButtonContainer.style.display = 'none';
-            afterPhotosContainer.style.display = 'block';
-            numberSelectionAfter.style.display = 'block';
-            sendAfterContainer.style.display = 'block';
-            
-            // Afficher le nombre AVANT déjà envoyé
-            completedBeforeNumber.textContent = selectedNumber;
-            
-            showNotification("Prêt à capturer les photos APRÈS", "success");
-            updateStatusBar("Prêt à capturer les photos APRÈS");
-        }
-
-        function sendAfterPhotos() {
-            if (!checkSendAfterStatus()) {
-                alert("Veuillez compléter toutes les informations avant d'envoyer les photos APRÈS");
-                return;
-            }
-            
-            if (!tempReport) {
-                alert("Erreur : rapport temporaire non trouvé");
-                return;
-            }
-            
-            // Trouver le rapport AVANT existant
-            const zoneCode = selectedArea.code;
-            const zoneData = zoneReports[zoneCode];
-            if (!zoneData) {
-                alert("Erreur : zone non trouvée");
-                return;
-            }
-            
-            const existingReportIndex = zoneData.reports.findIndex(r => r.id === tempReport.id);
-            if (existingReportIndex === -1) {
-                alert("Erreur : rapport AVANT non trouvé");
-                return;
-            }
-            
-            // Mettre à jour le rapport avec les photos APRÈS
-            const updatedReport = {
-                ...zoneData.reports[existingReportIndex],
-                numberAfter: selectedNumberAfter,
-                afterPhotos: afterPhotos.filter(p => p !== null),
-                status: 'complete',
-                completionDate: new Date().toISOString(),
-                step: 'complete'
-            };
-            
-            // Remplacer le rapport dans la liste
-            zoneData.reports[existingReportIndex] = updatedReport;
-            
-            // Ajouter photos APRÈS
-            afterPhotos.forEach((photo, index) => {
-                if (photo) {
-                    zoneData.photos.push({
-                        type: 'after',
-                        index: index,
-                        url: photo.url,
-                        timestamp: photo.timestamp,
-                        reportId: tempReport.id
-                    });
-                }
-            });
-            
             saveToLocalStorage();
-            
-            // Générer fichier complet
-            generateZoneFile(zoneCode);
-            
-            // Supprimer temporaire
-            tempReport = null;
-            localStorage.removeItem('tempReport');
-            
-            // Réinitialiser
-            resetForm();
-            
-            // Notifier superviseur
-            notifySupervisor(updatedReport);
-            
-            showNotification("Rapport complet envoyé avec succès !", "success");
-            updateStatusBar("Rapport complet envoyé et fichier généré");
-            
-            updateCounters();
+            updateGitHubStatus("Configuration sauvegardée", "active");
+            showNotification("Configuration GitHub sauvegardée", "success");
         }
 
-        function notifySupervisor(report) {
-            console.log("📢 Notification au superviseur :", report);
+        function updateGitHubStatus(message, status = '') {
+            const statusDiv = document.getElementById('githubStatus');
+            const statusText = document.getElementById('githubStatusText');
             
-            if (adminPanel.style.display === 'block') {
-                displayMiniReports();
+            statusText.textContent = message;
+            statusDiv.className = 'sync-status';
+            if (status === 'active') statusDiv.classList.add('active');
+            else if (status === 'error') statusDiv.classList.add('error');
+        }
+
+        async function pushToGitHub() {
+            if (!githubConfig) {
+                showNotification("GitHub n'est pas configuré", "error");
+                return;
+            }
+            
+            try {
+                updateGitHubStatus("Envoi des données vers GitHub...", "active");
+                
+                const data = {
+                    usersData,
+                    assignedAreas,
+                    zoneReports,
+                    timestamp: new Date().toISOString(),
+                    version: "1.0.0"
+                };
+                
+                const contentBase64 = btoa(JSON.stringify(data, null, 2));
+                
+                let sha = null;
+                try {
+                    const existingFile = await fetch(
+                        `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/notecam-data.json`,
+                        {
+                            headers: {
+                                'Authorization': `token ${githubConfig.token}`,
+                                'Accept': 'application/vnd.github.v3+json'
+                            }
+                        }
+                    );
+                    
+                    if (existingFile.ok) {
+                        const fileData = await existingFile.json();
+                        sha = fileData.sha;
+                    }
+                } catch (error) {}
+                
+                const response = await fetch(
+                    `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/notecam-data.json`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/vnd.github.v3+json'
+                        },
+                        body: JSON.stringify({
+                            message: `Synchronisation NoteCam - ${new Date().toISOString()}`,
+                            content: contentBase64,
+                            branch: githubConfig.branch,
+                            sha: sha
+                        })
+                    }
+                );
+                
+                if (response.ok) {
+                    lastSync = new Date().toISOString();
+                    saveToLocalStorage();
+                    updateGitHubStatus("Données envoyées avec succès ✓", "active");
+                    showNotification("Données envoyées vers GitHub", "success");
+                } else {
+                    updateGitHubStatus("Échec de l'envoi", "error");
+                    showNotification("Erreur lors de l'envoi", "error");
+                }
+            } catch (error) {
+                updateGitHubStatus("Erreur de connexion", "error");
+                showNotification("Erreur de connexion à GitHub", "error");
             }
         }
 
-        function resetForm() {
-            selectedNumber = null;
-            selectedNumberAfter = null;
-            beforePhotos = [null, null, null, null, null];
-            afterPhotos = [null, null, null, null, null];
-            currentStep = 1;
+        async function pullFromGitHub() {
+            if (!githubConfig) {
+                showNotification("GitHub n'est pas configuré", "error");
+                return;
+            }
             
-            // Réinitialiser interface
-            document.querySelectorAll('.number-btn').forEach(btn => {
-                btn.classList.remove('selected');
-            });
-            
-            selectedNumberDisplay.textContent = "Aucun";
-            selectedNumberDisplayAfter.textContent = "Aucun";
-            statusNumber.textContent = "-";
-            statusNumberAfter.textContent = "-";
-            summaryNumber.textContent = "-";
-            summaryNumberAfter.textContent = "-";
-            completedBeforeNumber.textContent = "-";
-            
-            // Réinitialiser photos
-            document.querySelectorAll('.photo-box').forEach(box => {
-                box.classList.remove('captured');
-                const preview = box.querySelector('.photo-preview');
-                if (preview) {
-                    preview.src = '';
+            try {
+                updateGitHubStatus("Récupération des données depuis GitHub...", "active");
+                
+                const response = await fetch(
+                    `https://api.github.com/repos/${githubConfig.owner}/${githubConfig.repo}/contents/notecam-data.json`,
+                    {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    }
+                );
+                
+                if (response.ok) {
+                    const fileData = await response.json();
+                    const content = JSON.parse(atob(fileData.content));
+                    
+                    usersData = content.usersData || usersData;
+                    assignedAreas = content.assignedAreas || assignedAreas;
+                    zoneReports = content.zoneReports || zoneReports;
+                    lastSync = new Date().toISOString();
+                    
+                    saveToLocalStorage();
+                    updateGitHubStatus("Données récupérées avec succès ✓", "active");
+                    showNotification("Données récupérées depuis GitHub", "success");
+                    
+                    if (currentUser && currentUser.role === 'admin') {
+                        updateAdminDashboard();
+                    }
+                } else {
+                    updateGitHubStatus("Fichier non trouvé", "error");
+                    showNotification("Aucune donnée sur GitHub", "error");
                 }
-            });
-            
-            // Réinitialiser compteurs
-            beforePhotosCount.textContent = "0/5";
-            afterPhotosCount.textContent = "0/5";
-            statusBefore.textContent = "0/5";
-            statusAfter.textContent = "0/5";
-            summaryBeforePhotos.textContent = "0/5";
-            summaryAfterPhotos.textContent = "0/5";
-            
-            // Réinitialiser styles
-            statusBefore.classList.remove('completed');
-            statusAfter.classList.remove('completed');
-            
-            // Réafficher AVANT
-            beforePhotosContainer.style.display = 'block';
-            afterPhotosContainer.style.display = 'none';
-            sendBeforeContainer.style.display = 'block';
-            sendAfterContainer.style.display = 'none';
-            apresButtonContainer.style.display = 'none';
-            numberSelection.style.display = 'block';
-            numberSelectionAfter.style.display = 'none';
-            
-            // Réinitialiser boutons
-            sendBeforeBtn.disabled = true;
-            sendAfterBtn.disabled = true;
-            
-            updateStepDisplay();
-            
-            showNotification("Formulaire réinitialisé - Prêt pour un nouveau rapport", "success");
-            updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
+            } catch (error) {
+                updateGitHubStatus("Erreur de récupération", "error");
+                showNotification("Erreur de connexion à GitHub", "error");
+            }
+        }
+
+        async function syncWithGitHub() {
+            await pullFromGitHub();
+            await pushToGitHub();
         }
 
         // ========== GESTION DES DONNÉES ==========
@@ -1989,28 +1399,18 @@
                     usersData = {...defaultUsersData, ...data.usersData};
                     assignedAreas = data.assignedAreas || assignedAreas;
                     zoneReports = data.zoneReports || {};
+                    githubConfig = data.githubConfig || null;
+                    lastSync = data.lastSync || null;
                 }
                 
                 const savedTempReport = localStorage.getItem('tempReport');
                 if (savedTempReport) {
                     try {
                         tempReport = JSON.parse(savedTempReport);
-                        if (tempReport) {
-                            currentStep = 2;
-                            selectedNumber = tempReport.numberBefore;
-                            selectedArea = assignedAreas.find(area => area.code === tempReport.areaCode);
-                        }
-                    } catch (e) {
-                        console.error('Erreur de chargement du rapport temporaire:', e);
-                    }
-                }
-                
-                const savedUser = localStorage.getItem('currentUser');
-                if (savedUser) {
-                    currentUser = JSON.parse(savedUser);
+                    } catch (e) {}
                 }
             } catch (error) {
-                console.error('Erreur de chargement des données :', error);
+                console.error('Erreur de chargement:', error);
             }
         }
 
@@ -2018,130 +1418,11 @@
             const data = {
                 usersData,
                 assignedAreas,
-                zoneReports
+                zoneReports,
+                githubConfig,
+                lastSync
             };
             localStorage.setItem('noteCamSystemData', JSON.stringify(data));
-        }
-
-        // ========== AUTHENTIFICATION ==========
-        function login() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            if (!username || !password) {
-                alert("Veuillez saisir le nom d'utilisateur et le mot de passe");
-                return;
-            }
-            
-            const user = usersData[username];
-            
-            if (user && user.password === password) {
-                currentUser = {username, ...user};
-                updateStatusBar(`Bienvenue ${user.name}`);
-                
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                
-                loginPage.style.display = 'none';
-                
-                if (user.role === 'admin') {
-                    adminPanel.style.display = 'block';
-                    employeePanel.style.display = 'none';
-                    reportsPanel.style.display = 'none';
-                    updateAdminDashboard();
-                } else {
-                    adminPanel.style.display = 'none';
-                    employeePanel.style.display = 'block';
-                    reportsPanel.style.display = 'none';
-                    employeeName.textContent = `Employé : ${user.name}`;
-                    loadEmployeeAreas();
-                    populateAreaSelect();
-                    
-                    setTimeout(() => {
-                        activateCameraAutomatically();
-                    }, 1000);
-                    
-                    if (tempReport) {
-                        beforePhotosContainer.style.display = 'none';
-                        sendBeforeContainer.style.display = 'none';
-                        numberSelection.style.display = 'none';
-                        afterPhotosContainer.style.display = 'block';
-                        numberSelectionAfter.style.display = 'block';
-                        sendAfterContainer.style.display = 'block';
-                        apresButtonContainer.style.display = 'none';
-                        currentStep = 2;
-                        updateStepDisplay();
-                        
-                        // Afficher le nombre AVANT déjà envoyé
-                        completedBeforeNumber.textContent = selectedNumber;
-                        selectedNumberDisplayAfter.textContent = "Aucun";
-                    }
-                }
-                
-                showNotification(`Connexion réussie - Bienvenue ${user.name}`, "success");
-                
-            } else {
-                showNotification("Nom d'utilisateur ou mot de passe incorrect", "error");
-                alert("Nom d'utilisateur ou mot de passe incorrect");
-            }
-        }
-
-        function checkLoggedInUser() {
-            if (currentUser) {
-                loginPage.style.display = 'none';
-                
-                if (currentUser.role === 'admin') {
-                    adminPanel.style.display = 'block';
-                    updateAdminDashboard();
-                } else {
-                    employeePanel.style.display = 'block';
-                    employeeName.textContent = `Employé : ${currentUser.name}`;
-                    loadEmployeeAreas();
-                    populateAreaSelect();
-                    
-                    setTimeout(() => {
-                        activateCameraAutomatically();
-                    }, 1000);
-                    
-                    if (tempReport) {
-                        beforePhotosContainer.style.display = 'none';
-                        sendBeforeContainer.style.display = 'none';
-                        numberSelection.style.display = 'none';
-                        afterPhotosContainer.style.display = 'block';
-                        numberSelectionAfter.style.display = 'block';
-                        sendAfterContainer.style.display = 'block';
-                        apresButtonContainer.style.display = 'none';
-                        currentStep = 2;
-                        updateStepDisplay();
-                        
-                        completedBeforeNumber.textContent = selectedNumber;
-                        selectedNumberDisplayAfter.textContent = "Aucun";
-                    }
-                }
-                
-                updateStatusBar(`Bienvenue ${currentUser.name}`);
-            }
-        }
-
-        function logout() {
-            if (isCameraActive && videoStream) {
-                videoStream.getTracks().forEach(track => track.stop());
-                videoStream = null;
-                isCameraActive = false;
-            }
-            
-            currentUser = null;
-            selectedArea = null;
-            selectedNumber = null;
-            selectedNumberAfter = null;
-            
-            loginPage.style.display = 'block';
-            adminPanel.style.display = 'none';
-            employeePanel.style.display = 'none';
-            reportsPanel.style.display = 'none';
-            
-            localStorage.removeItem('currentUser');
-            showNotification("Déconnexion réussie", "success");
-            updateStatusBar("Déconnexion réussie");
         }
 
         // ========== GESTION DES EMPLOYÉS ==========
@@ -2151,12 +1432,12 @@
             const name = document.getElementById('empName').value;
             
             if (!username || !password || !name) {
-                alert("Veuillez remplir tous les champs");
+                showNotification("Veuillez remplir tous les champs", "error");
                 return;
             }
             
             if (usersData[username]) {
-                alert("Le nom d'utilisateur existe déjà");
+                showNotification("L'utilisateur existe déjà", "error");
                 return;
             }
             
@@ -2167,95 +1448,101 @@
                 assignedAreas: []
             };
             
+            saveToLocalStorage();
             updateEmployeeSelect();
             displayEmployees();
             updateCounters();
-            saveToLocalStorage();
             
             document.getElementById('empUsername').value = '';
             document.getElementById('empPassword').value = '';
             document.getElementById('empName').value = '';
             
             showNotification("Employé ajouté avec succès", "success");
-            alert("Employé ajouté avec succès");
         }
 
         function displayEmployees() {
-            employeesList.innerHTML = '';
+            const container = document.getElementById('employeesList');
+            container.innerHTML = '';
             
             let employeeCount = 0;
             
             Object.entries(usersData).forEach(([username, data]) => {
                 if (data.role === "employee") {
                     employeeCount++;
-                    const employeeCard = document.createElement('div');
-                    employeeCard.className = 'employee-card';
-                    
                     const areasCount = (data.assignedAreas || []).length;
                     
-                    employeeCard.innerHTML = `
+                    const div = document.createElement('div');
+                    div.className = 'employee-card';
+                    div.innerHTML = `
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
-                                <div style="font-weight: 700; color: #1a5fb4; font-size: 16px; margin-bottom: 5px;">
+                                <div style="font-weight: 700; color: #1a5fb4; font-size: 16px;">
                                     ${data.name}
                                 </div>
-                                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
-                                    Nom d'utilisateur : ${username}
+                                <div style="color: #666; font-size: 14px;">
+                                    Utilisateur: ${username}
                                 </div>
-                                <div style="display: flex; gap: 15px;">
+                                <div style="margin-top: 8px;">
                                     <span style="background: #e3f2fd; padding: 3px 10px; border-radius: 15px; font-size: 12px; color: #1a5fb4;">
                                         <i class="fas fa-map-marker-alt"></i> ${areasCount} zones
                                     </span>
                                 </div>
                             </div>
-                            <button class="control-btn danger" style="padding: 5px 10px; font-size: 12px;" onclick="deleteEmployee('${username}')">
+                            <button onclick="deleteEmployee('${username}')" class="action-btn" style="background: #ff6b6b; padding: 5px 10px;">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     `;
-                    
-                    employeesList.appendChild(employeeCard);
+                    container.appendChild(div);
                 }
             });
             
             if (employeeCount === 0) {
-                employeesList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucun employé enregistré</p>';
+                container.innerHTML = '<p style="text-align: center; color: #666;">Aucun employé</p>';
             }
         }
 
         function deleteEmployee(username) {
-            if (!confirm(`Voulez-vous vraiment supprimer l'employé ${username} ?`)) {
-                return;
-            }
+            if (!confirm(`Supprimer l'employé ${username} ?`)) return;
             
-            if (usersData[username]) {
-                delete usersData[username];
-            }
-            
+            delete usersData[username];
             assignedAreas = assignedAreas.filter(area => area.employee !== username);
             
+            saveToLocalStorage();
             updateEmployeeSelect();
             displayEmployees();
             updateCounters();
-            saveToLocalStorage();
             
-            showNotification("Employé supprimé avec succès", "success");
-            alert("Employé supprimé avec succès");
+            showNotification("Employé supprimé", "success");
+        }
+
+        function updateEmployeeSelect() {
+            const select = document.getElementById('employeeSelect');
+            select.innerHTML = '<option value="">Sélectionner un employé</option>';
+            
+            Object.entries(usersData).forEach(([username, data]) => {
+                if (data.role === "employee") {
+                    const option = document.createElement('option');
+                    option.value = username;
+                    option.textContent = `${data.name} (${username})`;
+                    select.appendChild(option);
+                }
+            });
         }
 
         // ========== GESTION DES ZONES ==========
         function assignArea() {
-            const employeeUsername = employeeSelect.value;
+            const employeeUsername = document.getElementById('employeeSelect').value;
             const areaName = document.getElementById('areaName').value;
             const areaCode = document.getElementById('areaCode').value;
             
             if (!employeeUsername || !areaName || !areaCode) {
-                alert("Veuillez remplir tous les champs");
+                showNotification("Veuillez remplir tous les champs", "error");
                 return;
             }
             
             if (assignedAreas.some(area => area.code === areaCode)) {
-                alert("Ce code de zone existe déjà");
+                showNotification("Ce code de zone existe déjà", "error");
                 return;
             }
             
@@ -2286,7 +1573,6 @@
             }
             
             saveToLocalStorage();
-            
             displayAssignedAreasList();
             updateCounters();
             
@@ -2294,72 +1580,14 @@
             document.getElementById('areaCode').value = '';
             
             showNotification("Zone attribuée avec succès", "success");
-            alert("Zone attribuée avec succès");
-        }
-
-        function loadEmployeeAreas() {
-            if (!currentUser || !currentUser.assignedAreas) {
-                selectedAreaInfo.style.display = 'none';
-                return;
-            }
-            
-            const areas = currentUser.assignedAreas;
-            if (areas.length > 0) {
-                if (!selectedArea) {
-                    selectArea(areas[0]);
-                }
-            } else {
-                selectedAreaInfo.style.display = 'none';
-            }
-        }
-
-        function populateAreaSelect() {
-            if (!currentUser || !currentUser.assignedAreas) {
-                areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
-                return;
-            }
-            
-            areaSelect.innerHTML = '<option value="">Choisissez une zone</option>';
-            
-            const areas = currentUser.assignedAreas;
-            areas.forEach(area => {
-                const option = document.createElement('option');
-                option.value = area.id;
-                option.textContent = `${area.name} (${area.code})`;
-                areaSelect.appendChild(option);
-            });
-            
-            areaSelect.onchange = function() {
-                const areaId = parseInt(this.value);
-                if (areaId) {
-                    const area = currentUser.assignedAreas.find(a => a.id === areaId);
-                    if (area) {
-                        selectArea(area);
-                    }
-                }
-            };
-        }
-
-        function selectArea(area) {
-            selectedArea = area;
-            selectedAreaName.textContent = area.name;
-            selectedAreaCode.textContent = area.code;
-            areaAssignedDate.textContent = formatDate(area.date);
-            selectedAreaInfo.style.display = 'block';
-            
-            statusZone.textContent = area.name;
-            statusZoneAfter.textContent = area.name;
-            summaryZone.textContent = area.name;
-            summaryZoneAfter.textContent = area.name;
-            
-            checkSendBeforeStatus();
-            
-            updateStatusBar(`Zone sélectionnée : ${area.name}`);
         }
 
         function displayAssignedAreasList() {
+            const container = document.getElementById('assignedAreasList');
+            container.innerHTML = '';
+            
             if (assignedAreas.length === 0) {
-                assignedAreasList.innerHTML = '<p style="text-align: center; color: #666; padding: 20px;">Aucune zone attribuée</p>';
+                container.innerHTML = '<p style="text-align: center; color: #666;">Aucune zone attribuée</p>';
                 return;
             }
             
@@ -2371,30 +1599,28 @@
                 areasByEmployee[area.employee].push(area);
             });
             
-            assignedAreasList.innerHTML = '';
-            
             Object.keys(areasByEmployee).forEach(employeeUsername => {
                 const employee = usersData[employeeUsername];
                 if (!employee) return;
                 
-                const employeeSection = document.createElement('div');
-                employeeSection.className = 'employee-card';
+                const section = document.createElement('div');
+                section.className = 'employee-card';
                 
                 let areasHTML = '';
                 areasByEmployee[employeeUsername].forEach(area => {
                     const reportCount = zoneReports[area.code]?.reports?.length || 0;
                     
                     areasHTML += `
-                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: #ffffff; border-radius: 8px; margin: 5px 0; border: 1px solid #e1e8ed;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px; background: white; border-radius: 8px; margin: 5px 0; border: 1px solid #e1e8ed;">
                             <div>
                                 <div style="font-weight: 700; color: #333;">${area.name}</div>
-                                <div style="font-size: 12px; color: #666;">Code: ${area.code} • ${formatDate(area.date)}</div>
+                                <div style="font-size: 12px; color: #666;">Code: ${area.code}</div>
                             </div>
                             <div style="display: flex; gap: 5px; align-items: center;">
                                 <span style="background: #f0fff4; padding: 2px 8px; border-radius: 12px; font-size: 11px; color: #2ea043;">
                                     ${reportCount} rapports
                                 </span>
-                                <button class="control-btn danger" style="padding: 3px 8px; font-size: 11px;" onclick="deleteArea(${area.id})">
+                                <button onclick="deleteArea(${area.id})" class="action-btn" style="background: #ff6b6b; padding: 3px 8px; font-size: 11px;">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -2402,21 +1628,19 @@
                     `;
                 });
                 
-                employeeSection.innerHTML = `
-                    <div style="color: #1a5fb4; font-weight: 700; margin-bottom: 10px; font-size: 16px;">
+                section.innerHTML = `
+                    <div style="color: #1a5fb4; font-weight: 700; margin-bottom: 10px;">
                         ${employee.name} <span style="font-size: 12px; color: #666;">(${employeeUsername})</span>
                     </div>
                     ${areasHTML}
                 `;
                 
-                assignedAreasList.appendChild(employeeSection);
+                container.appendChild(section);
             });
         }
 
         function deleteArea(areaId) {
-            if (!confirm("Voulez-vous vraiment supprimer cette zone ?")) {
-                return;
-            }
+            if (!confirm("Supprimer cette zone ?")) return;
             
             const areaIndex = assignedAreas.findIndex(a => a.id === areaId);
             if (areaIndex === -1) return;
@@ -2437,25 +1661,270 @@
                 delete zoneReports[areaCode];
             }
             
-            if (currentUser && currentUser.username === area.employee && selectedArea && selectedArea.id === areaId) {
-                selectedArea = null;
-                selectedAreaInfo.style.display = 'none';
-                if (areaSelect) areaSelect.value = '';
-                statusZone.textContent = "-";
-                statusZoneAfter.textContent = "-";
-                summaryZone.textContent = "-";
-                summaryZoneAfter.textContent = "-";
-            }
-            
             saveToLocalStorage();
             displayAssignedAreasList();
             updateCounters();
             
-            showNotification("Zone supprimée avec succès", "success");
-            alert("Zone supprimée avec succès");
+            showNotification("Zone supprimée", "success");
         }
 
-        // ========== GESTION DES RAPPORTS ==========
+        // ========== FONCTIONS DE L'EMPLOYÉ ==========
+        function selectNumber(number) {
+            selectedNumber = number;
+            
+            document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.getAttribute('data-number') === number) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('selectedNumberDisplay').textContent = number;
+        }
+
+        function selectNumberAfter(number) {
+            selectedNumberAfter = number;
+            
+            document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
+                btn.classList.remove('selected');
+                if (btn.getAttribute('data-number') === number) {
+                    btn.classList.add('selected');
+                }
+            });
+            
+            document.getElementById('selectedNumberDisplayAfter').textContent = number;
+        }
+
+        async function capturePhoto(index, type) {
+            if (!isCameraActive) {
+                showNotification("La caméra n'est pas activée", "error");
+                return;
+            }
+            
+            try {
+                // Simuler la capture
+                const canvas = document.createElement('canvas');
+                canvas.width = 800;
+                canvas.height = 600;
+                const context = canvas.getContext('2d');
+                
+                // Fond blanc
+                context.fillStyle = '#ffffff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Texte de démo
+                context.fillStyle = '#1a5fb4';
+                context.font = 'bold 48px Arial';
+                context.textAlign = 'center';
+                context.fillText(`Photo ${type} ${index + 1}`, canvas.width/2, canvas.height/2);
+                
+                context.fillStyle = '#666';
+                context.font = '24px Arial';
+                context.fillText(`Zone: ${selectedArea ? selectedArea.name : 'N/A'}`, canvas.width/2, canvas.height/2 + 50);
+                context.fillText(new Date().toLocaleString(), canvas.width/2, canvas.height/2 + 100);
+                
+                const imageUrl = canvas.toDataURL('image/jpeg');
+                
+                if (type === 'before') {
+                    beforePhotos[index] = {
+                        url: imageUrl,
+                        timestamp: new Date().toISOString(),
+                        noteCode: selectedArea ? selectedArea.code : "ZN000"
+                    };
+                } else {
+                    afterPhotos[index] = {
+                        url: imageUrl,
+                        timestamp: new Date().toISOString(),
+                        noteCode: selectedArea ? selectedArea.code : "ZN000"
+                    };
+                }
+                
+                const photoBox = document.querySelector(`.photo-box[data-index="${index}"][data-type="${type}"]`);
+                photoBox.classList.add('captured');
+                const preview = photoBox.querySelector('.photo-preview');
+                preview.src = imageUrl;
+                
+                updatePhotoCount(type);
+                showNotification(`Photo ${type} ${index + 1} capturée`, "success");
+                
+            } catch (error) {
+                showNotification("Erreur lors de la capture", "error");
+            }
+        }
+
+        function updatePhotoCount(type) {
+            if (type === 'before') {
+                const count = beforePhotos.filter(p => p !== null).length;
+                document.getElementById('beforePhotosCount').textContent = `${count}/5`;
+                
+                if (count === 5 && selectedNumber && selectedArea) {
+                    document.getElementById('sendBeforeBtn').disabled = false;
+                }
+            } else {
+                const count = afterPhotos.filter(p => p !== null).length;
+                document.getElementById('afterPhotosCount').textContent = `${count}/5`;
+                
+                if (count === 5 && selectedNumberAfter && selectedArea) {
+                    document.getElementById('sendAfterBtn').disabled = false;
+                }
+            }
+        }
+
+        function clearAllPhotos() {
+            if (!confirm("Effacer toutes les photos ?")) return;
+            
+            beforePhotos = [null, null, null, null, null];
+            afterPhotos = [null, null, null, null, null];
+            
+            document.querySelectorAll('.photo-box').forEach(box => {
+                box.classList.remove('captured');
+                const preview = box.querySelector('.photo-preview');
+                if (preview) preview.src = '';
+            });
+            
+            updatePhotoCount('before');
+            updatePhotoCount('after');
+            showNotification("Photos effacées", "success");
+        }
+
+        async function activateCameraAutomatically() {
+            try {
+                document.getElementById('cameraStatus').innerHTML = `
+                    <div class="camera-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="camera-text">Activation de la caméra...</div>
+                `;
+                
+                isCameraActive = true;
+                
+                setTimeout(() => {
+                    document.getElementById('cameraStatus').classList.add('active');
+                    document.getElementById('cameraStatus').innerHTML = `
+                        <div class="camera-icon">
+                            <i class="fas fa-video"></i>
+                        </div>
+                        <div class="camera-text">Caméra active ✓</div>
+                    `;
+                    showNotification("Caméra activée", "success");
+                }, 1000);
+                
+            } catch (error) {
+                document.getElementById('cameraStatus').innerHTML = `
+                    <div class="camera-icon" style="color: #ff6b6b;">
+                        <i class="fas fa-video-slash"></i>
+                    </div>
+                    <div class="camera-text" style="color: #ff6b6b;">Caméra non disponible</div>
+                `;
+                showNotification("Erreur de caméra", "error");
+            }
+        }
+
+        async function toggleCameraManually() {
+            if (!isCameraActive) {
+                await activateCameraAutomatically();
+            } else {
+                isCameraActive = false;
+                document.getElementById('cameraStatus').classList.remove('active');
+                document.getElementById('cameraStatus').innerHTML = `
+                    <div class="camera-icon">
+                        <i class="fas fa-video-slash"></i>
+                    </div>
+                    <div class="camera-text">Caméra désactivée</div>
+                `;
+                showNotification("Caméra désactivée", "success");
+            }
+        }
+
+        function updateLocationInfo() {
+            showNotification("Localisation actualisée", "success");
+        }
+
+        function sendBeforePhotos() {
+            if (!selectedArea || !selectedNumber || beforePhotos.filter(p => p !== null).length < 5) {
+                showNotification("Veuillez compléter toutes les informations", "error");
+                return;
+            }
+            
+            const report = {
+                id: Date.now(),
+                employee: currentUser.username,
+                employeeName: currentUser.name,
+                numberBefore: selectedNumber,
+                date: new Date().toISOString(),
+                beforePhotos: beforePhotos.filter(p => p !== null),
+                area: selectedArea.name,
+                areaCode: selectedArea.code,
+                status: 'before_only'
+            };
+            
+            const zoneCode = selectedArea.code;
+            if (!zoneReports[zoneCode]) {
+                zoneReports[zoneCode] = {
+                    name: selectedArea.name,
+                    reports: [],
+                    photos: []
+                };
+            }
+            
+            zoneReports[zoneCode].reports.push(report);
+            tempReport = report;
+            localStorage.setItem('tempReport', JSON.stringify(tempReport));
+            saveToLocalStorage();
+            
+            // Masquer AVANT, montrer APRÈS
+            document.getElementById('beforePhotosContainer').style.display = 'none';
+            document.getElementById('sendBeforeContainer').style.display = 'none';
+            document.getElementById('numberSelection').style.display = 'none';
+            document.getElementById('apresButtonContainer').style.display = 'block';
+            
+            showNotification("Photos AVANT envoyées avec succès !", "success");
+            updateCounters();
+        }
+
+        function showAfterPhotos() {
+            document.getElementById('apresButtonContainer').style.display = 'none';
+            document.getElementById('afterPhotosContainer').style.display = 'block';
+            document.getElementById('numberSelectionAfter').style.display = 'block';
+            document.getElementById('sendAfterContainer').style.display = 'block';
+        }
+
+        function sendAfterPhotos() {
+            if (!selectedArea || !selectedNumberAfter || afterPhotos.filter(p => p !== null).length < 5) {
+                showNotification("Veuillez compléter toutes les informations", "error");
+                return;
+            }
+            
+            const zoneCode = selectedArea.code;
+            const zoneData = zoneReports[zoneCode];
+            if (!zoneData || !tempReport) {
+                showNotification("Erreur: rapport non trouvé", "error");
+                return;
+            }
+            
+            const reportIndex = zoneData.reports.findIndex(r => r.id === tempReport.id);
+            if (reportIndex === -1) {
+                showNotification("Erreur: rapport non trouvé", "error");
+                return;
+            }
+            
+            zoneData.reports[reportIndex].numberAfter = selectedNumberAfter;
+            zoneData.reports[reportIndex].afterPhotos = afterPhotos.filter(p => p !== null);
+            zoneData.reports[reportIndex].status = 'complete';
+            zoneData.reports[reportIndex].completionDate = new Date().toISOString();
+            
+            saveToLocalStorage();
+            
+            // Générer fichier
+            generateZoneFile(zoneCode);
+            
+            // Réinitialiser
+            resetForm();
+            
+            showNotification("Rapport complet envoyé avec succès !", "success");
+            updateCounters();
+        }
+
         function generateZoneFile(zoneCode) {
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) return;
@@ -2465,24 +1934,7 @@
                 zoneName: zoneData.name,
                 generatedAt: new Date().toISOString(),
                 totalReports: zoneData.reports.length,
-                totalPhotos: zoneData.photos.length,
-                reports: zoneData.reports.map(report => ({
-                    id: report.id,
-                    employee: report.employeeName,
-                    numberBefore: report.numberBefore,
-                    numberAfter: report.numberAfter,
-                    date: formatDate(report.date),
-                    completionDate: report.completionDate ? formatDate(report.completionDate) : null,
-                    location: report.location,
-                    status: report.status,
-                    step: report.step
-                })),
-                photos: zoneData.photos.map(photo => ({
-                    type: photo.type,
-                    index: photo.index,
-                    reportId: photo.reportId,
-                    timestamp: formatDate(photo.timestamp)
-                }))
+                reports: zoneData.reports
             };
             
             const jsonData = JSON.stringify(zoneFile, null, 2);
@@ -2491,27 +1943,115 @@
             
             const link = document.createElement('a');
             link.href = url;
-            link.download = `NoteCam_Zone_${zoneCode}_${new Date().toISOString().split('T')[0]}.json`;
-            
-            document.body.appendChild(link);
+            link.download = `NoteCam_Zone_${zoneCode}.json`;
             link.click();
-            document.body.removeChild(link);
+            
             URL.revokeObjectURL(url);
         }
 
+        function resetForm() {
+            selectedNumber = null;
+            selectedNumberAfter = null;
+            beforePhotos = [null, null, null, null, null];
+            afterPhotos = [null, null, null, null, null];
+            tempReport = null;
+            localStorage.removeItem('tempReport');
+            
+            document.querySelectorAll('.number-btn').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById('selectedNumberDisplay').textContent = "Aucun";
+            document.getElementById('selectedNumberDisplayAfter').textContent = "Aucun";
+            document.getElementById('sendBeforeBtn').disabled = true;
+            document.getElementById('sendAfterBtn').disabled = true;
+            
+            document.querySelectorAll('.photo-box').forEach(box => {
+                box.classList.remove('captured');
+                const preview = box.querySelector('.photo-preview');
+                if (preview) preview.src = '';
+            });
+            
+            document.getElementById('beforePhotosContainer').style.display = 'block';
+            document.getElementById('afterPhotosContainer').style.display = 'none';
+            document.getElementById('sendBeforeContainer').style.display = 'block';
+            document.getElementById('sendAfterContainer').style.display = 'none';
+            document.getElementById('apresButtonContainer').style.display = 'none';
+            document.getElementById('numberSelection').style.display = 'block';
+            document.getElementById('numberSelectionAfter').style.display = 'none';
+            
+            updatePhotoCount('before');
+            updatePhotoCount('after');
+        }
+
+        // ========== AUTHENTIFICATION ==========
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            const user = usersData[username];
+            
+            if (user && user.password === password) {
+                currentUser = {
+                    username: username,
+                    ...user
+                };
+                
+                document.getElementById('loginPage').style.display = 'none';
+                
+                if (user.role === 'admin') {
+                    document.getElementById('adminPanel').style.display = 'block';
+                    updateAdminDashboard();
+                } else {
+                    document.getElementById('employeePanel').style.display = 'block';
+                    document.getElementById('employeeName').textContent = `Employé : ${user.name}`;
+                    
+                    setTimeout(() => {
+                        activateCameraAutomatically();
+                    }, 1000);
+                    
+                    if (tempReport) {
+                        document.getElementById('beforePhotosContainer').style.display = 'none';
+                        document.getElementById('sendBeforeContainer').style.display = 'none';
+                        document.getElementById('numberSelection').style.display = 'none';
+                        document.getElementById('afterPhotosContainer').style.display = 'block';
+                        document.getElementById('numberSelectionAfter').style.display = 'block';
+                        document.getElementById('sendAfterContainer').style.display = 'block';
+                        document.getElementById('apresButtonContainer').style.display = 'none';
+                    }
+                }
+                
+                showNotification(`Bienvenue ${user.name}`, "success");
+                updateStatusBar(`Connecté: ${user.name}`);
+                
+            } else {
+                showNotification("Identifiants incorrects", "error");
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            document.getElementById('loginPage').style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('employeePanel').style.display = 'none';
+            document.getElementById('githubPanel').style.display = 'none';
+            document.getElementById('reportsPanel').style.display = 'none';
+            
+            showNotification("Déconnecté", "success");
+            updateStatusBar("Prêt");
+        }
+
+        function checkLoggedInUser() {
+            // Pour cette démo, pas de session persistante
+        }
+
+        // ========== GESTION DES RAPPORTS ==========
         function viewAllReports() {
-            adminPanel.style.display = 'none';
-            reportsPanel.style.display = 'block';
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('reportsPanel').style.display = 'block';
             displayFullReports();
         }
 
-        function backToAdminPanel() {
-            adminPanel.style.display = 'block';
-            reportsPanel.style.display = 'none';
-        }
-
         function displayFullReports() {
-            reportDetailsContainer.innerHTML = '';
+            const container = document.getElementById('reportDetailsContainer');
+            container.innerHTML = '';
             
             let totalReports = 0;
             Object.values(zoneReports).forEach(zone => {
@@ -2519,11 +2059,10 @@
             });
             
             if (totalReports === 0) {
-                reportDetailsContainer.innerHTML = `
+                container.innerHTML = `
                     <div class="employee-card" style="text-align: center; padding: 40px;">
-                        <i class="fas fa-file-alt" style="font-size: 48px; color: #e1e8ed; margin-bottom: 20px;"></i>
-                        <h3 style="color: #666; margin-bottom: 15px;">Aucun rapport</h3>
-                        <p style="color: #999;">Aucun rapport reçu pour le moment</p>
+                        <i class="fas fa-file-alt" style="font-size: 48px; color: #e1e8ed;"></i>
+                        <h3 style="color: #666;">Aucun rapport</h3>
                     </div>
                 `;
                 return;
@@ -2534,343 +2073,77 @@
                 
                 const zoneCard = document.createElement('div');
                 zoneCard.className = 'employee-card';
-                zoneCard.style.marginBottom = '25px';
                 
                 let reportsHTML = '';
-                zoneData.reports.forEach((report, index) => {
-                    const beforeCount = report.beforePhotos?.length || 0;
-                    const afterCount = report.afterPhotos?.length || 0;
+                zoneData.reports.forEach(report => {
                     const statusBadge = report.status === 'complete' ? 
                         '<span style="background: #2ea043; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">Complet</span>' : 
                         '<span style="background: #1a5fb4; color: white; padding: 2px 8px; border-radius: 10px; font-size: 11px;">AVANT seulement</span>';
                     
                     reportsHTML += `
-                        <div style="background: #ffffff; border-radius: 8px; padding: 15px; margin: 10px 0; border: 1px solid #e1e8ed;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <div style="background: white; border-radius: 8px; padding: 15px; margin: 10px 0; border: 1px solid #e1e8ed;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
                                 <div>
-                                    <div style="font-weight: 700; color: #333;">${report.employeeName}</div>
-                                    <div style="font-size: 12px; color: #666;">${formatDate(report.date)}</div>
+                                    <strong>${report.employeeName}</strong>
+                                    <div style="font-size: 12px; color: #666;">${new Date(report.date).toLocaleString()}</div>
                                 </div>
-                                <div style="display: flex; gap: 5px; align-items: center;">
-                                    ${statusBadge}
-                                </div>
+                                ${statusBadge}
                             </div>
-                            <div style="display: flex; gap: 10px; font-size: 12px; color: #666; margin-bottom: 8px;">
-                                ${report.numberBefore !== undefined ? 
-                                    `<span><i class="fas fa-hashtag" style="color: #1a5fb4;"></i> AVANT: ${report.numberBefore}</span>` : ''}
-                                ${report.numberAfter !== undefined ? 
-                                    `<span><i class="fas fa-hashtag" style="color: #ff6b6b;"></i> APRÈS: ${report.numberAfter}</span>` : ''}
+                            <div style="font-size: 14px; color: #666;">
+                                Zone: ${report.area} | Photos: ${report.beforePhotos.length + (report.afterPhotos ? report.afterPhotos.length : 0)}
                             </div>
-                            <div style="display: flex; gap: 15px; font-size: 12px; color: #666; margin-bottom: 10px;">
-                                <span><i class="fas fa-images"></i> ${beforeCount + afterCount} photos</span>
-                                <span><i class="fas fa-map-marker-alt"></i> ${report.location.lat.toFixed(6)}, ${report.location.lng.toFixed(6)}</span>
-                            </div>
-                            <button class="control-btn" style="margin-top: 10px; padding: 5px 10px; font-size: 12px;" onclick="viewReportDetails('${zoneCode}', ${report.id})">
-                                <i class="fas fa-eye"></i> Voir détails
-                            </button>
                         </div>
                     `;
                 });
                 
                 zoneCard.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid #e1e8ed;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                         <div>
-                            <h3 style="color: #1a5fb4; margin: 0; font-size: 18px;">${zoneData.name}</h3>
-                            <div style="font-size: 14px; color: #666;">Code : ${zoneCode}</div>
+                            <h3 style="color: #1a5fb4; margin: 0;">${zoneData.name}</h3>
+                            <div style="color: #666;">Code: ${zoneCode}</div>
                         </div>
-                        <div style="display: flex; gap: 10px;">
-                            <span class="badge badge-blue">${zoneData.reports.length} rapports</span>
-                            <span class="badge badge-green">${zoneData.photos.length} photos</span>
-                            <button class="control-btn primary" onclick="downloadZoneData('${zoneCode}')" style="padding: 5px 15px;">
-                                <i class="fas fa-download"></i> Télécharger
-                            </button>
-                        </div>
+                        <button onclick="downloadZoneData('${zoneCode}')" class="action-btn">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
                     </div>
                     ${reportsHTML}
                 `;
                 
-                reportDetailsContainer.appendChild(zoneCard);
+                container.appendChild(zoneCard);
             });
-        }
-
-        function displayMiniReports() {
-            reportsListMini.innerHTML = '';
-            
-            let totalReports = 0;
-            Object.values(zoneReports).forEach(zone => {
-                totalReports += zone.reports.length;
-            });
-            
-            if (totalReports === 0) {
-                reportsListMini.innerHTML = `
-                    <div style="text-align: center; padding: 30px; background: #f8f9fa; border-radius: 8px;">
-                        <i class="fas fa-inbox" style="font-size: 48px; color: #e1e8ed; margin-bottom: 15px;"></i>
-                        <h4 style="color: #666; margin-bottom: 10px;">Aucun rapport reçu</h4>
-                        <p style="color: #999; font-size: 14px;">Les rapports apparaîtront ici lorsque les employés les enverront</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            let allReports = [];
-            Object.values(zoneReports).forEach(zone => {
-                zone.reports.forEach(report => {
-                    allReports.push({...report, zoneData: zone});
-                });
-            });
-            
-            allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
-            
-            const recentReports = allReports.slice(0, 5);
-            
-            recentReports.forEach(report => {
-                const beforeCount = report.beforePhotos?.length || 0;
-                const afterCount = report.afterPhotos?.length || 0;
-                const statusColor = report.status === 'complete' ? '#2ea043' : '#1a5fb4';
-                const statusText = report.status === 'complete' ? 'Complet' : 'AVANT seulement';
-                
-                const reportCard = document.createElement('div');
-                reportCard.className = 'report-card';
-                
-                reportCard.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <div>
-                            <div style="font-weight: 700; color: #1a5fb4; font-size: 16px;">${report.employeeName}</div>
-                            <div style="font-size: 12px; color: #666;">${formatDate(report.date)}</div>
-                        </div>
-                        <span style="background: ${statusColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 700;">
-                            ${statusText}
-                        </span>
-                    </div>
-                    <div style="display: flex; gap: 10px; font-size: 12px; color: #666; margin-bottom: 8px;">
-                        ${report.numberBefore !== undefined ? 
-                            `<span><i class="fas fa-hashtag" style="color: #1a5fb4;"></i> AVANT: ${report.numberBefore}</span>` : ''}
-                        ${report.numberAfter !== undefined ? 
-                            `<span><i class="fas fa-hashtag" style="color: #ff6b6b;"></i> APRÈS: ${report.numberAfter}</span>` : ''}
-                    </div>
-                    <div style="display: flex; gap: 15px; font-size: 12px; color: #666; margin-bottom: 10px;">
-                        <span><i class="fas fa-map-marker-alt"></i> ${report.area}</span>
-                        <span><i class="fas fa-images"></i> ${beforeCount + afterCount} photos</span>
-                    </div>
-                    <button class="control-btn primary" style="width: 100%; padding: 8px;" onclick="viewReportDetails('${report.areaCode}', ${report.id})">
-                        <i class="fas fa-eye"></i> Voir le rapport complet
-                    </button>
-                `;
-                
-                reportsListMini.appendChild(reportCard);
-            });
-        }
-
-        function viewReportDetails(zoneCode, reportId) {
-            const zoneData = zoneReports[zoneCode];
-            if (!zoneData) return;
-            
-            const report = zoneData.reports.find(r => r.id === reportId);
-            if (!report) return;
-            
-            const modal = document.createElement('div');
-            modal.style.position = 'fixed';
-            modal.style.top = '0';
-            modal.style.left = '0';
-            modal.style.width = '100%';
-            modal.style.height = '100%';
-            modal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-            modal.style.display = 'flex';
-            modal.style.justifyContent = 'center';
-            modal.style.alignItems = 'center';
-            modal.style.zIndex = '10000';
-            
-            let photosHTML = '';
-            
-            if (report.beforePhotos && report.beforePhotos.length > 0) {
-                photosHTML += '<h4 style="color: #1a5fb4; margin: 20px 0 10px;">Photos AVANT</h4>';
-                photosHTML += '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">';
-                report.beforePhotos.forEach((photo, index) => {
-                    photosHTML += `
-                        <div style="background: #ffffff; border-radius: 8px; overflow: hidden;">
-                            <img src="${photo.url}" style="width: 100%; height: 100px; object-fit: cover;">
-                            <div style="padding: 5px; text-align: center; font-size: 11px; color: #1a5fb4; font-weight: 700;">AVANT ${index + 1}</div>
-                        </div>
-                    `;
-                });
-                photosHTML += '</div>';
-            }
-            
-            if (report.afterPhotos && report.afterPhotos.length > 0) {
-                photosHTML += '<h4 style="color: #ff6b6b; margin: 20px 0 10px;">Photos APRÈS</h4>';
-                photosHTML += '<div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">';
-                report.afterPhotos.forEach((photo, index) => {
-                    photosHTML += `
-                        <div style="background: #ffffff; border-radius: 8px; overflow: hidden;">
-                            <img src="${photo.url}" style="width: 100%; height: 100px; object-fit: cover;">
-                            <div style="padding: 5px; text-align: center; font-size: 11px; color: #ff6b6b; font-weight: 700;">APRÈS ${index + 1}</div>
-                        </div>
-                    `;
-                });
-                photosHTML += '</div>';
-            }
-            
-            modal.innerHTML = `
-                <div style="background: #ffffff; border-radius: 15px; padding: 30px; max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #e1e8ed;">
-                        <h2 style="color: #1a5fb4; margin: 0;">Détails du rapport</h2>
-                        <button onclick="this.parentElement.parentElement.parentElement.remove()" style="background: #ff6b6b; color: white; border: none; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 16px;">×</button>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Employé</div>
-                                <div style="font-weight: 700; color: #333;">${report.employeeName}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Statut</div>
-                                <div style="font-weight: 700; color: ${report.status === 'complete' ? '#2ea043' : '#1a5fb4'};">${report.status === 'complete' ? 'Complet' : 'AVANT seulement'}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Nombre AVANT</div>
-                                <div style="font-weight: 700; color: #1a5fb4; font-size: 20px;">${report.numberBefore || '-'}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Nombre APRÈS</div>
-                                <div style="font-weight: 700; color: #ff6b6b; font-size: 20px;">${report.numberAfter || '-'}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Zone</div>
-                                <div style="font-weight: 700; color: #333;">${report.area}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Date</div>
-                                <div style="font-weight: 700; color: #333;">${formatDate(report.date)}</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div style="background: #f8f9fa; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
-                        <h4 style="color: #1a5fb4; margin-bottom: 15px;">Localisation</h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Latitude</div>
-                                <div style="font-weight: 700; color: #333;">${report.location.lat.toFixed(6)}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Longitude</div>
-                                <div style="font-weight: 700; color: #333;">${report.location.lng.toFixed(6)}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Altitude</div>
-                                <div style="font-weight: 700; color: #333;">${report.location.elev}</div>
-                            </div>
-                            <div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Précision</div>
-                                <div style="font-weight: 700; color: #333;">${report.location.prec.toFixed(2)} m</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    ${photosHTML}
-                    
-                    <div style="text-align: center; margin-top: 30px;">
-                        <button class="control-btn primary" onclick="downloadReport('${zoneCode}', ${report.id})" style="padding: 10px 30px;">
-                            <i class="fas fa-download"></i> Télécharger ce rapport
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
         }
 
         function downloadZoneData(zoneCode) {
             generateZoneFile(zoneCode);
         }
 
-        function downloadReport(zoneCode, reportId) {
-            const zoneData = zoneReports[zoneCode];
-            if (!zoneData) return;
-            
-            const report = zoneData.reports.find(r => r.id === reportId);
-            if (!report) return;
-            
-            const reportData = {
-                reportId: report.id,
-                employee: report.employeeName,
-                zone: report.area,
-                zoneCode: report.areaCode,
-                numberBefore: report.numberBefore,
-                numberAfter: report.numberAfter,
-                date: formatDate(report.date),
-                completionDate: report.completionDate ? formatDate(report.completionDate) : null,
-                location: report.location,
-                noteCode: report.noteCode,
-                status: report.status,
-                beforePhotosCount: report.beforePhotos?.length || 0,
-                afterPhotosCount: report.afterPhotos?.length || 0
-            };
-            
-            const jsonData = JSON.stringify(reportData, null, 2);
-            const blob = new Blob([jsonData], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `NoteCam_Rapport_${report.employeeName}_${report.areaCode}_${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-        }
-
         function exportAllData() {
-            const exportData = {
-                exportedAt: new Date().toISOString(),
-                users: Object.keys(usersData).length,
-                zones: assignedAreas.length,
-                zoneReports: zoneReports
+            const data = {
+                usersData,
+                assignedAreas,
+                zoneReports,
+                githubConfig,
+                lastSync,
+                exportedAt: new Date().toISOString()
             };
             
-            const jsonData = JSON.stringify(exportData, null, 2);
+            const jsonData = JSON.stringify(data, null, 2);
             const blob = new Blob([jsonData], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             
             const link = document.createElement('a');
             link.href = url;
-            link.download = `NoteCam_Export_Complet_${new Date().toISOString().split('T')[0]}.json`;
+            link.download = `NoteCam_Export_${new Date().toISOString().split('T')[0]}.json`;
             link.click();
             
             URL.revokeObjectURL(url);
-            
-            showNotification("Toutes les données exportées", "success");
-            updateStatusBar("Toutes les données exportées");
-        }
-
-        // ========== INTERFACE ==========
-        function updateEmployeeSelect() {
-            employeeSelect.innerHTML = '<option value="">Sélectionner un employé</option>';
-            
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    const option = document.createElement('option');
-                    option.value = username;
-                    option.textContent = `${data.name} (${username})`;
-                    employeeSelect.appendChild(option);
-                }
-            });
-        }
-
-        function updateAdminDashboard() {
-            displayEmployees();
-            displayAssignedAreasList();
-            displayMiniReports();
-            updateCounters();
-            updateEmployeeSelect();
+            showNotification("Données exportées", "success");
         }
 
         function updateCounters() {
             let employeeCount = 0;
-            Object.entries(usersData).forEach(([username, data]) => {
-                if (data.role === "employee") {
-                    employeeCount++;
-                }
+            Object.values(usersData).forEach(user => {
+                if (user.role === "employee") employeeCount++;
             });
             document.getElementById('employeesCount').textContent = employeeCount;
             document.getElementById('areasCount').textContent = assignedAreas.length;
@@ -2882,7 +2155,14 @@
             document.getElementById('reportsCount').textContent = totalReports;
         }
 
-        // ========== INITIALISER L'APPLICATION ==========
+        function updateAdminDashboard() {
+            displayEmployees();
+            displayAssignedAreasList();
+            updateEmployeeSelect();
+            updateCounters();
+        }
+
+        // ========== DÉMARRAGE ==========
         document.addEventListener('DOMContentLoaded', initializeApp);
     </script>
 </body>
