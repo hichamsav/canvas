@@ -647,6 +647,51 @@
             opacity: 0;
         }
 
+        /* Styles pour عرض الصور في التفاصيل */
+        .photos-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .photo-item {
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .photo-info {
+            padding: 10px;
+            background: white;
+        }
+
+        .photo-type {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .photo-type.before {
+            background: #1a5fb4;
+            color: white;
+        }
+
+        .photo-type.after {
+            background: #ff6b6b;
+            color: white;
+        }
+
         @media (max-width: 768px) {
             .photo-boxes-container {
                 flex-direction: column;
@@ -678,6 +723,10 @@
             .controls-under-area {
                 flex-direction: column;
                 align-items: center;
+            }
+            
+            .photos-gallery {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
         }
 
@@ -1276,17 +1325,18 @@
             updateStatusBar("Retour aux photos AVANT");
         }
 
-        // ========== FONCTIONS FIREBASE ==========
+        // ========== نظام تخزين كامل في Firebase ==========
         async function initializeFirebase() {
             try {
                 await db.collection('system').doc('status').set({
                     lastOnline: new Date().toISOString(),
-                    status: 'online'
+                    status: 'online',
+                    version: '1.0.0'
                 }, { merge: true });
                 
                 isFirebaseInitialized = true;
                 console.log('Firebase initialisé avec succès');
-                await loadFromFirebase();
+                await loadAllFromFirebase();
                 showNotification("Connecté à Firebase", "success");
                 
             } catch (error) {
@@ -1295,59 +1345,97 @@
             }
         }
 
-        async function loadFromFirebase() {
+        async function loadAllFromFirebase() {
             try {
+                // تحميل المستخدمين
                 const usersSnapshot = await db.collection('users').get();
-                usersSnapshot.forEach(doc => {
-                    usersData[doc.id] = doc.data();
-                });
+                if (!usersSnapshot.empty) {
+                    usersSnapshot.forEach(doc => {
+                        usersData[doc.id] = doc.data();
+                    });
+                    console.log('Utilisateurs chargés depuis Firebase');
+                }
                 
+                // تحميل المناطق
                 const areasSnapshot = await db.collection('assignedAreas').get();
-                areasSnapshot.forEach(doc => {
-                    assignedAreas.push(doc.data());
-                });
+                if (!areasSnapshot.empty) {
+                    assignedAreas = [];
+                    areasSnapshot.forEach(doc => {
+                        assignedAreas.push(doc.data());
+                    });
+                    console.log('Zones chargées depuis Firebase');
+                }
                 
-                const reportsSnapshot = await db.collection('zoneReports').get();
-                reportsSnapshot.forEach(doc => {
-                    zoneReports[doc.id] = doc.data();
-                });
+                // تحميل التقارير
+                const reportsSnapshot = await db.collection('reports').get();
+                if (!reportsSnapshot.empty) {
+                    zoneReports = {};
+                    reportsSnapshot.forEach(doc => {
+                        const report = doc.data();
+                        const zoneCode = report.areaCode;
+                        
+                        if (!zoneReports[zoneCode]) {
+                            zoneReports[zoneCode] = {
+                                name: report.area,
+                                reports: [],
+                                photos: []
+                            };
+                        }
+                        
+                        zoneReports[zoneCode].reports.push(report);
+                        
+                        if (report.photos) {
+                            report.photos.forEach(photo => {
+                                zoneReports[zoneCode].photos.push(photo);
+                            });
+                        }
+                    });
+                    console.log('Rapports chargés depuis Firebase');
+                }
                 
-                console.log('Données chargées depuis Firebase');
+                saveToLocalStorage();
                 
             } catch (error) {
-                console.error('Erreur de chargement:', error);
+                console.error('Erreur de chargement Firebase:', error);
             }
         }
 
-        async function saveToFirebase() {
+        async function saveAllToFirebase() {
             try {
                 if (!isFirebaseInitialized) return;
                 
+                // حفظ المستخدمين
                 for (const [username, userData] of Object.entries(usersData)) {
                     await db.collection('users').doc(username).set({
                         ...userData,
                         lastUpdated: new Date().toISOString()
                     }, { merge: true });
                 }
+                console.log('Utilisateurs sauvegardés sur Firebase');
                 
+                // حفظ المناطق
                 for (const area of assignedAreas) {
                     await db.collection('assignedAreas').doc(`area_${area.id}`).set({
                         ...area,
                         lastUpdated: new Date().toISOString()
                     }, { merge: true });
                 }
+                console.log('Zones sauvegardées sur Firebase');
                 
+                // حفظ التقارير
                 for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
-                    await db.collection('zoneReports').doc(zoneCode).set({
-                        ...zoneData,
-                        lastUpdated: new Date().toISOString()
-                    }, { merge: true });
+                    for (const report of zoneData.reports) {
+                        const reportId = `report_${report.id}`;
+                        await db.collection('reports').doc(reportId).set({
+                            ...report,
+                            lastUpdated: new Date().toISOString()
+                        }, { merge: true });
+                    }
                 }
-                
-                console.log('Données sauvegardées sur Firebase');
+                console.log('Rapports sauvegardés sur Firebase');
                 
             } catch (error) {
-                console.error('Erreur de sauvegarde:', error);
+                console.error('Erreur de sauvegarde Firebase:', error);
             }
         }
 
@@ -1364,39 +1452,68 @@
             }
         }
 
-        async function saveReportToFirebase(report, photos, type) {
+        async function saveReportWithImagesToFirebase(report, beforePhotosArray, afterPhotosArray) {
             try {
                 const reportId = `report_${report.id}`;
-                
                 const uploadedPhotos = [];
-                for (let i = 0; i < photos.length; i++) {
-                    if (photos[i]) {
-                        const photoPath = `reports/${report.id}/${type}_${i + 1}_${Date.now()}.jpg`;
-                        const photoUrl = await uploadImageToFirebase(photos[i].blob, photoPath);
-                        
-                        if (photoUrl) {
-                            uploadedPhotos.push({
-                                url: photoUrl,
-                                type: type,
-                                index: i,
-                                timestamp: photos[i].timestamp
-                            });
+                
+                // تحميل صور AVANT
+                if (beforePhotosArray) {
+                    for (let i = 0; i < beforePhotosArray.length; i++) {
+                        if (beforePhotosArray[i] && beforePhotosArray[i].blob) {
+                            const photoPath = `reports/${report.id}/before_${i + 1}_${Date.now()}.jpg`;
+                            const photoUrl = await uploadImageToFirebase(beforePhotosArray[i].blob, photoPath);
+                            
+                            if (photoUrl) {
+                                uploadedPhotos.push({
+                                    url: photoUrl,
+                                    type: 'before',
+                                    index: i,
+                                    timestamp: beforePhotosArray[i].timestamp,
+                                    location: beforePhotosArray[i].location,
+                                    noteCode: beforePhotosArray[i].noteCode
+                                });
+                            }
                         }
                     }
                 }
                 
-                await db.collection('reports').doc(reportId).set({
+                // تحميل صور APRÈS
+                if (afterPhotosArray) {
+                    for (let i = 0; i < afterPhotosArray.length; i++) {
+                        if (afterPhotosArray[i] && afterPhotosArray[i].blob) {
+                            const photoPath = `reports/${report.id}/after_${i + 1}_${Date.now()}.jpg`;
+                            const photoUrl = await uploadImageToFirebase(afterPhotosArray[i].blob, photoPath);
+                            
+                            if (photoUrl) {
+                                uploadedPhotos.push({
+                                    url: photoUrl,
+                                    type: 'after',
+                                    index: i,
+                                    timestamp: afterPhotosArray[i].timestamp,
+                                    location: afterPhotosArray[i].location,
+                                    noteCode: afterPhotosArray[i].noteCode
+                                });
+                            }
+                        }
+                    }
+                }
+                
+                // حفظ التقرير مع الروابط
+                const reportData = {
                     ...report,
                     photos: uploadedPhotos,
                     uploadedAt: new Date().toISOString(),
-                    status: type === 'before' ? 'before_only' : 'complete'
-                }, { merge: true });
+                    firebaseSync: true
+                };
                 
-                return true;
+                await db.collection('reports').doc(reportId).set(reportData, { merge: true });
+                
+                return reportData;
                 
             } catch (error) {
-                console.error('Erreur de sauvegarde rapport:', error);
-                return false;
+                console.error('Erreur de sauvegarde rapport avec images:', error);
+                return null;
             }
         }
 
@@ -1583,7 +1700,11 @@
                 zoneReports
             };
             localStorage.setItem('noteCamSystemData', JSON.stringify(data));
-            saveToFirebase();
+            
+            // حفظ تلقائي في Firebase
+            if (isFirebaseInitialized) {
+                saveAllToFirebase();
+            }
         }
 
         // ========== AUTHENTIFICATION ==========
@@ -2426,7 +2547,8 @@
             
             saveToLocalStorage();
             
-            saveReportToFirebase(beforeReport, beforePhotos, 'before');
+            // حفظ مع الصور في Firebase
+            saveReportWithImagesToFirebase(beforeReport, beforePhotos, null);
             
             tempReport = {
                 id: beforeReport.id,
@@ -2515,7 +2637,8 @@
             
             saveToLocalStorage();
             
-            saveReportToFirebase(updatedReport, afterPhotos, 'after');
+            // حفظ مع الصور في Firebase
+            saveReportWithImagesToFirebase(updatedReport, null, afterPhotos);
             
             generateZoneFile(zoneCode);
             
@@ -2668,6 +2791,426 @@
             });
         }
 
+        function displayFullReports() {
+            const reportDetailsContainer = document.getElementById('reportDetailsContainer');
+            reportDetailsContainer.innerHTML = '';
+            
+            let totalReports = 0;
+            Object.values(zoneReports).forEach(zone => {
+                totalReports += zone.reports.length;
+            });
+            
+            if (totalReports === 0) {
+                reportDetailsContainer.innerHTML = `
+                    <div class="dashboard-section">
+                        <div style="text-align: center; padding: 50px;">
+                            <i class="fas fa-inbox" style="font-size: 64px; color: #e1e8ed; margin-bottom: 20px;"></i>
+                            <h3 style="color: #666; margin-bottom: 15px;">Aucun rapport disponible</h3>
+                            <p style="color: #999; font-size: 16px; margin-bottom: 30px;">Les rapports apparaîtront ici lorsque les employés les enverront</p>
+                            <button class="control-btn primary" onclick="backToAdminPanel()">
+                                <i class="fas fa-arrow-left"></i> Retour au panneau
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let allReports = [];
+            Object.values(zoneReports).forEach(zone => {
+                zone.reports.forEach(report => {
+                    allReports.push({...report, zoneData: zone});
+                });
+            });
+            
+            allReports.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            const reportsListHTML = `
+                <div class="dashboard-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Tous les Rapports (${totalReports})</h3>
+                        <button class="control-btn primary" onclick="backToAdminPanel()">
+                            <i class="fas fa-arrow-left"></i> Retour au panneau
+                        </button>
+                    </div>
+                    
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <div style="background: #e3f2fd; padding: 10px 15px; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #1a5fb4;">Total Rapports</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #1a5fb4;">${totalReports}</div>
+                        </div>
+                        <div style="background: #f0fff4; padding: 10px 15px; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #2ea043;">Complets</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #2ea043;">${allReports.filter(r => r.status === 'complete').length}</div>
+                        </div>
+                        <div style="background: #fff3cd; padding: 10px 15px; border-radius: 8px;">
+                            <div style="font-size: 12px; color: #856404;">AVANT seulement</div>
+                            <div style="font-size: 20px; font-weight: 700; color: #856404;">${allReports.filter(r => r.status === 'before_only').length}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="reports-container" id="fullReportsList"></div>
+                </div>
+            `;
+            
+            reportDetailsContainer.innerHTML = reportsListHTML;
+            
+            const fullReportsList = document.getElementById('fullReportsList');
+            
+            allReports.forEach((report, index) => {
+                const beforeCount = report.beforePhotos?.length || 0;
+                const afterCount = report.afterPhotos?.length || 0;
+                const totalPhotos = beforeCount + afterCount;
+                const statusColor = report.status === 'complete' ? '#2ea043' : '#1a5fb4';
+                const statusText = report.status === 'complete' ? 'Complet' : 'AVANT seulement';
+                const statusIcon = report.status === 'complete' ? 'fa-check-circle' : 'fa-hourglass-half';
+                
+                const reportCard = document.createElement('div');
+                reportCard.className = 'report-card';
+                
+                reportCard.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                        <div>
+                            <div style="font-weight: 700; color: #1a5fb4; font-size: 18px; margin-bottom: 5px;">
+                                ${report.employeeName}
+                            </div>
+                            <div style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                                <i class="fas fa-calendar"></i> ${formatDate(report.date)}
+                                ${report.completionDate ? ` • <i class="fas fa-check-circle"></i> Complété: ${formatDate(report.completionDate)}` : ''}
+                            </div>
+                            <div style="display: flex; gap: 15px; font-size: 12px; color: #666;">
+                                <span><i class="fas fa-map-marker-alt"></i> ${report.area} (${report.areaCode})</span>
+                                <span><i class="fas fa-images"></i> ${totalPhotos} photos</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-direction: column; align-items: end; gap: 5px;">
+                            <span style="background: ${statusColor}; color: white; padding: 5px 12px; border-radius: 15px; font-size: 12px; font-weight: 700;">
+                                <i class="fas ${statusIcon}"></i> ${statusText}
+                            </span>
+                            <div style="display: flex; gap: 5px; font-size: 12px;">
+                                ${report.numberBefore !== undefined ? 
+                                    `<span style="background: #e3f2fd; padding: 2px 8px; border-radius: 10px; color: #1a5fb4;">
+                                        <i class="fas fa-hashtag"></i> AVANT: ${report.numberBefore}
+                                    </span>` : ''}
+                                ${report.numberAfter !== undefined ? 
+                                    `<span style="background: #ffe6e6; padding: 2px 8px; border-radius: 10px; color: #ff6b6b;">
+                                        <i class="fas fa-hashtag"></i> APRÈS: ${report.numberAfter}
+                                    </span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 10px; justify-content: end;">
+                        <button class="control-btn" style="padding: 8px 15px;" onclick="viewReportDetails('${report.areaCode}', ${report.id})">
+                            <i class="fas fa-eye"></i> Voir détails
+                        </button>
+                        <button class="control-btn primary" style="padding: 8px 15px;" onclick="downloadReport('${report.areaCode}', ${report.id})">
+                            <i class="fas fa-download"></i> Télécharger
+                        </button>
+                    </div>
+                `;
+                
+                fullReportsList.appendChild(reportCard);
+            });
+        }
+
+        // ========== عرض تفاصيل التقرير الكاملة ==========
+        function viewReportDetails(zoneCode, reportId) {
+            const zoneData = zoneReports[zoneCode];
+            if (!zoneData) {
+                showNotification("Zone non trouvée", "error");
+                return;
+            }
+            
+            const report = zoneData.reports.find(r => r.id === reportId);
+            if (!report) {
+                showNotification("Rapport non trouvé", "error");
+                return;
+            }
+            
+            document.getElementById('adminPanel').style.display = 'none';
+            document.getElementById('reportsPanel').style.display = 'block';
+            
+            const reportDetailsContainer = document.getElementById('reportDetailsContainer');
+            reportDetailsContainer.innerHTML = '';
+            
+            const beforeCount = report.beforePhotos?.length || 0;
+            const afterCount = report.afterPhotos?.length || 0;
+            const totalPhotos = beforeCount + afterCount;
+            
+            // جلب الصور من zoneData.photos
+            const reportPhotos = zoneData.photos.filter(photo => photo.reportId === reportId);
+            const beforePhotosList = reportPhotos.filter(p => p.type === 'before');
+            const afterPhotosList = reportPhotos.filter(p => p.type === 'after');
+            
+            const reportDetailsHTML = `
+                <div class="dashboard-section">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Détails du Rapport #${report.id}</h3>
+                        <button class="control-btn primary" onclick="displayFullReports()">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </button>
+                    </div>
+                    
+                    <!-- معلومات الموظف -->
+                    <div class="employee-card" style="margin-bottom: 20px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start;">
+                            <div>
+                                <div style="font-weight: 700; color: #1a5fb4; font-size: 18px; margin-bottom: 10px;">
+                                    ${report.employeeName} <span style="font-size: 14px; color: #666;">(${report.employee})</span>
+                                </div>
+                                <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                                    <i class="fas fa-calendar"></i> Date : ${formatDate(report.date)}
+                                </div>
+                                ${report.completionDate ? `
+                                    <div style="color: #666; font-size: 14px; margin-bottom: 8px;">
+                                        <i class="fas fa-check-circle"></i> Complété le : ${formatDate(report.completionDate)}
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <span style="background: ${report.status === 'complete' ? '#2ea043' : '#1a5fb4'}; color: white; padding: 8px 16px; border-radius: 15px; font-size: 14px; font-weight: 700;">
+                                ${report.status === 'complete' ? 'Complet' : 'AVANT seulement'}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- معلومات عامة -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                        <div class="employee-card">
+                            <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
+                                <i class="fas fa-info-circle"></i> Informations Générales
+                            </h4>
+                            <div style="display: grid; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Zone :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.area}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Code Zone :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.areaCode}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Note Code :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.noteCode}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Nombre AVANT :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.numberBefore || 'Non spécifié'}</span>
+                                </div>
+                                ${report.numberAfter ? `
+                                    <div style="display: flex; justify-content: space-between;">
+                                        <span style="color: #666;">Nombre APRÈS :</span>
+                                        <span style="font-weight: 700; color: #ff6b6b;">${report.numberAfter}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                        
+                        <div class="employee-card">
+                            <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
+                                <i class="fas fa-map-marker-alt"></i> Localisation
+                            </h4>
+                            <div style="display: grid; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Latitude :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.location?.lat?.toFixed(6) || 'N/A'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Longitude :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.location?.lng?.toFixed(6) || 'N/A'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Élévation :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.location?.elev || 'N/A'}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Précision :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.location?.prec?.toFixed(2) || 'N/A'} m</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span style="color: #666;">Heure :</span>
+                                    <span style="font-weight: 700; color: #1a5fb4;">${report.location?.time || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- صور AVANT -->
+                    ${beforePhotosList.length > 0 ? `
+                        <div class="employee-card" style="margin-bottom: 20px;">
+                            <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
+                                <i class="fas fa-camera"></i> Photos AVANT (${beforePhotosList.length})
+                            </h4>
+                            <div class="photos-gallery">
+                                ${beforePhotosList.map(photo => `
+                                    <div class="photo-item">
+                                        <img src="${photo.url || '#'}" alt="Photo AVANT ${photo.index + 1}" 
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9IiNlMWU4ZWQiPjx0ZXh0IHg9IjEwMCIgeT0iNzUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2NjYiPlBob3RvIEFWQU5UICR7cGhvdG8uaW5kZXggKyAxfTwvdGV4dD48L3N2Zz4='"
+                                             style="cursor: pointer;" onclick="openPhotoModal('${photo.url || ''}', 'Photo AVANT ${photo.index + 1}')">
+                                        <div class="photo-info">
+                                            <span class="photo-type before">AVANT ${photo.index + 1}</span>
+                                            <div style="font-size: 10px; color: #666;">
+                                                ${photo.timestamp ? formatDate(photo.timestamp) : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- صور APRÈS -->
+                    ${afterPhotosList.length > 0 ? `
+                        <div class="employee-card" style="margin-bottom: 20px;">
+                            <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
+                                <i class="fas fa-camera-retro"></i> Photos APRÈS (${afterPhotosList.length})
+                            </h4>
+                            <div class="photos-gallery">
+                                ${afterPhotosList.map(photo => `
+                                    <div class="photo-item">
+                                        <img src="${photo.url || '#'}" alt="Photo APRÈS ${photo.index + 1}"
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjE1MCIgdmlld0JveD0iMCAwIDIwMCAxNTAiIGZpbGw9IiNlMWU4ZWQiPjx0ZXh0IHg9IjEwMCIgeT0iNzUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtc2l6ZT0iMTIiIGZpbGw9IiM2NjYiPlBob3RvIEFQUkVTICR7cGhvdG8uaW5kZXggKyAxfTwvdGV4dD48L3N2Zz4='"
+                                             style="cursor: pointer;" onclick="openPhotoModal('${photo.url || ''}', 'Photo APRÈS ${photo.index + 1}')">
+                                        <div class="photo-info">
+                                            <span class="photo-type after">APRÈS ${photo.index + 1}</span>
+                                            <div style="font-size: 10px; color: #666;">
+                                                ${photo.timestamp ? formatDate(photo.timestamp) : ''}
+                                            </div>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <!-- أزرار الإجراءات -->
+                    <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px;">
+                        <button class="control-btn primary" onclick="downloadReport('${zoneCode}', ${reportId})">
+                            <i class="fas fa-download"></i> Télécharger le rapport
+                        </button>
+                        <button class="control-btn" onclick="printReport('${zoneCode}', ${reportId})">
+                            <i class="fas fa-print"></i> Imprimer
+                        </button>
+                        <button class="control-btn danger" onclick="deleteReport('${zoneCode}', ${reportId})">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            reportDetailsContainer.innerHTML = reportDetailsHTML;
+        }
+
+        function downloadReport(zoneCode, reportId) {
+            const zoneData = zoneReports[zoneCode];
+            if (!zoneData) return;
+            
+            const report = zoneData.reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            const reportData = {
+                reportId: report.id,
+                employee: report.employeeName,
+                date: formatDate(report.date),
+                zone: report.area,
+                zoneCode: report.areaCode,
+                numberBefore: report.numberBefore,
+                numberAfter: report.numberAfter,
+                location: report.location,
+                status: report.status,
+                completionDate: report.completionDate ? formatDate(report.completionDate) : null,
+                downloadDate: formatTime()
+            };
+            
+            const jsonData = JSON.stringify(reportData, null, 2);
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `Rapport_${report.areaCode}_${report.id}_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            
+            showNotification("Rapport téléchargé", "success");
+        }
+
+        function printReport(zoneCode, reportId) {
+            const zoneData = zoneReports[zoneCode];
+            if (!zoneData) return;
+            
+            const report = zoneData.reports.find(r => r.id === reportId);
+            if (!report) return;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Rapport ${report.areaCode} - ${report.id}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #1a5fb4; }
+                        .section { margin-bottom: 20px; }
+                        .info-item { margin: 5px 0; }
+                        .label { font-weight: bold; color: #666; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Rapport NoteCam</h1>
+                    <div class="section">
+                        <h2>Informations Générales</h2>
+                        <div class="info-item"><span class="label">Employé:</span> ${report.employeeName}</div>
+                        <div class="info-item"><span class="label">Date:</span> ${formatDate(report.date)}</div>
+                        <div class="info-item"><span class="label">Zone:</span> ${report.area} (${report.areaCode})</div>
+                        <div class="info-item"><span class="label">Nombre AVANT:</span> ${report.numberBefore || 'Non spécifié'}</div>
+                        ${report.numberAfter ? `<div class="info-item"><span class="label">Nombre APRÈS:</span> ${report.numberAfter}</div>` : ''}
+                        <div class="info-item"><span class="label">Statut:</span> ${report.status === 'complete' ? 'Complet' : 'AVANT seulement'}</div>
+                    </div>
+                    <div class="section">
+                        <h2>Localisation</h2>
+                        <div class="info-item"><span class="label">Latitude:</span> ${report.location?.lat?.toFixed(6) || 'N/A'}</div>
+                        <div class="info-item"><span class="label">Longitude:</span> ${report.location?.lng?.toFixed(6) || 'N/A'}</div>
+                        <div class="info-item"><span class="label">Élévation:</span> ${report.location?.elev || 'N/A'}</div>
+                        <div class="info-item"><span class="label">Précision:</span> ${report.location?.prec?.toFixed(2) || 'N/A'} m</div>
+                        <div class="info-item"><span class="label">Heure:</span> ${report.location?.time || 'N/A'}</div>
+                    </div>
+                    <div class="section">
+                        <p>Généré le: ${formatTime()}</p>
+                        <p>Système NoteCam - Tous droits réservés</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function deleteReport(zoneCode, reportId) {
+            if (!confirm("Voulez-vous vraiment supprimer ce rapport ? Cette action est irréversible.")) {
+                return;
+            }
+            
+            const zoneData = zoneReports[zoneCode];
+            if (!zoneData) return;
+            
+            const reportIndex = zoneData.reports.findIndex(r => r.id === reportId);
+            if (reportIndex === -1) return;
+            
+            // إزالة التقرير
+            zoneData.reports.splice(reportIndex, 1);
+            
+            // إزالة الصور المرتبطة
+            zoneData.photos = zoneData.photos.filter(photo => photo.reportId !== reportId);
+            
+            saveToLocalStorage();
+            
+            // تحديث الواجهة
+            displayFullReports();
+            
+            showNotification("Rapport supprimé avec succès", "success");
+            updateCounters();
+        }
+
         function generateZoneFile(zoneCode) {
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) return;
@@ -2732,6 +3275,42 @@
             
             showNotification("Toutes les données exportées", "success");
             updateStatusBar("Toutes les données exportées");
+        }
+
+        // ========== وظيفة فتح الصورة في نافذة منبثقة ==========
+        function openPhotoModal(imageUrl, title) {
+            if (!imageUrl || imageUrl === '#') return;
+            
+            const modal = document.createElement('div');
+            modal.style.position = 'fixed';
+            modal.style.top = '0';
+            modal.style.left = '0';
+            modal.style.width = '100%';
+            modal.style.height = '100%';
+            modal.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
+            modal.style.zIndex = '10000';
+            modal.style.display = 'flex';
+            modal.style.alignItems = 'center';
+            modal.style.justifyContent = 'center';
+            
+            modal.innerHTML = `
+                <div style="position: relative; max-width: 90%; max-height: 90%;">
+                    <button onclick="this.parentElement.parentElement.remove()" 
+                            style="position: absolute; top: -40px; right: 0; background: #ff6b6b; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer;">
+                        <i class="fas fa-times"></i> Fermer
+                    </button>
+                    <img src="${imageUrl}" alt="${title}" style="max-width: 100%; max-height: 80vh; border: 3px solid white; border-radius: 5px;">
+                    <div style="color: white; text-align: center; margin-top: 10px; font-size: 14px;">${title}</div>
+                </div>
+            `;
+            
+            modal.onclick = function(e) {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            };
+            
+            document.body.appendChild(modal);
         }
 
         // ========== INITIALISER L'APPLICATION ==========
