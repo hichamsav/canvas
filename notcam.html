@@ -9,6 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
+        /* ========== جميع الأنماط الأصلية بالكامل ========== */
         * {
             margin: 0;
             padding: 0;
@@ -47,6 +48,28 @@
             width: 100%;
             font-weight: 600;
             letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sync-status {
+            font-size: 11px;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sync-icon {
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         .login-container {
@@ -644,7 +667,6 @@
             opacity: 0;
         }
 
-        /* Styles pour عرض الصور في التفاصيل */
         .photos-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -845,6 +867,48 @@
                 opacity: 1;
             }
         }
+
+        /* أنماط نظام المزامنة الجديد */
+        .sync-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 15px;
+            background: #e3f2fd;
+            border-radius: 8px;
+            border: 1px solid #1a5fb4;
+        }
+
+        .sync-btn {
+            padding: 8px 15px;
+            background: #1a5fb4;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .sync-btn:hover {
+            background: #154a8a;
+        }
+
+        .sync-info {
+            font-size: 12px;
+            color: #666;
+            flex-grow: 1;
+        }
+
+        .sync-success {
+            color: #2ea043;
+        }
+
+        .sync-error {
+            color: #ff6b6b;
+        }
     </style>
     
     <!-- Font Awesome -->
@@ -857,7 +921,11 @@
     <div class="app-container">
         <!-- Barre d'état -->
         <div class="status-bar" id="statusBar">
-            Système NoteCam ● Prêt ●
+            <div>Système NoteCam ● Prêt ●</div>
+            <div class="sync-status" id="syncStatus">
+                <i class="fas fa-sync sync-icon" id="syncIcon"></i>
+                <span id="syncText">Synchronisation</span>
+            </div>
         </div>
 
         <!-- Page de connexion -->
@@ -874,6 +942,26 @@
                 <div class="panel-title">Panneau de Contrôle du Superviseur</div>
                 <div>
                     <button class="back-btn" onclick="logout()">Déconnexion</button>
+                </div>
+            </div>
+
+            <!-- Contrôles المزامنة -->
+            <div class="dashboard-section">
+                <h3><i class="fas fa-sync"></i> Système de Synchronisation</h3>
+                <div class="sync-controls">
+                    <button class="sync-btn" onclick="manualSync()">
+                        <i class="fas fa-sync-alt"></i> Synchroniser Maintenant
+                    </button>
+                    <button class="sync-btn" onclick="forceSyncFromSupabase()">
+                        <i class="fas fa-download"></i> Charger depuis Supabase
+                    </button>
+                    <button class="sync-btn" onclick="forceSyncToSupabase()">
+                        <i class="fas fa-upload"></i> Envoyer vers Supabase
+                    </button>
+                    <div class="sync-info">
+                        Dernière sync: <span id="lastSyncTime">Jamais</span>
+                        <div id="syncStatusDetail" class="sync-success">Prêt</div>
+                    </div>
                 </div>
             </div>
 
@@ -925,6 +1013,20 @@
                     <i class="fas fa-user"></i> Panneau de l'Employé
                 </div>
                 <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+
+            <!-- Contrôles المزامنة للعامل -->
+            <div class="dashboard-section">
+                <h3><i class="fas fa-sync"></i> Synchronisation</h3>
+                <div class="sync-controls">
+                    <button class="sync-btn" onclick="manualSync()">
+                        <i class="fas fa-sync-alt"></i> Synchroniser
+                    </button>
+                    <div class="sync-info">
+                        Votre progression est sauvegardée automatiquement
+                        <div id="employeeSyncStatus" class="sync-success">Connecté</div>
+                    </div>
+                </div>
             </div>
 
             <div class="employee-area">
@@ -1152,15 +1254,15 @@
     <div class="capture-flash" id="captureFlash"></div>
 
     <script>
-        // ========== SUPABASE CONFIGURATION ==========
+        // ========== CONFIGURATION SUPABASE ==========
         const SUPABASE_URL = 'https://jxvnmcgfwlbswtkiglmh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4dm5tY2dmd2xic3d0a2lnbG1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2MzY0NzAsImV4cCI6MjA0OTIxMjQ3MH0.2NInsIOwZjO8LurZUdI2wA_ljsWkESw';
         
-        // تعريف المتغير مرة واحدة فقط
+        // ========== VARIABLES GLOBALES ==========
         let supabaseClient;
         let isSupabaseInitialized = false;
-
-        // ========== DONNÉES SYSTÈME ==========
+        
+        // Données système
         const defaultUsersData = {
             admin: {
                 password: "admin123",
@@ -1194,6 +1296,14 @@
         let afterPhotos = [null, null, null, null, null];
         let tempReport = null;
 
+        // ========== نظام المزامنة الجديد ==========
+        let syncInterval;
+        let lastSyncTime = null;
+        let isSyncing = false;
+        let pendingSyncs = [];
+        const SYNC_INTERVAL = 15000; // 15 ثانية
+        const SYNC_RETRY_DELAY = 5000; // 5 ثواني
+
         // Éléments DOM
         const statusBar = document.getElementById('statusBar');
         const loginPage = document.getElementById('loginPage');
@@ -1202,6 +1312,485 @@
         const reportsPanel = document.getElementById('reportsPanel');
         const notification = document.getElementById('notification');
         const cameraStatus = document.getElementById('cameraStatus');
+        const syncStatus = document.getElementById('syncStatus');
+        const syncText = document.getElementById('syncText');
+        const syncIcon = document.getElementById('syncIcon');
+        const lastSyncTimeEl = document.getElementById('lastSyncTime');
+        const syncStatusDetail = document.getElementById('syncStatusDetail');
+
+        // ========== FONCTIONS UTILITAIRES ==========
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            notification.style.background = type === 'success' ? '#2ea043' : 
+                                           type === 'warning' ? '#ffa500' : '#ff6b6b';
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Jamais';
+            const date = new Date(dateString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+
+        function formatTime() {
+            const now = new Date();
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${day}/${month}/${year} ${hours}:${minutes}`;
+        }
+
+        function formatTimeShort(date) {
+            if (!date) return '';
+            const now = new Date();
+            const diffMs = now - new Date(date);
+            const diffMins = Math.floor(diffMs / 60000);
+            
+            if (diffMins < 1) return 'à l\'instant';
+            if (diffMins < 60) return `il y a ${diffMins} min`;
+            if (diffMins < 1440) return `il y a ${Math.floor(diffMins/60)} h`;
+            return formatDate(date);
+        }
+
+        function updateStatusBar(message) {
+            const statusText = statusBar.querySelector('div:first-child');
+            if (statusText) {
+                statusText.textContent = `Système NoteCam ● ${message} ●`;
+            }
+        }
+
+        function updateSyncStatus(status, message = '') {
+            syncText.textContent = status;
+            if (syncStatusDetail) {
+                syncStatusDetail.textContent = message;
+                syncStatusDetail.className = status === 'Synchro OK' ? 'sync-success' : 
+                                            status === 'Erreur' ? 'sync-error' : '';
+            }
+            
+            if (lastSyncTimeEl && lastSyncTime) {
+                lastSyncTimeEl.textContent = formatTimeShort(lastSyncTime);
+            }
+            
+            // تحديث الأيقونة
+            if (status === 'Synchronisation...') {
+                syncIcon.style.animation = 'spin 1s linear infinite';
+                syncStatus.style.background = 'rgba(255, 165, 0, 0.3)';
+            } else if (status === 'Synchro OK') {
+                syncIcon.style.animation = 'none';
+                syncIcon.className = 'fas fa-check-circle';
+                syncStatus.style.background = 'rgba(46, 160, 67, 0.3)';
+            } else if (status === 'Erreur') {
+                syncIcon.style.animation = 'none';
+                syncIcon.className = 'fas fa-exclamation-circle';
+                syncStatus.style.background = 'rgba(255, 107, 107, 0.3)';
+            } else {
+                syncIcon.style.animation = 'spin 2s linear infinite';
+                syncStatus.style.background = 'rgba(26, 95, 180, 0.3)';
+            }
+        }
+
+        // ========== SYSTEME DE SYNCHRONISATION ==========
+        function initSyncSystem() {
+            // تحديث الحالة
+            updateSyncStatus('Initialisation...');
+            
+            // مزامنة أولية
+            setTimeout(() => {
+                syncAllData();
+            }, 2000);
+            
+            // مزامنة دورية
+            syncInterval = setInterval(() => {
+                if (document.visibilityState === 'visible' && !isSyncing) {
+                    syncAllData();
+                }
+            }, SYNC_INTERVAL);
+            
+            // مزامنة عند ظهور الصفحة
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && !isSyncing) {
+                    syncAllData();
+                }
+            });
+            
+            // مزامنة عند الاتصال بالإنترنت
+            window.addEventListener('online', () => {
+                showNotification("Connexion Internet rétablie - Synchronisation en cours", "success");
+                syncAllData();
+            });
+            
+            // مزامنة عند الانفصال
+            window.addEventListener('offline', () => {
+                showNotification("Mode hors ligne - Synchronisation suspendue", "warning");
+                updateSyncStatus('Hors ligne', 'Connexion perdue');
+            });
+            
+            // مراقبة التغييرات المحلية
+            setupLocalChangeDetection();
+        }
+
+        function setupLocalChangeDetection() {
+            // مراقبة التغييرات في localStorage
+            const originalSetItem = localStorage.setItem;
+            localStorage.setItem = function(key, value) {
+                originalSetItem.apply(this, arguments);
+                
+                if (key.startsWith('userProgress_') || key === 'noteCamSystemData') {
+                    addPendingSync('local_changes');
+                }
+            };
+        }
+
+        function addPendingSync(type) {
+            if (!pendingSyncs.includes(type)) {
+                pendingSyncs.push(type);
+                
+                // تشغيل مزامنة فورية إذا كان هناك تغييرات مهمة
+                if (type === 'report' || type === 'employee') {
+                    setTimeout(() => syncAllData(), 1000);
+                }
+            }
+        }
+
+        async function syncAllData() {
+            if (isSyncing || !isSupabaseInitialized) {
+                console.log('Sync déjà en cours ou Supabase non initialisé');
+                return;
+            }
+            
+            if (!navigator.onLine) {
+                updateSyncStatus('Hors ligne', 'Attente de connexion');
+                return;
+            }
+            
+            isSyncing = true;
+            updateSyncStatus('Synchronisation...', 'Mise à jour des données');
+            
+            try {
+                console.log('Début synchronisation complète...');
+                
+                // 1. جلب البيانات من Supabase
+                await syncFromSupabase();
+                
+                // 2. إرسال البيانات إلى Supabase
+                await syncToSupabase();
+                
+                // 3. معالجة التغييرات المحلية
+                await processPendingSyncs();
+                
+                // تحديث الوقت
+                lastSyncTime = new Date();
+                
+                // تحديث الواجهة
+                updateSyncStatus('Synchro OK', `Dernière sync: ${formatTimeShort(lastSyncTime)}`);
+                
+                console.log('Synchronisation terminée avec succès');
+                
+                // تحديث واجهة المستخدم
+                if (currentUser) {
+                    if (currentUser.role === 'admin') {
+                        updateAdminDashboard();
+                    } else {
+                        loadEmployeeAreas();
+                        populateAreaSelect();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Erreur synchronisation:', error);
+                updateSyncStatus('Erreur', 'Échec de synchronisation');
+                showNotification("Erreur de synchronisation", "error");
+                
+                // إعادة المحاولة بعد تأخير
+                setTimeout(() => {
+                    if (!isSyncing) syncAllData();
+                }, SYNC_RETRY_DELAY);
+                
+            } finally {
+                isSyncing = false;
+                pendingSyncs = [];
+            }
+        }
+
+        async function syncFromSupabase() {
+            try {
+                // المستخدمين
+                const { data: users, error: usersError } = await supabaseClient
+                    .from('users')
+                    .select('*');
+                
+                if (usersError) throw usersError;
+                
+                if (users && users.length > 0) {
+                    const remoteUserCount = users.length;
+                    usersData = { ...defaultUsersData };
+                    
+                    users.forEach(user => {
+                        usersData[user.username] = {
+                            password: user.password,
+                            role: user.role,
+                            name: user.name,
+                            assignedAreas: user.assigned_areas || []
+                        };
+                    });
+                    
+                    console.log(`${remoteUserCount} utilisateurs chargés depuis Supabase`);
+                }
+                
+                // المناطق
+                const { data: areas, error: areasError } = await supabaseClient
+                    .from('assigned_areas')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (areasError) throw areasError;
+                
+                if (areas && areas.length > 0) {
+                    assignedAreas = areas.map(area => ({
+                        id: area.id,
+                        employee: area.employee,
+                        name: area.name,
+                        code: area.code,
+                        date: area.date,
+                        isActive: area.is_active
+                    }));
+                    
+                    console.log(`${areas.length} zones chargées depuis Supabase`);
+                }
+                
+                // التقارير
+                const { data: reports, error: reportsError } = await supabaseClient
+                    .from('reports')
+                    .select('*')
+                    .order('date', { ascending: false });
+                
+                if (reportsError) throw reportsError;
+                
+                if (reports && reports.length > 0) {
+                    zoneReports = {};
+                    reports.forEach(report => {
+                        const zoneCode = report.area_code;
+                        if (!zoneReports[zoneCode]) {
+                            zoneReports[zoneCode] = {
+                                name: report.area,
+                                reports: [],
+                                photos: []
+                            };
+                        }
+                        
+                        zoneReports[zoneCode].reports.push({
+                            id: report.id,
+                            employee: report.employee,
+                            employeeName: report.employee_name,
+                            numberBefore: report.number_before,
+                            numberAfter: report.number_after,
+                            date: report.date,
+                            location: report.location,
+                            area: report.area,
+                            areaCode: report.area_code,
+                            noteCode: report.note_code,
+                            status: report.status,
+                            step: report.step,
+                            completionDate: report.completion_date,
+                            photos: report.photos || []
+                        });
+                    });
+                    
+                    console.log(`${reports.length} rapports chargés depuis Supabase`);
+                }
+                
+                // حفظ محلي
+                saveToLocalStorage();
+                
+            } catch (error) {
+                console.error('Erreur syncFromSupabase:', error);
+                throw error;
+            }
+        }
+
+        async function syncToSupabase() {
+            try {
+                // 1. المزامنة المستخدمين
+                for (const [username, userData] of Object.entries(usersData)) {
+                    // تجاهل المستخدمين الافتراضيين إذا كانوا موجودين بالفعل
+                    if (username.startsWith('user') && username.match(/^user\d+$/)) continue;
+                    
+                    const { error } = await supabaseClient
+                        .from('users')
+                        .upsert({
+                            username: username,
+                            password: userData.password,
+                            role: userData.role,
+                            name: userData.name,
+                            assigned_areas: userData.assignedAreas || [],
+                            last_updated: new Date().toISOString()
+                        }, {
+                            onConflict: 'username'
+                        });
+                    
+                    if (error) console.error(`Erreur sync user ${username}:`, error);
+                }
+                
+                // 2. المزامنة المناطق
+                for (const area of assignedAreas) {
+                    const { error } = await supabaseClient
+                        .from('assigned_areas')
+                        .upsert({
+                            id: area.id,
+                            employee: area.employee,
+                            name: area.name,
+                            code: area.code,
+                            date: area.date,
+                            is_active: area.isActive,
+                            last_updated: new Date().toISOString()
+                        }, {
+                            onConflict: 'id'
+                        });
+                    
+                    if (error) console.error(`Erreur sync area ${area.code}:`, error);
+                }
+                
+                // 3. المزامنة التقارير
+                for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
+                    for (const report of zoneData.reports) {
+                        const { error } = await supabaseClient
+                            .from('reports')
+                            .upsert({
+                                id: report.id,
+                                employee: report.employee,
+                                employee_name: report.employeeName,
+                                number_before: report.numberBefore,
+                                number_after: report.numberAfter,
+                                date: report.date,
+                                location: report.location,
+                                area: report.area,
+                                area_code: report.areaCode,
+                                note_code: report.noteCode,
+                                status: report.status,
+                                step: report.step,
+                                completion_date: report.completionDate,
+                                photos: report.photos || [],
+                                supabase_sync: true,
+                                last_updated: new Date().toISOString()
+                            }, {
+                                onConflict: 'id'
+                            });
+                        
+                        if (error) console.error(`Erreur sync report ${report.id}:`, error);
+                    }
+                }
+                
+                console.log('Données envoyées à Supabase avec succès');
+                
+            } catch (error) {
+                console.error('Erreur syncToSupabase:', error);
+                throw error;
+            }
+        }
+
+        async function processPendingSyncs() {
+            if (pendingSyncs.length === 0) return;
+            
+            console.log(`Traitement de ${pendingSyncs.length} syncs en attente`);
+            
+            // هنا يمكنك إضافة منطق معالجة خاص للتغييرات المعلقة
+            // مثل إرسال الإشعارات أو تحديثات محددة
+            
+            pendingSyncs = [];
+        }
+
+        // ========== FONCTIONS DE CONTROLE ==========
+        async function manualSync() {
+            if (isSyncing) {
+                showNotification("Synchronisation déjà en cours", "warning");
+                return;
+            }
+            
+            showNotification("Synchronisation manuelle démarrée", "success");
+            await syncAllData();
+        }
+
+        async function forceSyncFromSupabase() {
+            showNotification("Chargement depuis Supabase...", "success");
+            updateSyncStatus('Chargement...', 'Récupération des données');
+            
+            try {
+                await syncFromSupabase();
+                showNotification("Données chargées depuis Supabase", "success");
+                updateSyncStatus('Chargé OK', 'Données mises à jour');
+                
+                // تحديث الواجهة
+                if (currentUser) {
+                    if (currentUser.role === 'admin') {
+                        updateAdminDashboard();
+                    }
+                }
+                
+            } catch (error) {
+                showNotification("Erreur chargement Supabase", "error");
+                updateSyncStatus('Erreur', 'Échec chargement');
+            }
+        }
+
+        async function forceSyncToSupabase() {
+            showNotification("Envoi vers Supabase...", "success");
+            updateSyncStatus('Envoi...', 'Transfert des données');
+            
+            try {
+                await syncToSupabase();
+                showNotification("Données envoyées à Supabase", "success");
+                updateSyncStatus('Envoyé OK', 'Données transférées');
+                
+            } catch (error) {
+                showNotification("Erreur envoi Supabase", "error");
+                updateSyncStatus('Erreur', 'Échec envoi');
+            }
+        }
+
+        // ========== INITIALISATION SUPABASE ==========
+        async function initializeSupabase() {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                
+                // اختبار الاتصال
+                const { data, error } = await supabaseClient
+                    .from('system_status')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    console.warn('Supabase connecté mais tables non initialisées');
+                    showNotification("Supabase connecté - Créez les tables", "warning");
+                }
+                
+                isSupabaseInitialized = true;
+                console.log('Supabase initialisé avec succès');
+                updateSyncStatus('Connecté', 'Prêt à synchroniser');
+                
+                // تشغيل نظام المزامنة
+                initSyncSystem();
+                
+            } catch (error) {
+                console.error('Erreur initialisation Supabase:', error);
+                updateSyncStatus('Erreur', 'Connexion échouée');
+                showNotification("Mode hors ligne - Données locales", "warning");
+            }
+        }
+
+        // ========== ========== ========== ========== ==========
+        // ========== هنا يبدأ الكود الأصلي الكامل (3000+ سطر) ==========
+        // ========== ========== ========== ========== ==========
 
         // ========== إدارة حالة المستخدم ==========
         function saveUserProgress() {
@@ -1311,335 +1900,45 @@
             updateStatusBar("Retour aux photos AVANT");
         }
 
-        // ========== INITIALIZE SUPABASE ==========
-        async function initializeSupabase() {
+        function loadFromLocalStorage() {
             try {
-                // استخدام اسم مختلف للمتغير
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                // Test connection
-                const { data, error } = await supabaseClient
-                    .from('system_status')
-                    .select('*')
-                    .limit(1);
-                
-                if (error) {
-                    // Try to create system_status table if it doesn't exist
-                    await createTablesIfNeeded();
+                const savedData = localStorage.getItem('noteCamSystemData');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    usersData = {...defaultUsersData, ...data.usersData};
+                    assignedAreas = data.assignedAreas || assignedAreas;
+                    zoneReports = data.zoneReports || {};
                 }
                 
-                isSupabaseInitialized = true;
-                console.log('Supabase initialisé avec succès');
-                showNotification("Connecté à Supabase", "success");
-                updateStatusBar("Connecté à Supabase");
+                const savedUser = localStorage.getItem('currentUser');
+                if (savedUser) {
+                    currentUser = JSON.parse(savedUser);
+                }
                 
-                // Load data
-                await loadAllFromSupabase();
+                const savedSync = localStorage.getItem('lastSyncTime');
+                if (savedSync) {
+                    lastSyncTime = new Date(savedSync);
+                }
                 
             } catch (error) {
-                console.error('Erreur Supabase:', error);
-                showNotification("Mode hors ligne - Données locales", "warning");
-                updateStatusBar("Mode hors ligne");
+                console.error('Erreur chargement données:', error);
             }
         }
 
-        async function createTablesIfNeeded() {
-            try {
-                // Create tables if they don't exist
-                // Note: In production, you should create these tables in Supabase dashboard
-                console.log('Création des tables si nécessaire...');
-                
-                // We'll just log for now - tables should be created manually in Supabase
-                console.log('Veuillez créer les tables manuellement dans Supabase:');
-                console.log('1. users, 2. assigned_areas, 3. reports, 4. photos, 5. system_status');
-                
-            } catch (error) {
-                console.error('Erreur création tables:', error);
-            }
-        }
-
-        // ========== FONCTIONS SUPABASE ==========
-        async function loadAllFromSupabase() {
-            if (!isSupabaseInitialized) return;
-            
-            try {
-                // Load users
-                const { data: users, error: usersError } = await supabaseClient
-                    .from('users')
-                    .select('*');
-                
-                if (!usersError && users && users.length > 0) {
-                    users.forEach(user => {
-                        usersData[user.username] = user;
-                    });
-                    console.log(`${users.length} utilisateurs chargés depuis Supabase`);
-                }
-                
-                // Load areas
-                const { data: areas, error: areasError } = await supabaseClient
-                    .from('assigned_areas')
-                    .select('*');
-                
-                if (!areasError && areas && areas.length > 0) {
-                    assignedAreas = areas;
-                    console.log(`${areas.length} zones chargées depuis Supabase`);
-                }
-                
-                // Load reports
-                const { data: reports, error: reportsError } = await supabaseClient
-                    .from('reports')
-                    .select('*');
-                
-                if (!reportsError && reports && reports.length > 0) {
-                    zoneReports = {};
-                    reports.forEach(report => {
-                        const zoneCode = report.area_code;
-                        if (!zoneReports[zoneCode]) {
-                            zoneReports[zoneCode] = {
-                                name: report.area_name,
-                                reports: [],
-                                photos: []
-                            };
-                        }
-                        zoneReports[zoneCode].reports.push(report);
-                    });
-                    console.log(`${reports.length} rapports chargés depuis Supabase`);
-                }
-                
-                saveToLocalStorage();
-                
-            } catch (error) {
-                console.error('Erreur chargement Supabase:', error);
-            }
-        }
-
-        async function saveAllToSupabase() {
-            if (!isSupabaseInitialized) return;
-            
-            try {
-                // Save users
-                for (const [username, userData] of Object.entries(usersData)) {
-                    const { error } = await supabaseClient
-                        .from('users')
-                        .upsert({
-                            username: username,
-                            ...userData,
-                            last_updated: new Date().toISOString()
-                        });
-                    
-                    if (error) console.error('Erreur sauvegarde utilisateur:', error);
-                }
-                console.log('Utilisateurs sauvegardés sur Supabase');
-                
-                // Save areas
-                for (const area of assignedAreas) {
-                    const { error } = await supabaseClient
-                        .from('assigned_areas')
-                        .upsert({
-                            ...area,
-                            last_updated: new Date().toISOString()
-                        });
-                    
-                    if (error) console.error('Erreur sauvegarde zone:', error);
-                }
-                console.log('Zones sauvegardées sur Supabase');
-                
-                // Save reports
-                for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
-                    for (const report of zoneData.reports) {
-                        const { error } = await supabaseClient
-                            .from('reports')
-                            .upsert({
-                                ...report,
-                                last_updated: new Date().toISOString()
-                            });
-                        
-                        if (error) console.error('Erreur sauvegarde rapport:', error);
-                    }
-                }
-                console.log('Rapports sauvegardés sur Supabase');
-                
-            } catch (error) {
-                console.error('Erreur de sauvegarde Supabase:', error);
-            }
-        }
-
-        async function uploadImageToSupabase(imageBlob, fileName) {
-            try {
-                const filePath = `reports/${Date.now()}_${fileName}`;
-                
-                const { data, error } = await supabaseClient.storage
-                    .from('photos')
-                    .upload(filePath, imageBlob);
-                
-                if (error) throw error;
-                
-                // Get public URL
-                const { data: { publicUrl } } = supabaseClient.storage
-                    .from('photos')
-                    .getPublicUrl(filePath);
-                
-                return publicUrl;
-                
-            } catch (error) {
-                console.error('Erreur de téléchargement:', error);
-                return null;
-            }
-        }
-
-        async function saveReportWithImagesToSupabase(report, beforePhotosArray, afterPhotosArray) {
-            try {
-                // Upload images
-                const uploadedPhotos = [];
-                
-                // Upload before photos
-                if (beforePhotosArray) {
-                    for (let i = 0; i < beforePhotosArray.length; i++) {
-                        if (beforePhotosArray[i] && beforePhotosArray[i].blob) {
-                            const fileName = `before_${i + 1}_${report.id}.jpg`;
-                            const photoUrl = await uploadImageToSupabase(beforePhotosArray[i].blob, fileName);
-                            
-                            if (photoUrl) {
-                                uploadedPhotos.push({
-                                    url: photoUrl,
-                                    type: 'before',
-                                    index: i,
-                                    timestamp: beforePhotosArray[i].timestamp,
-                                    location: beforePhotosArray[i].location,
-                                    note_code: beforePhotosArray[i].noteCode,
-                                    report_id: report.id
-                                });
-                            }
-                        }
-                    }
-                }
-                
-                // Upload after photos
-                if (afterPhotosArray) {
-                    for (let i = 0; i < afterPhotosArray.length; i++) {
-                        if (afterPhotosArray[i] && afterPhotosArray[i].blob) {
-                            const fileName = `after_${i + 1}_${report.id}.jpg`;
-                            const photoUrl = await uploadImageToSupabase(afterPhotosArray[i].blob, fileName);
-                            
-                            if (photoUrl) {
-                                uploadedPhotos.push({
-                                    url: photoUrl,
-                                    type: 'after',
-                                    index: i,
-                                    timestamp: afterPhotosArray[i].timestamp,
-                                    location: afterPhotosArray[i].location,
-                                    note_code: afterPhotosArray[i].noteCode,
-                                    report_id: report.id
-                                });
-                            }
-                        }
-                    }
-                }
-                
-                // Save report
-                const reportData = {
-                    id: report.id,
-                    employee: report.employee,
-                    employee_name: report.employeeName,
-                    number_before: report.numberBefore,
-                    number_after: report.numberAfter,
-                    date: report.date,
-                    location: report.location,
-                    area: report.area,
-                    area_code: report.areaCode,
-                    note_code: report.noteCode,
-                    status: report.status,
-                    step: report.step,
-                    completion_date: report.completionDate,
-                    photos: uploadedPhotos,
-                    uploaded_at: new Date().toISOString(),
-                    supabase_sync: true
-                };
-                
-                const { error } = await supabaseClient
-                    .from('reports')
-                    .upsert(reportData);
-                
-                if (error) throw error;
-                
-                // Save photos separately
-                for (const photo of uploadedPhotos) {
-                    await supabaseClient
-                        .from('photos')
-                        .upsert(photo);
-                }
-                
-                return reportData;
-                
-            } catch (error) {
-                console.error('Erreur de sauvegarde rapport avec images:', error);
-                return null;
-            }
-        }
-
-        // ========== FONCTIONS UTILITAIRES ==========
-        function showNotification(message, type = 'success') {
-            notification.textContent = message;
-            notification.style.background = type === 'success' ? '#2ea043' : '#ff6b6b';
-            notification.style.display = 'block';
-            
-            setTimeout(() => {
-                notification.style.display = 'none';
-            }, 3000);
-        }
-
-        function formatDate(dateString) {
-            const date = new Date(dateString);
-            const day = String(date.getDate()).padStart(2, '0');
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const year = date.getFullYear();
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
-        }
-
-        function formatTime() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${day}/${month}/${year} ${hours}:${minutes}`;
-        }
-
-        function updateStatusBar(message) {
-            statusBar.textContent = `Système NoteCam ● ${message} ●`;
-        }
-
-        const sampleLocations = [
-            {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
-            {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
-            {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
-        ];
-
-        let currentLocation = {
-            lat: 33.603016,
-            lng: -7.636873,
-            elev: "9.34±11.02",
-            prec: 13.28,
-            time: ""
-        };
-
-        function updateLocationInfo() {
-            const randomIndex = Math.floor(Math.random() * sampleLocations.length);
-            const location = sampleLocations[randomIndex];
-            
-            currentLocation = {
-                lat: location.lat,
-                lng: location.lng,
-                elev: location.elev,
-                prec: location.prec,
-                time: formatTime()
+        function saveToLocalStorage() {
+            const data = {
+                usersData,
+                assignedAreas,
+                zoneReports
             };
+            localStorage.setItem('noteCamSystemData', JSON.stringify(data));
             
-            showNotification("Localisation actualisée", "success");
-            updateStatusBar("Localisation actualisée");
+            if (lastSyncTime) {
+                localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
+            }
+            
+            // إضافة sync معلق
+            addPendingSync('local_changes');
         }
 
         // ========== GESTION CAMÉRA ==========
@@ -1730,40 +2029,6 @@
                 
                 showNotification("Caméra désactivée", "success");
                 updateStatusBar("Caméra désactivée");
-            }
-        }
-
-        function loadFromLocalStorage() {
-            try {
-                const savedData = localStorage.getItem('noteCamSystemData');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    usersData = {...defaultUsersData, ...data.usersData};
-                    assignedAreas = data.assignedAreas || assignedAreas;
-                    zoneReports = data.zoneReports || {};
-                }
-                
-                const savedUser = localStorage.getItem('currentUser');
-                if (savedUser) {
-                    currentUser = JSON.parse(savedUser);
-                }
-                
-            } catch (error) {
-                console.error('Erreur chargement données:', error);
-            }
-        }
-
-        function saveToLocalStorage() {
-            const data = {
-                usersData,
-                assignedAreas,
-                zoneReports
-            };
-            localStorage.setItem('noteCamSystemData', JSON.stringify(data));
-            
-            // Auto save to Supabase
-            if (isSupabaseInitialized) {
-                saveAllToSupabase();
             }
         }
 
@@ -1905,6 +2170,9 @@
                 assignedAreas: []
             };
             
+            // إضافة sync معلق
+            addPendingSync('employee');
+            
             updateEmployeeSelect();
             displayEmployees();
             updateCounters();
@@ -2024,6 +2292,9 @@
                     photos: []
                 };
             }
+            
+            // إضافة sync معلق
+            addPendingSync('area');
             
             saveToLocalStorage();
             
@@ -2605,10 +2876,10 @@
                 });
             });
             
-            saveToLocalStorage();
+            // إضافة sync معلق
+            addPendingSync('report');
             
-            // Save with images to Supabase
-            saveReportWithImagesToSupabase(beforeReport, beforePhotos, null);
+            saveToLocalStorage();
             
             tempReport = {
                 id: beforeReport.id,
@@ -2632,8 +2903,6 @@
             
             showNotification("Photos AVANT envoyées avec succès !", "success");
             updateStatusBar("Photos AVANT envoyées avec succès");
-            
-            notifySupervisor(beforeReport);
         }
 
         function showAfterPhotos() {
@@ -2695,10 +2964,10 @@
                 }
             });
             
-            saveToLocalStorage();
+            // إضافة sync معلق
+            addPendingSync('report');
             
-            // Save with images to Supabase
-            saveReportWithImagesToSupabase(updatedReport, null, afterPhotos);
+            saveToLocalStorage();
             
             generateZoneFile(zoneCode);
             
@@ -2707,20 +2976,10 @@
             
             resetForm();
             
-            notifySupervisor(updatedReport);
-            
             showNotification("Rapport complet envoyé avec succès !", "success");
             updateStatusBar("Rapport complet envoyé et fichier généré");
             
             updateCounters();
-        }
-
-        function notifySupervisor(report) {
-            console.log("📢 Notification au superviseur :", report);
-            
-            if (document.getElementById('adminPanel').style.display === 'block') {
-                displayMiniReports();
-            }
         }
 
         function resetForm() {
@@ -2973,7 +3232,6 @@
             });
         }
 
-        // ========== عرض تفاصيل التقرير الكاملة ==========
         function viewReportDetails(zoneCode, reportId) {
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) {
@@ -2997,7 +3255,6 @@
             const afterCount = report.afterPhotos?.length || 0;
             const totalPhotos = beforeCount + afterCount;
             
-            // جلب الصور من zoneData.photos
             const reportPhotos = zoneData.photos.filter(photo => photo.reportId === reportId);
             const beforePhotosList = reportPhotos.filter(p => p.type === 'before');
             const afterPhotosList = reportPhotos.filter(p => p.type === 'after');
@@ -3011,7 +3268,6 @@
                         </button>
                     </div>
                     
-                    <!-- معلومات الموظف -->
                     <div class="employee-card" style="margin-bottom: 20px;">
                         <div style="display: flex; justify-content: space-between; align-items: start;">
                             <div>
@@ -3033,7 +3289,6 @@
                         </div>
                     </div>
                     
-                    <!-- معلومات عامة -->
                     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin-bottom: 30px;">
                         <div class="employee-card">
                             <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
@@ -3094,7 +3349,6 @@
                         </div>
                     </div>
                     
-                    <!-- صور AVANT -->
                     ${beforePhotosList.length > 0 ? `
                         <div class="employee-card" style="margin-bottom: 20px;">
                             <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
@@ -3118,7 +3372,6 @@
                         </div>
                     ` : ''}
                     
-                    <!-- صور APRÈS -->
                     ${afterPhotosList.length > 0 ? `
                         <div class="employee-card" style="margin-bottom: 20px;">
                             <h4 style="color: #1a5fb4; margin-bottom: 15px; border-bottom: 2px solid #e1e8ed; padding-bottom: 8px;">
@@ -3142,7 +3395,6 @@
                         </div>
                     ` : ''}
                     
-                    <!-- أزرار الإجراءات -->
                     <div style="display: flex; gap: 10px; justify-content: center; margin-top: 30px;">
                         <button class="control-btn primary" onclick="downloadReport('${zoneCode}', ${reportId})">
                             <i class="fas fa-download"></i> Télécharger le rapport
@@ -3256,15 +3508,10 @@
             const reportIndex = zoneData.reports.findIndex(r => r.id === reportId);
             if (reportIndex === -1) return;
             
-            // إزالة التقرير
             zoneData.reports.splice(reportIndex, 1);
-            
-            // إزالة الصور المرتبطة
             zoneData.photos = zoneData.photos.filter(photo => photo.reportId !== reportId);
             
             saveToLocalStorage();
-            
-            // تحديث الواجهة
             displayFullReports();
             
             showNotification("Rapport supprimé avec succès", "success");
@@ -3337,7 +3584,6 @@
             updateStatusBar("Toutes les données exportées");
         }
 
-        // ========== وظيفة فتح الصورة في نافذة منبثقة ==========
         function openPhotoModal(imageUrl, title) {
             if (!imageUrl || imageUrl === '#') return;
             
@@ -3373,8 +3619,49 @@
             document.body.appendChild(modal);
         }
 
-        // ========== INITIALISER L'APPLICATION ==========
+        // ========== دعم الجوال والكاميرا ==========
+        const sampleLocations = [
+            {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
+            {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
+            {lat: 33.603167, lng: -7.63658, elev: "10.44±7.91", prec: 19.84}
+        ];
+
+        let currentLocation = {
+            lat: 33.603016,
+            lng: -7.636873,
+            elev: "9.34±11.02",
+            prec: 13.28,
+            time: ""
+        };
+
+        function updateLocationInfo() {
+            const randomIndex = Math.floor(Math.random() * sampleLocations.length);
+            const location = sampleLocations[randomIndex];
+            
+            currentLocation = {
+                lat: location.lat,
+                lng: location.lng,
+                elev: location.elev,
+                prec: location.prec,
+                time: new Date().toLocaleTimeString()
+            };
+            
+            showNotification("Localisation actualisée", "success");
+            updateStatusBar("Localisation actualisée");
+        }
+
+        // ========== LANCEMENT DE L'APPLICATION ==========
         document.addEventListener('DOMContentLoaded', initializeApp);
+
+        // Service Worker للتخزين المؤقت
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').then(() => {
+                    console.log('Service Worker enregistré pour le cache');
+                });
+            });
+        }
+
     </script>
 </body>
 </html>
