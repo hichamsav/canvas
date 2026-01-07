@@ -1156,7 +1156,8 @@
         const SUPABASE_URL = 'https://jxvnmcgfwlbswtkiglmh.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4dm5tY2dmd2xic3d0a2lnbG1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2MzY0NzAsImV4cCI6MjA0OTIxMjQ3MH0.2NInsIOwZjO8LurZUdI2wA_ljsWkESw';
         
-        let supabase;
+        // تعريف المتغير مرة واحدة فقط
+        let supabaseClient;
         let isSupabaseInitialized = false;
 
         // ========== DONNÉES SYSTÈME ==========
@@ -1313,10 +1314,11 @@
         // ========== INITIALIZE SUPABASE ==========
         async function initializeSupabase() {
             try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                // استخدام اسم مختلف للمتغير
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
                 // Test connection
-                const { data, error } = await supabase
+                const { data, error } = await supabaseClient
                     .from('system_status')
                     .select('*')
                     .limit(1);
@@ -1362,7 +1364,7 @@
             
             try {
                 // Load users
-                const { data: users, error: usersError } = await supabase
+                const { data: users, error: usersError } = await supabaseClient
                     .from('users')
                     .select('*');
                 
@@ -1374,7 +1376,7 @@
                 }
                 
                 // Load areas
-                const { data: areas, error: areasError } = await supabase
+                const { data: areas, error: areasError } = await supabaseClient
                     .from('assigned_areas')
                     .select('*');
                 
@@ -1384,7 +1386,7 @@
                 }
                 
                 // Load reports
-                const { data: reports, error: reportsError } = await supabase
+                const { data: reports, error: reportsError } = await supabaseClient
                     .from('reports')
                     .select('*');
                 
@@ -1417,7 +1419,7 @@
             try {
                 // Save users
                 for (const [username, userData] of Object.entries(usersData)) {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('users')
                         .upsert({
                             username: username,
@@ -1431,7 +1433,7 @@
                 
                 // Save areas
                 for (const area of assignedAreas) {
-                    const { error } = await supabase
+                    const { error } = await supabaseClient
                         .from('assigned_areas')
                         .upsert({
                             ...area,
@@ -1445,7 +1447,7 @@
                 // Save reports
                 for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
                     for (const report of zoneData.reports) {
-                        const { error } = await supabase
+                        const { error } = await supabaseClient
                             .from('reports')
                             .upsert({
                                 ...report,
@@ -1466,14 +1468,14 @@
             try {
                 const filePath = `reports/${Date.now()}_${fileName}`;
                 
-                const { data, error } = await supabase.storage
+                const { data, error } = await supabaseClient.storage
                     .from('photos')
                     .upload(filePath, imageBlob);
                 
                 if (error) throw error;
                 
                 // Get public URL
-                const { data: { publicUrl } } = supabase.storage
+                const { data: { publicUrl } } = supabaseClient.storage
                     .from('photos')
                     .getPublicUrl(filePath);
                 
@@ -1554,7 +1556,7 @@
                     supabase_sync: true
                 };
                 
-                const { error } = await supabase
+                const { error } = await supabaseClient
                     .from('reports')
                     .upsert(reportData);
                 
@@ -1562,7 +1564,7 @@
                 
                 // Save photos separately
                 for (const photo of uploadedPhotos) {
-                    await supabase
+                    await supabaseClient
                         .from('photos')
                         .upsert(photo);
                 }
@@ -2888,7 +2890,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3>Tous les Rapports (${totalReports})</h3>
                         <button class="control-btn primary" onclick="backToAdminPanel()">
-                            <i class="fas fa-arrow-left"></i> Retour au panneau
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
                         </button>
                     </div>
                     
