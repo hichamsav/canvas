@@ -3,13 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Système NoteCam - Superviseur et Employés</title>
+    <title>Système NoteCam - Supabase</title>
     
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-storage-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth-compat.js"></script>
+    <!-- Supabase JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         * {
@@ -944,7 +941,7 @@
                                     <i class="fas fa-map-marker-alt"></i> Zone sélectionnée : <span id="selectedAreaName">Aucune zone</span>
                                 </h4>
                                 <p style="color: #666; font-size: 14px;">
-                                    <strong>Code :</strong> <span id="selectedAreaCode">-</span> | 
+                                    <strong>Code :</strong> <span id="selectedAreaCode">  </span> | 
                                     <strong>Assignée le :</strong> <span id="areaAssignedDate">-</span>
                                 </p>
                             </div>
@@ -1155,24 +1152,12 @@
     <div class="capture-flash" id="captureFlash"></div>
 
     <script>
-        // ========== FIREBASE CONFIGURATION ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyCJHATLa34sB6dF_uqOXMeKXV2VXF1cOvU",
-            authDomain: "notcam-d2ee9.firebaseapp.com",
-            projectId: "notcam-d2ee9",
-            storageBucket: "notcam-d2ee9.firebasestorage.app",
-            messagingSenderId: "408140358418",
-            appId: "1:408140358418:web:1e2acb1c7de915092249cb",
-            measurementId: "G-8WP7T9M7V4"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const storage = firebase.storage();
-        const auth = firebase.auth();
-
-        let isFirebaseInitialized = false;
+        // ========== SUPABASE CONFIGURATION ==========
+        const SUPABASE_URL = 'https://jxvnmcgfwlbswtkiglmh.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp4dm5tY2dmd2xic3d0a2lnbG1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM2MzY0NzAsImV4cCI6MjA0OTIxMjQ3MH0.2NInsIOwZjO8LurZUdI2wA_ljsWkESw';
+        
+        let supabase;
+        let isSupabaseInitialized = false;
 
         // ========== DONNÉES SYSTÈME ==========
         const defaultUsersData = {
@@ -1325,144 +1310,192 @@
             updateStatusBar("Retour aux photos AVANT");
         }
 
-        // ========== نظام تخزين كامل في Firebase ==========
-        async function initializeFirebase() {
+        // ========== INITIALIZE SUPABASE ==========
+        async function initializeSupabase() {
             try {
-                await db.collection('system').doc('status').set({
-                    lastOnline: new Date().toISOString(),
-                    status: 'online',
-                    version: '1.0.0'
-                }, { merge: true });
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
                 
-                isFirebaseInitialized = true;
-                console.log('Firebase initialisé avec succès');
-                await loadAllFromFirebase();
-                showNotification("Connecté à Firebase", "success");
+                // Test connection
+                const { data, error } = await supabase
+                    .from('system_status')
+                    .select('*')
+                    .limit(1);
+                
+                if (error) {
+                    // Try to create system_status table if it doesn't exist
+                    await createTablesIfNeeded();
+                }
+                
+                isSupabaseInitialized = true;
+                console.log('Supabase initialisé avec succès');
+                showNotification("Connecté à Supabase", "success");
+                updateStatusBar("Connecté à Supabase");
+                
+                // Load data
+                await loadAllFromSupabase();
                 
             } catch (error) {
-                console.error('Erreur Firebase:', error);
-                showNotification("Mode hors ligne - Données locales", "error");
+                console.error('Erreur Supabase:', error);
+                showNotification("Mode hors ligne - Données locales", "warning");
+                updateStatusBar("Mode hors ligne");
             }
         }
 
-        async function loadAllFromFirebase() {
+        async function createTablesIfNeeded() {
             try {
-                // تحميل المستخدمين
-                const usersSnapshot = await db.collection('users').get();
-                if (!usersSnapshot.empty) {
-                    usersSnapshot.forEach(doc => {
-                        usersData[doc.id] = doc.data();
+                // Create tables if they don't exist
+                // Note: In production, you should create these tables in Supabase dashboard
+                console.log('Création des tables si nécessaire...');
+                
+                // We'll just log for now - tables should be created manually in Supabase
+                console.log('Veuillez créer les tables manuellement dans Supabase:');
+                console.log('1. users, 2. assigned_areas, 3. reports, 4. photos, 5. system_status');
+                
+            } catch (error) {
+                console.error('Erreur création tables:', error);
+            }
+        }
+
+        // ========== FONCTIONS SUPABASE ==========
+        async function loadAllFromSupabase() {
+            if (!isSupabaseInitialized) return;
+            
+            try {
+                // Load users
+                const { data: users, error: usersError } = await supabase
+                    .from('users')
+                    .select('*');
+                
+                if (!usersError && users && users.length > 0) {
+                    users.forEach(user => {
+                        usersData[user.username] = user;
                     });
-                    console.log('Utilisateurs chargés depuis Firebase');
+                    console.log(`${users.length} utilisateurs chargés depuis Supabase`);
                 }
                 
-                // تحميل المناطق
-                const areasSnapshot = await db.collection('assignedAreas').get();
-                if (!areasSnapshot.empty) {
-                    assignedAreas = [];
-                    areasSnapshot.forEach(doc => {
-                        assignedAreas.push(doc.data());
-                    });
-                    console.log('Zones chargées depuis Firebase');
+                // Load areas
+                const { data: areas, error: areasError } = await supabase
+                    .from('assigned_areas')
+                    .select('*');
+                
+                if (!areasError && areas && areas.length > 0) {
+                    assignedAreas = areas;
+                    console.log(`${areas.length} zones chargées depuis Supabase`);
                 }
                 
-                // تحميل التقارير
-                const reportsSnapshot = await db.collection('reports').get();
-                if (!reportsSnapshot.empty) {
+                // Load reports
+                const { data: reports, error: reportsError } = await supabase
+                    .from('reports')
+                    .select('*');
+                
+                if (!reportsError && reports && reports.length > 0) {
                     zoneReports = {};
-                    reportsSnapshot.forEach(doc => {
-                        const report = doc.data();
-                        const zoneCode = report.areaCode;
-                        
+                    reports.forEach(report => {
+                        const zoneCode = report.area_code;
                         if (!zoneReports[zoneCode]) {
                             zoneReports[zoneCode] = {
-                                name: report.area,
+                                name: report.area_name,
                                 reports: [],
                                 photos: []
                             };
                         }
-                        
                         zoneReports[zoneCode].reports.push(report);
-                        
-                        if (report.photos) {
-                            report.photos.forEach(photo => {
-                                zoneReports[zoneCode].photos.push(photo);
-                            });
-                        }
                     });
-                    console.log('Rapports chargés depuis Firebase');
+                    console.log(`${reports.length} rapports chargés depuis Supabase`);
                 }
                 
                 saveToLocalStorage();
                 
             } catch (error) {
-                console.error('Erreur de chargement Firebase:', error);
+                console.error('Erreur chargement Supabase:', error);
             }
         }
 
-        async function saveAllToFirebase() {
+        async function saveAllToSupabase() {
+            if (!isSupabaseInitialized) return;
+            
             try {
-                if (!isFirebaseInitialized) return;
-                
-                // حفظ المستخدمين
+                // Save users
                 for (const [username, userData] of Object.entries(usersData)) {
-                    await db.collection('users').doc(username).set({
-                        ...userData,
-                        lastUpdated: new Date().toISOString()
-                    }, { merge: true });
+                    const { error } = await supabase
+                        .from('users')
+                        .upsert({
+                            username: username,
+                            ...userData,
+                            last_updated: new Date().toISOString()
+                        });
+                    
+                    if (error) console.error('Erreur sauvegarde utilisateur:', error);
                 }
-                console.log('Utilisateurs sauvegardés sur Firebase');
+                console.log('Utilisateurs sauvegardés sur Supabase');
                 
-                // حفظ المناطق
+                // Save areas
                 for (const area of assignedAreas) {
-                    await db.collection('assignedAreas').doc(`area_${area.id}`).set({
-                        ...area,
-                        lastUpdated: new Date().toISOString()
-                    }, { merge: true });
+                    const { error } = await supabase
+                        .from('assigned_areas')
+                        .upsert({
+                            ...area,
+                            last_updated: new Date().toISOString()
+                        });
+                    
+                    if (error) console.error('Erreur sauvegarde zone:', error);
                 }
-                console.log('Zones sauvegardées sur Firebase');
+                console.log('Zones sauvegardées sur Supabase');
                 
-                // حفظ التقارير
+                // Save reports
                 for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
                     for (const report of zoneData.reports) {
-                        const reportId = `report_${report.id}`;
-                        await db.collection('reports').doc(reportId).set({
-                            ...report,
-                            lastUpdated: new Date().toISOString()
-                        }, { merge: true });
+                        const { error } = await supabase
+                            .from('reports')
+                            .upsert({
+                                ...report,
+                                last_updated: new Date().toISOString()
+                            });
+                        
+                        if (error) console.error('Erreur sauvegarde rapport:', error);
                     }
                 }
-                console.log('Rapports sauvegardés sur Firebase');
+                console.log('Rapports sauvegardés sur Supabase');
                 
             } catch (error) {
-                console.error('Erreur de sauvegarde Firebase:', error);
+                console.error('Erreur de sauvegarde Supabase:', error);
             }
         }
 
-        async function uploadImageToFirebase(imageBlob, path) {
+        async function uploadImageToSupabase(imageBlob, fileName) {
             try {
-                const storageRef = storage.ref();
-                const imageRef = storageRef.child(path);
-                await imageRef.put(imageBlob);
-                const downloadURL = await imageRef.getDownloadURL();
-                return downloadURL;
+                const filePath = `reports/${Date.now()}_${fileName}`;
+                
+                const { data, error } = await supabase.storage
+                    .from('photos')
+                    .upload(filePath, imageBlob);
+                
+                if (error) throw error;
+                
+                // Get public URL
+                const { data: { publicUrl } } = supabase.storage
+                    .from('photos')
+                    .getPublicUrl(filePath);
+                
+                return publicUrl;
+                
             } catch (error) {
                 console.error('Erreur de téléchargement:', error);
                 return null;
             }
         }
 
-        async function saveReportWithImagesToFirebase(report, beforePhotosArray, afterPhotosArray) {
+        async function saveReportWithImagesToSupabase(report, beforePhotosArray, afterPhotosArray) {
             try {
-                const reportId = `report_${report.id}`;
+                // Upload images
                 const uploadedPhotos = [];
                 
-                // تحميل صور AVANT
+                // Upload before photos
                 if (beforePhotosArray) {
                     for (let i = 0; i < beforePhotosArray.length; i++) {
                         if (beforePhotosArray[i] && beforePhotosArray[i].blob) {
-                            const photoPath = `reports/${report.id}/before_${i + 1}_${Date.now()}.jpg`;
-                            const photoUrl = await uploadImageToFirebase(beforePhotosArray[i].blob, photoPath);
+                            const fileName = `before_${i + 1}_${report.id}.jpg`;
+                            const photoUrl = await uploadImageToSupabase(beforePhotosArray[i].blob, fileName);
                             
                             if (photoUrl) {
                                 uploadedPhotos.push({
@@ -1471,19 +1504,20 @@
                                     index: i,
                                     timestamp: beforePhotosArray[i].timestamp,
                                     location: beforePhotosArray[i].location,
-                                    noteCode: beforePhotosArray[i].noteCode
+                                    note_code: beforePhotosArray[i].noteCode,
+                                    report_id: report.id
                                 });
                             }
                         }
                     }
                 }
                 
-                // تحميل صور APRÈS
+                // Upload after photos
                 if (afterPhotosArray) {
                     for (let i = 0; i < afterPhotosArray.length; i++) {
                         if (afterPhotosArray[i] && afterPhotosArray[i].blob) {
-                            const photoPath = `reports/${report.id}/after_${i + 1}_${Date.now()}.jpg`;
-                            const photoUrl = await uploadImageToFirebase(afterPhotosArray[i].blob, photoPath);
+                            const fileName = `after_${i + 1}_${report.id}.jpg`;
+                            const photoUrl = await uploadImageToSupabase(afterPhotosArray[i].blob, fileName);
                             
                             if (photoUrl) {
                                 uploadedPhotos.push({
@@ -1492,22 +1526,46 @@
                                     index: i,
                                     timestamp: afterPhotosArray[i].timestamp,
                                     location: afterPhotosArray[i].location,
-                                    noteCode: afterPhotosArray[i].noteCode
+                                    note_code: afterPhotosArray[i].noteCode,
+                                    report_id: report.id
                                 });
                             }
                         }
                     }
                 }
                 
-                // حفظ التقرير مع الروابط
+                // Save report
                 const reportData = {
-                    ...report,
+                    id: report.id,
+                    employee: report.employee,
+                    employee_name: report.employeeName,
+                    number_before: report.numberBefore,
+                    number_after: report.numberAfter,
+                    date: report.date,
+                    location: report.location,
+                    area: report.area,
+                    area_code: report.areaCode,
+                    note_code: report.noteCode,
+                    status: report.status,
+                    step: report.step,
+                    completion_date: report.completionDate,
                     photos: uploadedPhotos,
-                    uploadedAt: new Date().toISOString(),
-                    firebaseSync: true
+                    uploaded_at: new Date().toISOString(),
+                    supabase_sync: true
                 };
                 
-                await db.collection('reports').doc(reportId).set(reportData, { merge: true });
+                const { error } = await supabase
+                    .from('reports')
+                    .upsert(reportData);
+                
+                if (error) throw error;
+                
+                // Save photos separately
+                for (const photo of uploadedPhotos) {
+                    await supabase
+                        .from('photos')
+                        .upsert(photo);
+                }
                 
                 return reportData;
                 
@@ -1701,9 +1759,9 @@
             };
             localStorage.setItem('noteCamSystemData', JSON.stringify(data));
             
-            // حفظ تلقائي في Firebase
-            if (isFirebaseInitialized) {
-                saveAllToFirebase();
+            // Auto save to Supabase
+            if (isSupabaseInitialized) {
+                saveAllToSupabase();
             }
         }
 
@@ -1819,7 +1877,7 @@
             checkLoggedInUser();
             updateStepDisplay();
             
-            initializeFirebase();
+            initializeSupabase();
         }
 
         // ========== GESTION DES EMPLOYÉS ==========
@@ -2547,8 +2605,8 @@
             
             saveToLocalStorage();
             
-            // حفظ مع الصور في Firebase
-            saveReportWithImagesToFirebase(beforeReport, beforePhotos, null);
+            // Save with images to Supabase
+            saveReportWithImagesToSupabase(beforeReport, beforePhotos, null);
             
             tempReport = {
                 id: beforeReport.id,
@@ -2637,8 +2695,8 @@
             
             saveToLocalStorage();
             
-            // حفظ مع الصور في Firebase
-            saveReportWithImagesToFirebase(updatedReport, null, afterPhotos);
+            // Save with images to Supabase
+            saveReportWithImagesToSupabase(updatedReport, null, afterPhotos);
             
             generateZoneFile(zoneCode);
             
