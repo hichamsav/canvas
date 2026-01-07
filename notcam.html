@@ -923,6 +923,10 @@
                     <button class="control-btn" id="refreshLocation">
                         <i class="fas fa-sync-alt"></i> Actualiser la localisation
                     </button>
+                    <!-- زر الرجوع الجديد -->
+                    <button class="control-btn" id="backToStep1Btn" onclick="goBackToStep1()" style="display: none;">
+                        <i class="fas fa-arrow-left"></i> Retour aux photos AVANT
+                    </button>
                 </div>
 
                 <div class="areas-list" id="employeeAreasList"></div>
@@ -1163,10 +1167,118 @@
         const reportsPanel = document.getElementById('reportsPanel');
         const notification = document.getElementById('notification');
         const cameraStatus = document.getElementById('cameraStatus');
+
+        // ========== إدارة حالة المستخدم ==========
+        function saveUserProgress() {
+            if (!currentUser || currentUser.role !== 'employee') return;
+            
+            const progressData = {
+                selectedArea: selectedArea,
+                selectedNumber: selectedNumber,
+                selectedNumberAfter: selectedNumberAfter,
+                currentStep: currentStep,
+                beforePhotosCount: beforePhotos.filter(p => p !== null).length,
+                afterPhotosCount: afterPhotos.filter(p => p !== null).length,
+                hasBeforeReport: tempReport !== null,
+                lastUpdated: new Date().toISOString()
+            };
+            
+            localStorage.setItem(`userProgress_${currentUser.username}`, JSON.stringify(progressData));
+        }
+
+        function loadUserProgress() {
+            if (!currentUser || currentUser.role !== 'employee') return null;
+            
+            const savedProgress = localStorage.getItem(`userProgress_${currentUser.username}`);
+            if (savedProgress) {
+                try {
+                    return JSON.parse(savedProgress);
+                } catch (e) {
+                    console.error('Erreur chargement progression:', e);
+                }
+            }
+            return null;
+        }
+
+        function applyUserProgress(progress) {
+            if (!progress) return;
+            
+            currentStep = progress.currentStep || 1;
+            
+            if (progress.selectedArea && currentUser && currentUser.assignedAreas) {
+                const area = currentUser.assignedAreas.find(a => a.id === progress.selectedArea.id);
+                if (area) {
+                    selectArea(area);
+                }
+            }
+            
+            if (progress.selectedNumber !== undefined && progress.selectedNumber !== null) {
+                selectNumber(progress.selectedNumber);
+            }
+            
+            if (progress.selectedNumberAfter !== undefined && progress.selectedNumberAfter !== null) {
+                selectNumberAfter(progress.selectedNumberAfter);
+            }
+            
+            updateUIForCurrentStep();
+            
+            if (progress.hasBeforeReport) {
+                const savedTempReport = localStorage.getItem(`tempReport_${currentUser.username}`);
+                if (savedTempReport) {
+                    try {
+                        tempReport = JSON.parse(savedTempReport);
+                    } catch (e) {
+                        console.error('Erreur rapport temporaire:', e);
+                    }
+                }
+            }
+        }
+
+        function updateUIForCurrentStep() {
+            const backButton = document.getElementById('backToStep1Btn');
+            
+            if (currentStep === 1) {
+                document.getElementById('beforePhotosContainer').style.display = 'block';
+                document.getElementById('sendBeforeContainer').style.display = 'block';
+                document.getElementById('numberSelection').style.display = 'block';
+                document.getElementById('apresButtonContainer').style.display = 'none';
+                document.getElementById('afterPhotosContainer').style.display = 'none';
+                document.getElementById('numberSelectionAfter').style.display = 'none';
+                document.getElementById('sendAfterContainer').style.display = 'none';
+                if (backButton) backButton.style.display = 'none';
+            } else if (currentStep === 2) {
+                document.getElementById('beforePhotosContainer').style.display = 'none';
+                document.getElementById('sendBeforeContainer').style.display = 'none';
+                document.getElementById('numberSelection').style.display = 'none';
+                document.getElementById('apresButtonContainer').style.display = 'block';
+                document.getElementById('afterPhotosContainer').style.display = 'none';
+                document.getElementById('numberSelectionAfter').style.display = 'none';
+                document.getElementById('sendAfterContainer').style.display = 'none';
+                if (backButton) backButton.style.display = 'block';
+            }
+            
+            updateStepDisplay();
+        }
+
+        function goBackToStep1() {
+            if (!confirm("Voulez-vous vraiment retourner aux photos AVANT ? Les photos APRÈS seront perdues.")) {
+                return;
+            }
+            
+            currentStep = 1;
+            selectedNumberAfter = null;
+            afterPhotos = [null, null, null, null, null];
+            
+            updateUIForCurrentStep();
+            saveUserProgress();
+            
+            showNotification("Retour aux photos AVANT", "success");
+            updateStatusBar("Retour aux photos AVANT");
+        }
+
         // ========== FONCTIONS FIREBASE ==========
         async function initializeFirebase() {
             try {
-                // Test de connexion
                 await db.collection('system').doc('status').set({
                     lastOnline: new Date().toISOString(),
                     status: 'online'
@@ -1185,19 +1297,16 @@
 
         async function loadFromFirebase() {
             try {
-                // Charger les utilisateurs
                 const usersSnapshot = await db.collection('users').get();
                 usersSnapshot.forEach(doc => {
                     usersData[doc.id] = doc.data();
                 });
                 
-                // Charger les zones
                 const areasSnapshot = await db.collection('assignedAreas').get();
                 areasSnapshot.forEach(doc => {
                     assignedAreas.push(doc.data());
                 });
                 
-                // Charger les rapports
                 const reportsSnapshot = await db.collection('zoneReports').get();
                 reportsSnapshot.forEach(doc => {
                     zoneReports[doc.id] = doc.data();
@@ -1214,7 +1323,6 @@
             try {
                 if (!isFirebaseInitialized) return;
                 
-                // Sauvegarder les utilisateurs
                 for (const [username, userData] of Object.entries(usersData)) {
                     await db.collection('users').doc(username).set({
                         ...userData,
@@ -1222,7 +1330,6 @@
                     }, { merge: true });
                 }
                 
-                // Sauvegarder les zones
                 for (const area of assignedAreas) {
                     await db.collection('assignedAreas').doc(`area_${area.id}`).set({
                         ...area,
@@ -1230,7 +1337,6 @@
                     }, { merge: true });
                 }
                 
-                // Sauvegarder les rapports
                 for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
                     await db.collection('zoneReports').doc(zoneCode).set({
                         ...zoneData,
@@ -1262,7 +1368,6 @@
             try {
                 const reportId = `report_${report.id}`;
                 
-                // Télécharger les photos
                 const uploadedPhotos = [];
                 for (let i = 0; i < photos.length; i++) {
                     if (photos[i]) {
@@ -1280,7 +1385,6 @@
                     }
                 }
                 
-                // Sauvegarder le rapport
                 await db.collection('reports').doc(reportId).set({
                     ...report,
                     photos: uploadedPhotos,
@@ -1331,7 +1435,6 @@
             statusBar.textContent = `Système NoteCam ● ${message} ●`;
         }
 
-        // Données de localisation
         const sampleLocations = [
             {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
             {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
@@ -1453,7 +1556,6 @@
             }
         }
 
-        // ========== GESTION DES DONNÉES ==========
         function loadFromLocalStorage() {
             try {
                 const savedData = localStorage.getItem('noteCamSystemData');
@@ -1462,20 +1564,6 @@
                     usersData = {...defaultUsersData, ...data.usersData};
                     assignedAreas = data.assignedAreas || assignedAreas;
                     zoneReports = data.zoneReports || {};
-                }
-                
-                const savedTempReport = localStorage.getItem('tempReport');
-                if (savedTempReport) {
-                    try {
-                        tempReport = JSON.parse(savedTempReport);
-                        if (tempReport) {
-                            currentStep = 2;
-                            selectedNumber = tempReport.numberBefore;
-                            selectedArea = assignedAreas.find(area => area.code === tempReport.areaCode);
-                        }
-                    } catch (e) {
-                        console.error('Erreur rapport temporaire:', e);
-                    }
                 }
                 
                 const savedUser = localStorage.getItem('currentUser');
@@ -1531,22 +1619,12 @@
                     loadEmployeeAreas();
                     populateAreaSelect();
                     
+                    const progress = loadUserProgress();
+                    applyUserProgress(progress);
+                    
                     setTimeout(() => {
                         activateCameraAutomatically();
                     }, 1000);
-                    
-                    if (tempReport) {
-                        document.getElementById('beforePhotosContainer').style.display = 'none';
-                        document.getElementById('sendBeforeContainer').style.display = 'none';
-                        document.getElementById('numberSelection').style.display = 'none';
-                        document.getElementById('afterPhotosContainer').style.display = 'block';
-                        document.getElementById('numberSelectionAfter').style.display = 'block';
-                        document.getElementById('sendAfterContainer').style.display = 'block';
-                        document.getElementById('apresButtonContainer').style.display = 'none';
-                        currentStep = 2;
-                        updateStepDisplay();
-                        document.getElementById('completedBeforeNumber').textContent = selectedNumber;
-                    }
                 }
                 
                 showNotification(`Connexion réussie`, "success");
@@ -1569,22 +1647,12 @@
                     loadEmployeeAreas();
                     populateAreaSelect();
                     
+                    const progress = loadUserProgress();
+                    applyUserProgress(progress);
+                    
                     setTimeout(() => {
                         activateCameraAutomatically();
                     }, 1000);
-                    
-                    if (tempReport) {
-                        document.getElementById('beforePhotosContainer').style.display = 'none';
-                        document.getElementById('sendBeforeContainer').style.display = 'none';
-                        document.getElementById('numberSelection').style.display = 'none';
-                        document.getElementById('afterPhotosContainer').style.display = 'block';
-                        document.getElementById('numberSelectionAfter').style.display = 'block';
-                        document.getElementById('sendAfterContainer').style.display = 'block';
-                        document.getElementById('apresButtonContainer').style.display = 'none';
-                        currentStep = 2;
-                        updateStepDisplay();
-                        document.getElementById('completedBeforeNumber').textContent = selectedNumber;
-                    }
                 }
                 
                 updateStatusBar(`Bienvenue ${currentUser.name}`);
@@ -1598,10 +1666,11 @@
                 isCameraActive = false;
             }
             
+            if (currentUser && currentUser.role === 'employee') {
+                saveUserProgress();
+            }
+            
             currentUser = null;
-            selectedArea = null;
-            selectedNumber = null;
-            selectedNumberAfter = null;
             
             loginPage.style.display = 'block';
             adminPanel.style.display = 'none';
@@ -1629,10 +1698,10 @@
             checkLoggedInUser();
             updateStepDisplay();
             
-            // Initialiser Firebase
             initializeFirebase();
         }
-                // ========== GESTION DES EMPLOYÉS ==========
+
+        // ========== GESTION DES EMPLOYÉS ==========
         function addEmployee() {
             const username = document.getElementById('empUsername').value;
             const password = document.getElementById('empPassword').value;
@@ -1721,6 +1790,9 @@
             }
             
             assignedAreas = assignedAreas.filter(area => area.employee !== username);
+            
+            localStorage.removeItem(`userProgress_${username}`);
+            localStorage.removeItem(`tempReport_${username}`);
             
             updateEmployeeSelect();
             displayEmployees();
@@ -1840,6 +1912,7 @@
             document.getElementById('summaryZoneAfter').textContent = area.name;
             
             checkSendBeforeStatus();
+            saveUserProgress();
             
             updateStatusBar(`Zone sélectionnée : ${area.name}`);
         }
@@ -1934,6 +2007,7 @@
                 document.getElementById('statusZoneAfter').textContent = "-";
                 document.getElementById('summaryZone').textContent = "-";
                 document.getElementById('summaryZoneAfter').textContent = "-";
+                saveUserProgress();
             }
             
             saveToLocalStorage();
@@ -2011,7 +2085,6 @@
         }
 
         function setupNumberButtons() {
-            // Boutons pour AVANT
             document.querySelectorAll('#numberSelection .number-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const number = this.getAttribute('data-number');
@@ -2019,7 +2092,6 @@
                 });
             });
             
-            // Boutons pour APRÈS
             document.querySelectorAll('#numberSelectionAfter .number-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     const number = this.getAttribute('data-number');
@@ -2044,6 +2116,7 @@
             document.getElementById('summaryNumber').textContent = number;
             
             checkSendBeforeStatus();
+            saveUserProgress();
             
             updateStatusBar(`Nombre sélectionné : ${number}`);
         }
@@ -2064,10 +2137,12 @@
             document.getElementById('summaryNumberAfter').textContent = number;
             
             checkSendAfterStatus();
+            saveUserProgress();
             
             updateStatusBar(`Nombre APRÈS sélectionné : ${number}`);
         }
-                // ========== GESTION DES PHOTOS ==========
+
+        // ========== GESTION DES PHOTOS ==========
         function setupPhotoBoxes() {
             const photoBoxesContainer = document.getElementById('photoBoxesContainer');
             const afterPhotoBoxesContainer = document.getElementById('afterPhotoBoxesContainer');
@@ -2170,6 +2245,7 @@
                     preview.src = imageUrl;
                     
                     updatePhotoCount(type);
+                    saveUserProgress();
                     
                     updateStatusBar(`Photo ${type} ${index + 1} capturée`);
                     
@@ -2279,6 +2355,7 @@
             
             checkSendBeforeStatus();
             checkSendAfterStatus();
+            saveUserProgress();
             
             showNotification("Toutes les photos ont été effacées", "success");
             updateStatusBar('Toutes les photos effacées');
@@ -2311,7 +2388,6 @@
                 return;
             }
             
-            // Créer rapport pour AVANT seulement
             const beforeReport = {
                 id: Date.now(),
                 employee: currentUser.username,
@@ -2327,7 +2403,6 @@
                 step: 'first'
             };
             
-            // Enregistrer le rapport AVANT dans zoneReports
             const zoneCode = selectedArea.code;
             if (!zoneReports[zoneCode]) {
                 zoneReports[zoneCode] = {
@@ -2339,7 +2414,6 @@
             
             zoneReports[zoneCode].reports.push(beforeReport);
             
-            // Ajouter photos AVANT
             beforeReport.beforePhotos.forEach((photo, index) => {
                 zoneReports[zoneCode].photos.push({
                     type: 'before',
@@ -2350,13 +2424,10 @@
                 });
             });
             
-            // Sauvegarder
             saveToLocalStorage();
             
-            // Sauvegarder sur Firebase
             saveReportToFirebase(beforeReport, beforePhotos, 'before');
             
-            // Créer rapport temporaire pour APRÈS
             tempReport = {
                 id: beforeReport.id,
                 employee: currentUser.username,
@@ -2371,21 +2442,15 @@
                 status: 'awaiting_after'
             };
             
-            localStorage.setItem('tempReport', JSON.stringify(tempReport));
+            localStorage.setItem(`tempReport_${currentUser.username}`, JSON.stringify(tempReport));
             
-            // Masquer AVANT, montrer APRÈS
-            document.getElementById('beforePhotosContainer').style.display = 'none';
-            document.getElementById('sendBeforeContainer').style.display = 'none';
-            document.getElementById('numberSelection').style.display = 'none';
-            document.getElementById('apresButtonContainer').style.display = 'block';
+            currentStep = 2;
+            updateUIForCurrentStep();
+            saveUserProgress();
             
             showNotification("Photos AVANT envoyées avec succès !", "success");
             updateStatusBar("Photos AVANT envoyées avec succès");
             
-            currentStep = 2;
-            updateStepDisplay();
-            
-            // Notifier superviseur
             notifySupervisor(beforeReport);
         }
 
@@ -2395,7 +2460,6 @@
             document.getElementById('numberSelectionAfter').style.display = 'block';
             document.getElementById('sendAfterContainer').style.display = 'block';
             
-            // Afficher le nombre AVANT déjà envoyé
             document.getElementById('completedBeforeNumber').textContent = selectedNumber;
             
             showNotification("Prêt à capturer les photos APRÈS", "success");
@@ -2413,7 +2477,6 @@
                 return;
             }
             
-            // Trouver le rapport AVANT existant
             const zoneCode = selectedArea.code;
             const zoneData = zoneReports[zoneCode];
             if (!zoneData) {
@@ -2427,7 +2490,6 @@
                 return;
             }
             
-            // Mettre à jour le rapport avec les photos APRÈS
             const updatedReport = {
                 ...zoneData.reports[existingReportIndex],
                 numberAfter: selectedNumberAfter,
@@ -2437,10 +2499,8 @@
                 step: 'complete'
             };
             
-            // Remplacer le rapport dans la liste
             zoneData.reports[existingReportIndex] = updatedReport;
             
-            // Ajouter photos APRÈS
             afterPhotos.forEach((photo, index) => {
                 if (photo) {
                     zoneData.photos.push({
@@ -2455,20 +2515,15 @@
             
             saveToLocalStorage();
             
-            // Sauvegarder sur Firebase
             saveReportToFirebase(updatedReport, afterPhotos, 'after');
             
-            // Générer fichier complet
             generateZoneFile(zoneCode);
             
-            // Supprimer temporaire
             tempReport = null;
-            localStorage.removeItem('tempReport');
+            localStorage.removeItem(`tempReport_${currentUser.username}`);
             
-            // Réinitialiser
             resetForm();
             
-            // Notifier superviseur
             notifySupervisor(updatedReport);
             
             showNotification("Rapport complet envoyé avec succès !", "success");
@@ -2492,7 +2547,6 @@
             afterPhotos = [null, null, null, null, null];
             currentStep = 1;
             
-            // Réinitialiser interface
             document.querySelectorAll('.number-btn').forEach(btn => {
                 btn.classList.remove('selected');
             });
@@ -2505,7 +2559,6 @@
             document.getElementById('summaryNumberAfter').textContent = "-";
             document.getElementById('completedBeforeNumber').textContent = "-";
             
-            // Réinitialiser photos
             document.querySelectorAll('.photo-box').forEach(box => {
                 box.classList.remove('captured');
                 const preview = box.querySelector('.photo-preview');
@@ -2514,7 +2567,6 @@
                 }
             });
             
-            // Réinitialiser compteurs
             document.getElementById('beforePhotosCount').textContent = "0/5";
             document.getElementById('afterPhotosCount').textContent = "0/5";
             document.getElementById('statusBefore').textContent = "0/5";
@@ -2522,24 +2574,14 @@
             document.getElementById('summaryBeforePhotos').textContent = "0/5";
             document.getElementById('summaryAfterPhotos').textContent = "0/5";
             
-            // Réinitialiser styles
             document.getElementById('statusBefore').classList.remove('completed');
             document.getElementById('statusAfter').classList.remove('completed');
             
-            // Réafficher AVANT
-            document.getElementById('beforePhotosContainer').style.display = 'block';
-            document.getElementById('afterPhotosContainer').style.display = 'none';
-            document.getElementById('sendBeforeContainer').style.display = 'block';
-            document.getElementById('sendAfterContainer').style.display = 'none';
-            document.getElementById('apresButtonContainer').style.display = 'none';
-            document.getElementById('numberSelection').style.display = 'block';
-            document.getElementById('numberSelectionAfter').style.display = 'none';
+            updateUIForCurrentStep();
+            saveUserProgress();
             
-            // Réinitialiser boutons
             document.getElementById('sendBeforeBtn').disabled = true;
             document.getElementById('sendAfterBtn').disabled = true;
-            
-            updateStepDisplay();
             
             showNotification("Formulaire réinitialisé - Prêt pour un nouveau rapport", "success");
             updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
@@ -2697,4 +2739,3 @@
     </script>
 </body>
 </html>
-    
