@@ -868,7 +868,6 @@
             }
         }
 
-        /* أنماط نظام المزامنة الجديد */
         .sync-controls {
             display: flex;
             gap: 10px;
@@ -911,15 +910,12 @@
         }
     </style>
     
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Notification -->
     <div class="notification" id="notification"></div>
 
     <div class="app-container">
-        <!-- Barre d'état -->
         <div class="status-bar" id="statusBar">
             <div>Système NoteCam ● Prêt ●</div>
             <div class="sync-status" id="syncStatus">
@@ -928,7 +924,6 @@
             </div>
         </div>
 
-        <!-- Page de connexion -->
         <div class="login-container" id="loginPage">
             <h2>Connexion</h2>
             <input type="text" id="username" class="login-input" placeholder="Nom d'utilisateur">
@@ -936,7 +931,6 @@
             <button class="login-btn" onclick="login()">Se connecter</button>
         </div>
 
-        <!-- Panneau du superviseur -->
         <div class="admin-panel" id="adminPanel">
             <div class="panel-header">
                 <div class="panel-title">Panneau de Contrôle du Superviseur</div>
@@ -945,7 +939,6 @@
                 </div>
             </div>
 
-            <!-- Contrôles المزامنة -->
             <div class="dashboard-section">
                 <h3><i class="fas fa-sync"></i> Système de Synchronisation</h3>
                 <div class="sync-controls">
@@ -965,7 +958,6 @@
                 </div>
             </div>
 
-            <!-- Gestion des employés -->
             <div class="dashboard-section">
                 <h3>Gestion des Employés <span class="badge badge-blue" id="employeesCount">0</span></h3>
                 <div class="employee-form">
@@ -977,7 +969,6 @@
                 <div class="employee-list" id="employeesList"></div>
             </div>
 
-            <!-- Attribution des zones -->
             <div class="dashboard-section">
                 <h3>Attribution des Zones Géographiques <span class="badge badge-green" id="areasCount">0</span></h3>
                 <div class="employee-form">
@@ -991,7 +982,6 @@
                 <div class="areas-list" id="assignedAreasList"></div>
             </div>
 
-            <!-- Rapports reçus -->
             <div class="dashboard-section">
                 <h3>Rapports Reçus <span class="badge badge-red" id="reportsCount">0</span></h3>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -1006,7 +996,6 @@
             </div>
         </div>
 
-        <!-- Panneau de l'employé -->
         <div class="employee-panel" id="employeePanel">
             <div class="panel-header">
                 <div class="panel-title" id="employeeName">
@@ -1015,7 +1004,6 @@
                 <button class="logout-btn" onclick="logout()">Déconnexion</button>
             </div>
 
-            <!-- Contrôles المزامنة للعامل -->
             <div class="dashboard-section">
                 <h3><i class="fas fa-sync"></i> Synchronisation</h3>
                 <div class="sync-controls">
@@ -1052,7 +1040,6 @@
                     </div>
                 </div>
 
-                <!-- Indicateur de caméra -->
                 <div class="camera-status" id="cameraStatus">
                     <div class="camera-icon">
                         <i class="fas fa-video"></i>
@@ -1060,7 +1047,6 @@
                     <div class="camera-text">Caméra en cours d'activation...</div>
                 </div>
 
-                <!-- Contrôles -->
                 <div class="controls-under-area">
                     <button class="control-btn primary" id="toggleCamera" style="display: none;">
                         <i class="fas fa-video"></i> Activer la caméra
@@ -1071,7 +1057,6 @@
                     <button class="control-btn" id="refreshLocation">
                         <i class="fas fa-sync-alt"></i> Actualiser la localisation
                     </button>
-                    <!-- زر الرجوع الجديد -->
                     <button class="control-btn" id="backToStep1Btn" onclick="goBackToStep1()" style="display: none;">
                         <i class="fas fa-arrow-left"></i> Retour aux photos AVANT
                     </button>
@@ -1079,7 +1064,6 @@
 
                 <div class="areas-list" id="employeeAreasList"></div>
 
-                <!-- Indicateur de progression -->
                 <div class="progress-indicator">
                     <div class="progress-step" id="step1">1</div>
                     <div class="progress-step" id="step2">2</div>
@@ -1088,7 +1072,6 @@
                     <span id="step1Label">Photos AVANT</span> → <span id="step2Label">Photos APRÈS</span>
                 </div>
 
-                <!-- Photos AVANT -->
                 <div class="photos-container" id="beforePhotosContainer">
                     <div class="photos-title">
                         <span><i class="fas fa-camera"></i> PHOTOS AVANT</span>
@@ -1111,7 +1094,6 @@
                     <div class="photo-boxes-container" id="photoBoxesContainer"></div>
                 </div>
 
-                <!-- Saisie du nombre -->
                 <div class="number-selection" id="numberSelection">
                     <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
                         <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 :
@@ -1132,7 +1114,6 @@
                     </div>
                 </div>
 
-                <!-- Bouton d'envoi AVANT -->
                 <div class="send-report-container" id="sendBeforeContainer">
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -1152,14 +1133,12 @@
                     </button>
                 </div>
 
-                <!-- Bouton APRÈS -->
                 <div class="section-divider" id="apresButtonContainer" style="display: none;">
                     <button class="apres-button" id="apresButton" onclick="showAfterPhotos()">
                         <i class="fas fa-arrow-right"></i> PASSER AUX PHOTOS APRÈS
                     </button>
                 </div>
 
-                <!-- Photos APRÈS -->
                 <div class="photos-container" id="afterPhotosContainer" style="display: none;">
                     <div class="photos-title">
                         <span><i class="fas fa-camera-retro"></i> PHOTOS APRÈS</span>
@@ -1182,7 +1161,6 @@
                     <div class="photo-boxes-container" id="afterPhotoBoxesContainer"></div>
                 </div>
 
-                <!-- Saisie du nombre APRÈS -->
                 <div class="number-selection" id="numberSelectionAfter" style="display: none;">
                     <label style="display: block; margin-bottom: 12px; color: #1a5fb4; font-weight: 700; font-size: 16px;">
                         <i class="fas fa-keyboard"></i> Sélectionnez un nombre de 0 à 8 pour APRÈS :
@@ -1203,7 +1181,6 @@
                     </div>
                 </div>
 
-                <!-- Bouton d'envoi APRÈS -->
                 <div class="send-report-container" id="sendAfterContainer" style="display: none;">
                     <div style="margin-bottom: 15px;">
                         <div style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 10px;">
@@ -1233,7 +1210,6 @@
             </div>
         </div>
 
-        <!-- Page des rapports -->
         <div class="reports-panel" id="reportsPanel">
             <div class="panel-header">
                 <div class="panel-title">
@@ -1250,19 +1226,15 @@
         </div>
     </div>
 
-    <!-- Flash effect -->
     <div class="capture-flash" id="captureFlash"></div>
 
     <script>
-        // ========== CONFIGURATION SUPABASE CORRIGÉE ==========
         const SUPABASE_URL = 'https://jxvnmcgfwlbswtkiglmh.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_2NInsIOwZjO8LurZUdI2wA_ljsWkESw'; // Clé publishable
+        const SUPABASE_ANON_KEY = 'sb_publishable_2NInsIOwZjO8LurZUdI2wA_ljsWkESw';
         
-        // ========== VARIABLES GLOBALES ==========
         let supabaseClient;
         let isSupabaseInitialized = false;
         
-        // Données système
         const defaultUsersData = {
             admin: {
                 password: "admin123",
@@ -1284,7 +1256,6 @@
         let assignedAreas = [];
         let zoneReports = {};
 
-        // Variables système
         let currentUser = null;
         let videoStream = null;
         let isCameraActive = false;
@@ -1296,15 +1267,11 @@
         let afterPhotos = [null, null, null, null, null];
         let tempReport = null;
 
-        // ========== نظام المزامنة الجديد ==========
         let syncInterval;
         let lastSyncTime = null;
         let isSyncing = false;
-        let pendingSyncs = [];
-        const SYNC_INTERVAL = 15000; // 15 ثانية
-        const SYNC_RETRY_DELAY = 5000; // 5 ثواني
+        const SYNC_INTERVAL = 30000;
 
-        // Éléments DOM
         const statusBar = document.getElementById('statusBar');
         const loginPage = document.getElementById('loginPage');
         const adminPanel = document.getElementById('adminPanel');
@@ -1318,7 +1285,6 @@
         const lastSyncTimeEl = document.getElementById('lastSyncTime');
         const syncStatusDetail = document.getElementById('syncStatusDetail');
 
-        // ========== FONCTIONS UTILITAIRES ==========
         function showNotification(message, type = 'success') {
             notification.textContent = message;
             notification.style.background = type === 'success' ? '#2ea043' : 
@@ -1382,7 +1348,6 @@
                 lastSyncTimeEl.textContent = formatTimeShort(lastSyncTime);
             }
             
-            // تحديث الأيقونة
             if (status === 'Synchronisation...') {
                 syncIcon.style.animation = 'spin 1s linear infinite';
                 syncStatus.style.background = 'rgba(255, 165, 0, 0.3)';
@@ -1400,24 +1365,16 @@
             }
         }
 
-        // ========== INITIALISATION SUPABASE ==========
         async function initializeSupabase() {
             try {
                 console.log('Initialisation de Supabase...');
                 
                 if (typeof supabase === 'undefined') {
-                    console.log('Supabase non chargé, attente...');
                     await new Promise(resolve => setTimeout(resolve, 1000));
                 }
                 
-                if (typeof supabase === 'undefined') {
-                    throw new Error('Supabase library not loaded');
-                }
-                
                 supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-                    auth: {
-                        persistSession: false
-                    }
+                    auth: { persistSession: false }
                 });
                 
                 isSupabaseInitialized = true;
@@ -1425,7 +1382,6 @@
                 updateSyncStatus('Connecté', 'Prêt à synchroniser');
                 
                 initSyncSystem();
-                checkAndCreateTables();
                 
                 showNotification("Supabase connecté avec succès", "success");
                 
@@ -1442,103 +1398,6 @@
             }
         }
 
-        // ========== CRÉATION DES TABLES ==========
-        async function checkAndCreateTables() {
-            try {
-                console.log('Vérification des tables...');
-                
-                // Vérifier si la table users existe
-                const { data: usersExist, error: usersError } = await supabaseClient
-                    .from('users')
-                    .select('count')
-                    .limit(1);
-                
-                if (usersError && usersError.code === '42P01') {
-                    await createTables();
-                } else {
-                    console.log('Tables existent déjà');
-                }
-                
-            } catch (error) {
-                console.error('Erreur vérification tables:', error);
-            }
-        }
-
-        async function createTables() {
-            try {
-                console.log('Création des tables...');
-                
-                // SQL pour créer les tables
-                const sqlCommands = [
-                    // Table users
-                    `CREATE TABLE IF NOT EXISTS users (
-                        id BIGSERIAL PRIMARY KEY,
-                        username TEXT UNIQUE NOT NULL,
-                        password TEXT NOT NULL,
-                        role TEXT NOT NULL DEFAULT 'employee',
-                        name TEXT NOT NULL,
-                        assigned_areas JSONB DEFAULT '[]',
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                    );`,
-                    
-                    // Table assigned_areas
-                    `CREATE TABLE IF NOT EXISTS assigned_areas (
-                        id BIGSERIAL PRIMARY KEY,
-                        employee TEXT NOT NULL,
-                        name TEXT NOT NULL,
-                        code TEXT UNIQUE NOT NULL,
-                        date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                        is_active BOOLEAN DEFAULT true,
-                        last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                    );`,
-                    
-                    // Table reports
-                    `CREATE TABLE IF NOT EXISTS reports (
-                        id BIGSERIAL PRIMARY KEY,
-                        employee TEXT NOT NULL,
-                        employee_name TEXT NOT NULL,
-                        number_before INTEGER,
-                        number_after INTEGER,
-                        date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                        location JSONB,
-                        area TEXT NOT NULL,
-                        area_code TEXT NOT NULL,
-                        note_code TEXT NOT NULL,
-                        status TEXT DEFAULT 'before_only',
-                        step TEXT DEFAULT 'first',
-                        completion_date TIMESTAMP WITH TIME ZONE,
-                        photos JSONB DEFAULT '[]',
-                        supabase_sync BOOLEAN DEFAULT false,
-                        last_updated TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                    );`,
-                    
-                    // Table system_status
-                    `CREATE TABLE IF NOT EXISTS system_status (
-                        id SERIAL PRIMARY KEY,
-                        last_sync TIMESTAMP WITH TIME ZONE,
-                        sync_count INTEGER DEFAULT 0,
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                    );`
-                ];
-                
-                // Exécuter chaque commande SQL
-                for (const sql of sqlCommands) {
-                    const { error } = await supabaseClient.rpc('exec_sql', { query: sql });
-                    if (error) {
-                        console.log('Erreur exécution SQL:', error.message);
-                    }
-                }
-                
-                console.log('Tables créées avec succès');
-                showNotification("Tables Supabase créées", "success");
-                
-            } catch (error) {
-                console.error('Erreur création tables:', error);
-            }
-        }
-
-        // ========== SYSTEME DE SYNCHRONISATION ==========
         function initSyncSystem() {
             updateSyncStatus('Initialisation...');
             
@@ -1570,11 +1429,7 @@
         }
 
         async function syncAllData() {
-            if (isSyncing || !isSupabaseInitialized) {
-                console.log('Sync déjà en cours ou Supabase non initialisé');
-                return;
-            }
-            
+            if (isSyncing || !isSupabaseInitialized) return;
             if (!navigator.onLine) {
                 updateSyncStatus('Hors ligne', 'Attente de connexion');
                 return;
@@ -1584,16 +1439,11 @@
             updateSyncStatus('Synchronisation...', 'Mise à jour des données');
             
             try {
-                console.log('Début synchronisation complète...');
-                
                 await syncFromSupabase();
                 await syncToSupabase();
                 
                 lastSyncTime = new Date();
-                
                 updateSyncStatus('Synchro OK', `Dernière sync: ${formatTimeShort(lastSyncTime)}`);
-                
-                console.log('Synchronisation terminée avec succès');
                 
                 if (currentUser) {
                     if (currentUser.role === 'admin') {
@@ -1608,16 +1458,13 @@
                 console.error('Erreur synchronisation:', error);
                 updateSyncStatus('Erreur', 'Échec de synchronisation');
                 showNotification("Erreur de synchronisation", "error");
-                
             } finally {
                 isSyncing = false;
-                pendingSyncs = [];
             }
         }
 
         async function syncFromSupabase() {
             try {
-                // Récupérer les utilisateurs
                 const { data: users, error: usersError } = await supabaseClient
                     .from('users')
                     .select('*');
@@ -1638,7 +1485,6 @@
                     console.log(`${remoteUserCount} utilisateurs chargés depuis Supabase`);
                 }
                 
-                // Récupérer les zones
                 const { data: areas, error: areasError } = await supabaseClient
                     .from('assigned_areas')
                     .select('*')
@@ -1657,7 +1503,6 @@
                     console.log(`${areas.length} zones chargées depuis Supabase`);
                 }
                 
-                // Récupérer les rapports
                 const { data: reports, error: reportsError } = await supabaseClient
                     .from('reports')
                     .select('*')
@@ -1706,70 +1551,63 @@
 
         async function syncToSupabase() {
             try {
-                // Synchroniser les utilisateurs
                 for (const [username, userData] of Object.entries(usersData)) {
                     if (username.startsWith('user') && username.match(/^user\d+$/)) continue;
                     
+                    const userToSend = {
+                        username: username,
+                        password: userData.password,
+                        role: userData.role,
+                        name: userData.name,
+                        assigned_areas: userData.assignedAreas || []
+                    };
+                    
                     const { error } = await supabaseClient
                         .from('users')
-                        .upsert({
-                            username: username,
-                            password: userData.password,
-                            role: userData.role,
-                            name: userData.name,
-                            assigned_areas: userData.assignedAreas || [],
-                            updated_at: new Date().toISOString()
-                        }, {
-                            onConflict: 'username'
-                        });
+                        .upsert(userToSend, { onConflict: 'username' });
                     
                     if (error) console.error(`Erreur sync user ${username}:`, error.message);
                 }
                 
-                // Synchroniser les zones
                 for (const area of assignedAreas) {
+                    const areaToSend = {
+                        id: area.id,
+                        employee: area.employee,
+                        name: area.name,
+                        code: area.code,
+                        date: area.date,
+                        is_active: area.isActive
+                    };
+                    
                     const { error } = await supabaseClient
                         .from('assigned_areas')
-                        .upsert({
-                            id: area.id,
-                            employee: area.employee,
-                            name: area.name,
-                            code: area.code,
-                            date: area.date,
-                            is_active: area.isActive,
-                            last_updated: new Date().toISOString()
-                        }, {
-                            onConflict: 'id'
-                        });
+                        .upsert(areaToSend, { onConflict: 'id' });
                     
                     if (error) console.error(`Erreur sync area ${area.code}:`, error.message);
                 }
                 
-                // Synchroniser les rapports
                 for (const [zoneCode, zoneData] of Object.entries(zoneReports)) {
                     for (const report of zoneData.reports) {
+                        const reportToSend = {
+                            id: report.id,
+                            employee: report.employee,
+                            employee_name: report.employeeName,
+                            number_before: report.numberBefore,
+                            number_after: report.numberAfter,
+                            date: report.date,
+                            location: report.location,
+                            area: report.area,
+                            area_code: report.areaCode,
+                            note_code: report.noteCode,
+                            status: report.status,
+                            step: report.step,
+                            completion_date: report.completionDate,
+                            photos: report.photos || []
+                        };
+                        
                         const { error } = await supabaseClient
                             .from('reports')
-                            .upsert({
-                                id: report.id,
-                                employee: report.employee,
-                                employee_name: report.employeeName,
-                                number_before: report.numberBefore,
-                                number_after: report.numberAfter,
-                                date: report.date,
-                                location: report.location,
-                                area: report.area,
-                                area_code: report.areaCode,
-                                note_code: report.noteCode,
-                                status: report.status,
-                                step: report.step,
-                                completion_date: report.completionDate,
-                                photos: report.photos || [],
-                                supabase_sync: true,
-                                last_updated: new Date().toISOString()
-                            }, {
-                                onConflict: 'id'
-                            });
+                            .upsert(reportToSend, { onConflict: 'id' });
                         
                         if (error) console.error(`Erreur sync report ${report.id}:`, error.message);
                     }
@@ -1783,7 +1621,6 @@
             }
         }
 
-        // ========== FONCTIONS DE CONTROLE ==========
         async function manualSync() {
             if (isSyncing) {
                 showNotification("Synchronisation déjà en cours", "warning");
@@ -1828,7 +1665,6 @@
             }
         }
 
-        // ========== إدارة حالة المستخدم ==========
         function saveUserProgress() {
             if (!currentUser || currentUser.role !== 'employee') return;
             
@@ -1974,7 +1810,6 @@
             }
         }
 
-        // ========== GESTION CAMÉRA ==========
         async function activateCameraAutomatically() {
             try {
                 cameraStatus.innerHTML = `
@@ -2065,7 +1900,6 @@
             }
         }
 
-        // ========== AUTHENTIFICATION ==========
         function login() {
             const username = document.getElementById('username').value;
             const password = document.getElementById('password').value;
@@ -2161,7 +1995,6 @@
             updateStatusBar("Déconnexion réussie");
         }
 
-        // ========== INITIALISATION ==========
         function initializeApp() {
             loadFromLocalStorage();
             updateStatusBar("Prêt à l'utilisation");
@@ -2180,7 +2013,6 @@
             initializeSupabase();
         }
 
-        // ========== GESTION DES EMPLOYÉS ==========
         function addEmployee() {
             const username = document.getElementById('empUsername').value;
             const password = document.getElementById('empPassword').value;
@@ -2281,7 +2113,6 @@
             showNotification("Employé supprimé avec succès", "success");
         }
 
-        // ========== GESTION DES ZONES ==========
         function assignArea() {
             const employeeUsername = document.getElementById('employeeSelect').value;
             const areaName = document.getElementById('areaName').value;
@@ -2535,7 +2366,6 @@
             document.getElementById('reportsCount').textContent = totalReports;
         }
 
-        // ========== GESTION DES ÉTAPES ==========
         function updateStepDisplay() {
             const step1 = document.getElementById('step1');
             const step2 = document.getElementById('step2');
@@ -2621,7 +2451,6 @@
             updateStatusBar(`Nombre APRÈS sélectionné : ${number}`);
         }
 
-        // ========== GESTION DES PHOTOS ==========
         function setupPhotoBoxes() {
             const photoBoxesContainer = document.getElementById('photoBoxesContainer');
             const afterPhotoBoxesContainer = document.getElementById('afterPhotoBoxesContainer');
@@ -2860,7 +2689,6 @@
             return canSend;
         }
 
-        // ========== GESTION DES RAPPORTS ==========
         function sendBeforePhotos() {
             if (!checkSendBeforeStatus()) {
                 alert("Veuillez compléter toutes les informations avant d'envoyer les photos AVANT");
@@ -3050,7 +2878,6 @@
             updateStatusBar("Formulaire réinitialisé - Prêt pour un nouveau rapport");
         }
 
-        // ========== FONCTIONS SUPPLÉMENTAIRES ==========
         function viewAllReports() {
             document.getElementById('adminPanel').style.display = 'none';
             document.getElementById('reportsPanel').style.display = 'block';
@@ -3640,7 +3467,6 @@
             document.body.appendChild(modal);
         }
 
-        // ========== دعم الجوال والكاميرا ==========
         const sampleLocations = [
             {lat: 33.603016, lng: -7.636873, elev: "9.34±11.02", prec: 13.28},
             {lat: 33.603058, lng: -7.63656, elev: "10.44±7.73", prec: 56.10},
@@ -3671,7 +3497,6 @@
             updateStatusBar("Localisation actualisée");
         }
 
-        // ========== LANCEMENT DE L'APPLICATION ==========
         document.addEventListener('DOMContentLoaded', initializeApp);
 
     </script>
