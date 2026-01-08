@@ -1400,6 +1400,61 @@
             }
         }
 
+        // ========== INITIALISATION SUPABASE CORRIGÉE ==========
+        async function initializeSupabase() {
+            try {
+                console.log('Initialisation de Supabase...');
+                
+                // انتظر تحميل مكتبة Supabase
+                if (typeof supabase === 'undefined') {
+                    console.log('Supabase non chargé, attente...');
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+                }
+                
+                if (typeof supabase === 'undefined') {
+                    throw new Error('Supabase library not loaded');
+                }
+                
+                // إنشاء العميل
+                supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+                    auth: {
+                        persistSession: false
+                    }
+                });
+                
+                // اختبار الاتصال البسيط
+                const { data, error } = await supabaseClient
+                    .from('system_status')
+                    .select('*')
+                    .limit(1);
+                
+                if (error && error.code !== '42P01') { // تجاهل خطأ الجدول غير موجود
+                    console.log('Supabase connecté mais erreur de requête:', error.message);
+                }
+                
+                isSupabaseInitialized = true;
+                console.log('Supabase initialisé avec succès');
+                updateSyncStatus('Connecté', 'Prêt à synchroniser');
+                
+                // تشغيل نظام المزامنة
+                initSyncSystem();
+                
+                showNotification("Supabase connecté avec succès", "success");
+                
+            } catch (error) {
+                console.error('Erreur initialisation Supabase:', error);
+                updateSyncStatus('Erreur', 'Connexion échouée');
+                showNotification("Mode hors ligne - Données locales", "warning");
+                
+                // المحاولة مرة أخرى بعد تأخير
+                setTimeout(() => {
+                    if (!isSupabaseInitialized) {
+                        initializeSupabase();
+                    }
+                }, 5000);
+            }
+        }
+
         // ========== SYSTEME DE SYNCHRONISATION ==========
         function initSyncSystem() {
             // تحديث الحالة
@@ -1435,32 +1490,6 @@
                 showNotification("Mode hors ligne - Synchronisation suspendue", "warning");
                 updateSyncStatus('Hors ligne', 'Connexion perdue');
             });
-            
-            // مراقبة التغييرات المحلية
-            setupLocalChangeDetection();
-        }
-
-        function setupLocalChangeDetection() {
-            // مراقبة التغييرات في localStorage
-            const originalSetItem = localStorage.setItem;
-            localStorage.setItem = function(key, value) {
-                originalSetItem.apply(this, arguments);
-                
-                if (key.startsWith('userProgress_') || key === 'noteCamSystemData') {
-                    addPendingSync('local_changes');
-                }
-            };
-        }
-
-        function addPendingSync(type) {
-            if (!pendingSyncs.includes(type)) {
-                pendingSyncs.push(type);
-                
-                // تشغيل مزامنة فورية إذا كان هناك تغييرات مهمة
-                if (type === 'report' || type === 'employee') {
-                    setTimeout(() => syncAllData(), 1000);
-                }
-            }
         }
 
         async function syncAllData() {
@@ -1486,9 +1515,6 @@
                 // 2. إرسال البيانات إلى Supabase
                 await syncToSupabase();
                 
-                // 3. معالجة التغييرات المحلية
-                await processPendingSyncs();
-                
                 // تحديث الوقت
                 lastSyncTime = new Date();
                 
@@ -1512,11 +1538,6 @@
                 updateSyncStatus('Erreur', 'Échec de synchronisation');
                 showNotification("Erreur de synchronisation", "error");
                 
-                // إعادة المحاولة بعد تأخير
-                setTimeout(() => {
-                    if (!isSyncing) syncAllData();
-                }, SYNC_RETRY_DELAY);
-                
             } finally {
                 isSyncing = false;
                 pendingSyncs = [];
@@ -1530,9 +1551,7 @@
                     .from('users')
                     .select('*');
                 
-                if (usersError) throw usersError;
-                
-                if (users && users.length > 0) {
+                if (!usersError && users && users.length > 0) {
                     const remoteUserCount = users.length;
                     usersData = { ...defaultUsersData };
                     
@@ -1554,9 +1573,7 @@
                     .select('*')
                     .order('date', { ascending: false });
                 
-                if (areasError) throw areasError;
-                
-                if (areas && areas.length > 0) {
+                if (!areasError && areas && areas.length > 0) {
                     assignedAreas = areas.map(area => ({
                         id: area.id,
                         employee: area.employee,
@@ -1575,9 +1592,7 @@
                     .select('*')
                     .order('date', { ascending: false });
                 
-                if (reportsError) throw reportsError;
-                
-                if (reports && reports.length > 0) {
+                if (!reportsError && reports && reports.length > 0) {
                     zoneReports = {};
                     reports.forEach(report => {
                         const zoneCode = report.area_code;
@@ -1699,17 +1714,6 @@
             }
         }
 
-        async function processPendingSyncs() {
-            if (pendingSyncs.length === 0) return;
-            
-            console.log(`Traitement de ${pendingSyncs.length} syncs en attente`);
-            
-            // هنا يمكنك إضافة منطق معالجة خاص للتغييرات المعلقة
-            // مثل إرسال الإشعارات أو تحديثات محددة
-            
-            pendingSyncs = [];
-        }
-
         // ========== FONCTIONS DE CONTROLE ==========
         async function manualSync() {
             if (isSyncing) {
@@ -1757,40 +1761,6 @@
                 updateSyncStatus('Erreur', 'Échec envoi');
             }
         }
-
-        // ========== INITIALISATION SUPABASE ==========
-        async function initializeSupabase() {
-            try {
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                
-                // اختبار الاتصال
-                const { data, error } = await supabaseClient
-                    .from('system_status')
-                    .select('*')
-                    .limit(1);
-                
-                if (error) {
-                    console.warn('Supabase connecté mais tables non initialisées');
-                    showNotification("Supabase connecté - Créez les tables", "warning");
-                }
-                
-                isSupabaseInitialized = true;
-                console.log('Supabase initialisé avec succès');
-                updateSyncStatus('Connecté', 'Prêt à synchroniser');
-                
-                // تشغيل نظام المزامنة
-                initSyncSystem();
-                
-            } catch (error) {
-                console.error('Erreur initialisation Supabase:', error);
-                updateSyncStatus('Erreur', 'Connexion échouée');
-                showNotification("Mode hors ligne - Données locales", "warning");
-            }
-        }
-
-        // ========== ========== ========== ========== ==========
-        // ========== هنا يبدأ الكود الأصلي الكامل (3000+ سطر) ==========
-        // ========== ========== ========== ========== ==========
 
         // ========== إدارة حالة المستخدم ==========
         function saveUserProgress() {
@@ -1936,9 +1906,6 @@
             if (lastSyncTime) {
                 localStorage.setItem('lastSyncTime', lastSyncTime.toISOString());
             }
-            
-            // إضافة sync معلق
-            addPendingSync('local_changes');
         }
 
         // ========== GESTION CAMÉRA ==========
@@ -2170,9 +2137,6 @@
                 assignedAreas: []
             };
             
-            // إضافة sync معلق
-            addPendingSync('employee');
-            
             updateEmployeeSelect();
             displayEmployees();
             updateCounters();
@@ -2292,9 +2256,6 @@
                     photos: []
                 };
             }
-            
-            // إضافة sync معلق
-            addPendingSync('area');
             
             saveToLocalStorage();
             
@@ -2876,9 +2837,6 @@
                 });
             });
             
-            // إضافة sync معلق
-            addPendingSync('report');
-            
             saveToLocalStorage();
             
             tempReport = {
@@ -2963,9 +2921,6 @@
                     });
                 }
             });
-            
-            // إضافة sync معلق
-            addPendingSync('report');
             
             saveToLocalStorage();
             
@@ -3652,15 +3607,6 @@
 
         // ========== LANCEMENT DE L'APPLICATION ==========
         document.addEventListener('DOMContentLoaded', initializeApp);
-
-        // Service Worker للتخزين المؤقت
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').then(() => {
-                    console.log('Service Worker enregistré pour le cache');
-                });
-            });
-        }
 
     </script>
 </body>
